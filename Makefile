@@ -4,8 +4,8 @@ CXX = clang++
 CXXFLAGS = -std=c++17 -O2# -Wall -Wextra -Werror
 LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
-VPATH = src
-SRCS = main.cpp
+VPATH = src src/application
+SRCS = main.cpp window.cpp cleanup.cpp debug.cpp
 INC_DIR = -I include
 
 OBJ_DIR = obj
