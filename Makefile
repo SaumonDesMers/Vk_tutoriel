@@ -37,6 +37,6 @@ fclean : clean
 	$(RM) -rf $(target)
 
 re : fclean
-	@make all --no-print-directory
+	@$(MAKE) all --no-print-directory
 
 .PHONY : all clean fclean re
