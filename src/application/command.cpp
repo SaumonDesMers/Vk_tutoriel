@@ -44,7 +44,7 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	/* Only for secondary command buffers */
 	beginInfo.pInheritanceInfo = nullptr; // Optional
 
-	if (vkBeginCommandBuffer(this->commandBuffer, &beginInfo) != VK_SUCCESS) {
+	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
 		throw std::runtime_error("failed to begin recording command buffer!");
 	}
 
@@ -60,9 +60,9 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	renderPassInfo.clearValueCount = 1;
 	renderPassInfo.pClearValues = &clearColor;
 
-	vkCmdBeginRenderPass(this->commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	vkCmdBindPipeline(this->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, this->graphicsPipeline);
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, this->graphicsPipeline);
 
 	/* We set viewport and scissor as dynamic state, so we need to set them before drawing */
 	VkViewport viewport{};
@@ -72,12 +72,12 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	viewport.height = static_cast<float>(this->swapChainExtent.height);
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(this->commandBuffer, 0, 1, &viewport);
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = {0, 0};
 	scissor.extent = this->swapChainExtent;
-	vkCmdSetScissor(this->commandBuffer, 0, 1, &scissor);
+	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 	/*
 		* vertexCount: The number of vertices to draw.
@@ -85,12 +85,11 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 		* firstVertex: Used as an offset into the vertex buffer, defines the lowest value of gl_VertexIndex.
 		* firstInstance: Used as an offset for instanced rendering, defines the lowest value of gl_InstanceIndex.
 		*/
-	vkCmdDraw(this->commandBuffer, 3, 1, 0, 0);
+	vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
-	vkCmdEndRenderPass(this->commandBuffer);
+	vkCmdEndRenderPass(commandBuffer);
 
-	if (vkEndCommandBuffer(this->commandBuffer) != VK_SUCCESS) {
+	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
-
 }
