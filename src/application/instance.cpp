@@ -2,7 +2,7 @@
 
 void Application::createInstance() {
 	/* Check if validation layers are available */
-	if (enableValidationLayers && !checkValidationLayerSupport()) {
+	if (enableValidationLayers && !this->checkValidationLayerSupport()) {
 		throw std::runtime_error("validation layers requested, but not available!");
 	}
 
@@ -21,7 +21,7 @@ void Application::createInstance() {
 	createInfo.pApplicationInfo = &appInfo;
 
 	/* Get required extensions and add them to the createInfo */
-	auto extensions = getRequiredExtensions();
+	auto extensions = this->getRequiredExtensions();
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 	createInfo.ppEnabledExtensionNames = extensions.data();
 
@@ -32,16 +32,15 @@ void Application::createInstance() {
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 
 		/* Add debug messenger to the createInfo so that it is called during instance creation and destruction */
-		populateDebugMessengerCreateInfo(debugCreateInfo);
+		this->populateDebugMessengerCreateInfo(debugCreateInfo);
 		createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
 	} else {
 		createInfo.enabledLayerCount = 0;
-
 		createInfo.pNext = nullptr;
 	}
 
 	/* Create the instance */
-	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+	if (vkCreateInstance(&createInfo, nullptr, &this->instance) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create instance!");
 	}
 }

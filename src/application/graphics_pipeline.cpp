@@ -1,11 +1,11 @@
 #include "application.hpp"
 
 void Application::createGraphicsPipeline() {
-	auto vertShaderCode = readFile("shaders/vert.spv");
-	auto fragShaderCode = readFile("shaders/frag.spv");
+	auto vertShaderCode = this->readFile("shaders/vert.spv");
+	auto fragShaderCode = this->readFile("shaders/frag.spv");
 
-	VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+	VkShaderModule vertShaderModule = this->createShaderModule(vertShaderCode);
+	VkShaderModule fragShaderModule = this->createShaderModule(fragShaderCode);
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -50,15 +50,15 @@ void Application::createGraphicsPipeline() {
 	// VkViewport viewport{};
 	// viewport.x = 0.0f;
 	// viewport.y = 0.0f;
-	// viewport.width = (float) swapChainExtent.width;
-	// viewport.height = (float) swapChainExtent.height;
+	// viewport.width = (float) this->swapChainExtent.width;
+	// viewport.height = (float) this->swapChainExtent.height;
 	// viewport.minDepth = 0.0f;
 	// viewport.maxDepth = 1.0f;
 
 	// /* Scissor describes the region of the framebuffer pixels will be stored. Any pixels outside the scissor will be discarded by the rasterizer */
 	// VkRect2D scissor{};
 	// scissor.offset = {0, 0};
-	// scissor.extent = swapChainExtent;
+	// scissor.extent = this->swapChainExtent;
 
 	/* Combine viewport and scissor into a viewport state */
 	VkPipelineViewportStateCreateInfo viewportState{};
@@ -74,11 +74,11 @@ void Application::createGraphicsPipeline() {
 	rasterizer.depthClampEnable = VK_FALSE;
 	rasterizer.rasterizerDiscardEnable = VK_FALSE;
 	/*
-		* polygonMode can be:
-		* VK_POLYGON_MODE_FILL: fill the area of the polygon with fragments
-		* VK_POLYGON_MODE_LINE: polygon edges are drawn as lines (requires enabling a GPU feature)
-		* VK_POLYGON_MODE_POINT: polygon vertices are drawn as points (requires enabling a GPU feature)
-		*/
+	 * polygonMode can be:
+	 * VK_POLYGON_MODE_FILL: fill the area of the polygon with fragments
+	 * VK_POLYGON_MODE_LINE: polygon edges are drawn as lines (requires enabling a GPU feature)
+	 * VK_POLYGON_MODE_POINT: polygon vertices are drawn as points (requires enabling a GPU feature)
+	 */
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	/* Line thicker than 1.0f requires enabling the wideLines GPU feature */
 	rasterizer.lineWidth = 1.0f;
@@ -130,7 +130,7 @@ void Application::createGraphicsPipeline() {
 	pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
 	pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
-	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+	if (vkCreatePipelineLayout(this->device, &pipelineLayoutInfo, nullptr, &this->pipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
@@ -146,19 +146,19 @@ void Application::createGraphicsPipeline() {
 	pipelineInfo.pDepthStencilState = nullptr; // Optional
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
-	pipelineInfo.layout = pipelineLayout;
-	pipelineInfo.renderPass = renderPass;
+	pipelineInfo.layout = this->pipelineLayout;
+	pipelineInfo.renderPass = this->renderPass;
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 	pipelineInfo.basePipelineIndex = -1; // Optional
 
-	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+	if (vkCreateGraphicsPipelines(this->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &this->graphicsPipeline) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 
 	/* Clean up the shader modules */
-	vkDestroyShaderModule(device, fragShaderModule, nullptr);
-	vkDestroyShaderModule(device, vertShaderModule, nullptr);
+	vkDestroyShaderModule(this->device, fragShaderModule, nullptr);
+	vkDestroyShaderModule(this->device, vertShaderModule, nullptr);
 }
 
 std::vector<char> Application::readFile(const std::string& filename) {
@@ -187,7 +187,7 @@ VkShaderModule Application::createShaderModule(const std::vector<char>& code) {
 	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
 	VkShaderModule shaderModule;
-	if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+	if (vkCreateShaderModule(this->device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create shader module!");
 	}
 

@@ -2,7 +2,7 @@
 
 void Application::createLogicalDevice() {
 	/* Specify which queue families to create */
-	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+	QueueFamilyIndices indices = this->findQueueFamilies(this->physicalDevice);
 
 	/* Create all queue families */
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -40,11 +40,11 @@ void Application::createLogicalDevice() {
 	}
 
 	/* Create the logical device */
-	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+	if (vkCreateDevice(this->physicalDevice, &createInfo, nullptr, &this->device) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create logical device!");
 	}
 
 	/* Get the queues handles */
-	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
-	vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+	vkGetDeviceQueue(this->device, indices.graphicsFamily.value(), 0, &this->graphicsQueue);
+	vkGetDeviceQueue(this->device, indices.presentFamily.value(), 0, &this->presentQueue);
 }

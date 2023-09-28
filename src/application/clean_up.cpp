@@ -13,35 +13,35 @@ static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMesse
 }
 
 void Application::cleanup() {
-	vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
-	vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
-	vkDestroyFence(device, inFlightFence, nullptr);
+	vkDestroySemaphore(this->device, this->renderFinishedSemaphore, nullptr);
+	vkDestroySemaphore(this->device, this->imageAvailableSemaphore, nullptr);
+	vkDestroyFence(this->device, this->inFlightFence, nullptr);
 
-	vkDestroyCommandPool(device, commandPool, nullptr);
+	vkDestroyCommandPool(this->device, this->commandPool, nullptr);
 
-	for (auto framebuffer : swapChainFramebuffers) {
-		vkDestroyFramebuffer(device, framebuffer, nullptr);
+	for (auto framebuffer : this->swapChainFramebuffers) {
+		vkDestroyFramebuffer(this->device, framebuffer, nullptr);
 	}
 
-	vkDestroyPipeline(device, graphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-	vkDestroyRenderPass(device, renderPass, nullptr);
+	vkDestroyPipeline(this->device, this->graphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(this->device, this->pipelineLayout, nullptr);
+	vkDestroyRenderPass(this->device, this->renderPass, nullptr);
 
-	for (auto imageView : swapChainImageViews) {
-		vkDestroyImageView(device, imageView, nullptr);
+	for (auto imageView : this->swapChainImageViews) {
+		vkDestroyImageView(this->device, imageView, nullptr);
 	}
 
-	vkDestroySwapchainKHR(device, swapChain, nullptr);
-	vkDestroyDevice(device, nullptr);
+	vkDestroySwapchainKHR(this->device, this->swapChain, nullptr);
+	vkDestroyDevice(this->device, nullptr);
 
 	if (enableValidationLayers) {
-		DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+		DestroyDebugUtilsMessengerEXT(this->instance, this->debugMessenger, nullptr);
 	}
 
-	vkDestroySurfaceKHR(instance, surface, nullptr);
-	vkDestroyInstance(instance, nullptr);
+	vkDestroySurfaceKHR(this->instance, this->surface, nullptr);
+	vkDestroyInstance(this->instance, nullptr);
 
-	glfwDestroyWindow(window);
+	glfwDestroyWindow(this->window);
 
 	glfwTerminate();
 }

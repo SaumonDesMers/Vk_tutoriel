@@ -53,10 +53,10 @@ struct SwapChainSupportDetails {
 class Application {
 public:
 	void run() {
-		initWindow();
-		initVulkan();
-		mainLoop();
-		cleanup();
+		this->initWindow();
+		this->initVulkan();
+		this->mainLoop();
+		this->cleanup();
 	}
 
 private:
@@ -91,19 +91,19 @@ private:
 	VkFence inFlightFence;
 
 	void initVulkan() {
-		createInstance();
-		setupDebugMessenger();
-		createSurface();
-		pickPhysicalDevice();
-		createLogicalDevice();
-		createSwapChain();
-		createImageViews();
-		createRenderPass();
-		createGraphicsPipeline();
-		createFramebuffers();
-		createCommandPool();
-		createCommandBuffer();
-		createSyncObjects();
+		this->createInstance();
+		this->setupDebugMessenger();
+		this->createSurface();
+		this->pickPhysicalDevice();
+		this->createLogicalDevice();
+		this->createSwapChain();
+		this->createImageViews();
+		this->createRenderPass();
+		this->createGraphicsPipeline();
+		this->createFramebuffers();
+		this->createCommandPool();
+		this->createCommandBuffer();
+		this->createSyncObjects();
 	}
 
 	/* window.cpp */

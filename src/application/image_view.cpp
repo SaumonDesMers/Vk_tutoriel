@@ -1,16 +1,16 @@
 #include "application.hpp"
 
 void Application::createImageViews() {
-	swapChainImageViews.resize(swapChainImages.size());
+	this->swapChainImageViews.resize(this->swapChainImages.size());
 
-	for (size_t i = 0; i < swapChainImages.size(); i++) {
+	for (size_t i = 0; i < this->swapChainImages.size(); i++) {
 
 		VkImageViewCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		createInfo.image = swapChainImages[i];
+		createInfo.image = this->swapChainImages[i];
 		/* Specify how the image data should be interpreted */
 		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		createInfo.format = swapChainImageFormat;
+		createInfo.format = this->swapChainImageFormat;
 		/* The components field allows you to swizzle the color channels around. For example, you can map all of the channels to the red channel for a monochrome texture.
 			You can also map constant values of 0 and 1 to a channel. In our case we'll stick to the default mapping */
 		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -26,7 +26,7 @@ void Application::createImageViews() {
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
 
-		if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
+		if (vkCreateImageView(this->device, &createInfo, nullptr, &this->swapChainImageViews[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create image views!");
 		}
 	}

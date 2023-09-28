@@ -2,10 +2,10 @@
 
 void Application::createRenderPass() {
 	/*
-		* TODO: J'ai pas encore compris à quoi ça sert
-		*/
+	 * TODO: J'ai pas encore compris à quoi ça sert
+	 */
 	VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = swapChainImageFormat;
+	colorAttachment.format = this->swapChainImageFormat;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 	/* Specify what to do with the data in the attachment before rendering and after rendering: clear then store */
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -44,7 +44,7 @@ void Application::createRenderPass() {
 	renderPassInfo.dependencyCount = 1;
 	renderPassInfo.pDependencies = &dependency;
 
-	if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+	if (vkCreateRenderPass(this->device, &renderPassInfo, nullptr, &this->renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");
 	}
 }

@@ -1,15 +1,15 @@
 #include "application.hpp"
 
 void Application::createSwapChain() {
-	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
+	SwapChainSupportDetails swapChainSupport = this->querySwapChainSupport(this->physicalDevice);
 
-	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-	VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-	VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+	VkSurfaceFormatKHR surfaceFormat = this->chooseSwapSurfaceFormat(swapChainSupport.formats);
+	VkPresentModeKHR presentMode = this->chooseSwapPresentMode(swapChainSupport.presentModes);
+	VkExtent2D extent = this->chooseSwapExtent(swapChainSupport.capabilities);
 
 	/* Store the chosen values for later use */
-	swapChainImageFormat = surfaceFormat.format;
-	swapChainExtent = extent;
+	this->swapChainImageFormat = surfaceFormat.format;
+	this->swapChainExtent = extent;
 
 	/* Choose the number of images in the swap chain. We try to get one more than the minimum to avoid waiting for the driver to complete internal operations before we can acquire another image to render to */
 	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
@@ -20,7 +20,7 @@ void Application::createSwapChain() {
 
 	VkSwapchainCreateInfoKHR createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	createInfo.surface = surface;
+	createInfo.surface = this->surface;
 	createInfo.minImageCount = imageCount;
 	createInfo.imageFormat = surfaceFormat.format;
 	createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -30,7 +30,7 @@ void Application::createSwapChain() {
 	/* The imageUsage specifies what kind of operations we will use the images in the swap chain for. In this case, we will render directly to them, which means that they are used as color attachment */
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+	QueueFamilyIndices indices = this->findQueueFamilies(this->physicalDevice);
 	uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
 	/* Images sharing mode is used to determine if the images can be used across multiple queue families */
@@ -57,49 +57,50 @@ void Application::createSwapChain() {
 	/* Specify a handle to an old swap chain if we are recreating it (when the window is resized for example) */
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
+	/* Create the swap chain */
+	if (vkCreateSwapchainKHR(this->device, &createInfo, nullptr, &this->swapChain) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
 	/* Get the handles of the swap chain images */
-	vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
-	swapChainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());
+	vkGetSwapchainImagesKHR(this->device, this->swapChain, &imageCount, nullptr);
+	this->swapChainImages.resize(imageCount);
+	vkGetSwapchainImagesKHR(this->device, this->swapChain, &imageCount, this->swapChainImages.data());
 }
 
 SwapChainSupportDetails Application::querySwapChainSupport(VkPhysicalDevice device) {
 	SwapChainSupportDetails details;
 
 	/* Get the basic surface capabilities */
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, this->surface, &details.capabilities);
 
 	/* Get the supported surface formats */
 	uint32_t formatCount;
-	vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, this->surface, &formatCount, nullptr);
 
 	if (formatCount != 0) {
 		details.formats.resize(formatCount);
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, this->surface, &formatCount, details.formats.data());
 	}
 
 	/* Get the supported presentation modes */
 	uint32_t presentModeCount;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, this->surface, &presentModeCount, nullptr);
 
 	if (presentModeCount != 0) {
 		details.presentModes.resize(presentModeCount);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, this->surface, &presentModeCount, details.presentModes.data());
 	}
 
 	return details;
 }
 
 /*
-	* The surface format is the color depth of the swap chain images.
-	* It is represented by a combination of format and color space.
-	* The format specifies the color channels and types (e.g. RGBA 32 bit).
-	* The color space specifies if the SRGB color space is supported or not.
-	*/
+ * The surface format is the color depth of the swap chain images.
+ * It is represented by a combination of format and color space.
+ * The format specifies the color channels and types (e.g. RGBA 32 bit).
+ * The color space specifies if the SRGB color space is supported or not.
+ */
 VkSurfaceFormatKHR Application::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
 	/* Check for the preferred format: 32 bit BGRA with SRGB color space */
 	for (const auto& availableFormat : availableFormats) {
@@ -113,13 +114,13 @@ VkSurfaceFormatKHR Application::chooseSwapSurfaceFormat(const std::vector<VkSurf
 }
 
 /*
-	* The presentation mode is the condition for "swapping" images to the screen.
-	* Possibles modes are:
-	* VK_PRESENT_MODE_IMMEDIATE_KHR
-	* VK_PRESENT_MODE_FIFO_KHR
-	* VK_PRESENT_MODE_FIFO_RELAXED_KHR
-	* VK_PRESENT_MODE_MAILBOX_KHR
-	*/
+ * The presentation mode is the condition for "swapping" images to the screen.
+ * Possibles modes are:
+ * VK_PRESENT_MODE_IMMEDIATE_KHR
+ * VK_PRESENT_MODE_FIFO_KHR
+ * VK_PRESENT_MODE_FIFO_RELAXED_KHR
+ * VK_PRESENT_MODE_MAILBOX_KHR
+ */
 VkPresentModeKHR Application::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
 	/* Check for the preferred presentation mode: Mailbox (triple buffering) */
 	for (const auto& availablePresentMode : availablePresentModes) {
@@ -133,8 +134,8 @@ VkPresentModeKHR Application::chooseSwapPresentMode(const std::vector<VkPresentM
 }
 
 /*
-	* The swap extent is the resolution of the swap chain images.
-	*/
+ * The swap extent is the resolution of the swap chain images.
+ */
 VkExtent2D Application::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
 	/* If the current extent is not the maximum value, use it */
 	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
@@ -142,7 +143,7 @@ VkExtent2D Application::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabil
 	} else {
 		/* Get the actual extent of the window in pixels. This is needed because the size in pixels may be different from the size in screen coordinates (e.g. on HiDPI display) */
 		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
+		glfwGetFramebufferSize(this->window, &width, &height);
 
 		VkExtent2D actualExtent = {
 			static_cast<uint32_t>(width),

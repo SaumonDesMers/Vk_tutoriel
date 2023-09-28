@@ -1,9 +1,9 @@
 #include "application.hpp"
 
 void Application::mainLoop() {
-	while (!glfwWindowShouldClose(window)) {
+	while (!glfwWindowShouldClose(this->window)) {
 		glfwPollEvents();
-		drawFrame();
+		this->drawFrame();
 	}
-	vkDeviceWaitIdle(device);
+	vkDeviceWaitIdle(this->device);
 }
