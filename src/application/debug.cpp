@@ -1,5 +1,12 @@
 #include "application.hpp"
 
+/* Callback function for the debug messenger */
+VKAPI_ATTR VkBool32 VKAPI_CALL Application::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+
+	return VK_FALSE;
+}
+
 /*
  * This function is used to create a debug messenger object.
  * It is needed because the vkCreateDebugUtilsMessengerEXT function is an extension function which is not automatically loaded.

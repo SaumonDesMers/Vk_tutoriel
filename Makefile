@@ -5,7 +5,10 @@ CXXFLAGS = -std=c++17 -O2# -Wall -Wextra -Werror
 LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
 VPATH = src src/application
-SRCS = main.cpp window.cpp cleanup.cpp debug.cpp
+SRCS = main.cpp window.cpp clean_up.cpp debug.cpp instance.cpp main_loop.cpp \
+		physical_device.cpp logical_device.cpp swap_chain.cpp image_view.cpp \
+		render_pass.cpp graphics_pipeline.cpp frame_buffer.cpp command.cpp \
+		sync_objects.cpp draw.cpp
 INC_DIR = -I include
 
 OBJ_DIR = obj
