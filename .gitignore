@@ -1,32 +1,9 @@
-# Prerequisites
-*.d
+obj/*.o
+dep/*.d
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+vulkan_test
 
-# Precompiled Headers
-*.gch
-*.pch
+glslc
+*.spv
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+*.json
