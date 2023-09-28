@@ -19,6 +19,8 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
 #ifdef NDEBUG
 	const bool enableValidationLayers = false;
 #else
@@ -84,11 +86,13 @@ private:
 	VkPipeline graphicsPipeline;
 
 	VkCommandPool commandPool;
-	VkCommandBuffer commandBuffer;
+	std::vector<VkCommandBuffer> commandBuffers;
 
-	VkSemaphore imageAvailableSemaphore;
-	VkSemaphore renderFinishedSemaphore;
-	VkFence inFlightFence;
+	std::vector<VkSemaphore> imageAvailableSemaphores;
+	std::vector<VkSemaphore> renderFinishedSemaphores;
+	std::vector<VkFence> inFlightFences;
+
+	uint32_t currentFrame = 0;
 
 	void initVulkan() {
 		this->createInstance();
@@ -102,7 +106,7 @@ private:
 		this->createGraphicsPipeline();
 		this->createFramebuffers();
 		this->createCommandPool();
-		this->createCommandBuffer();
+		this->createCommandBuffers();
 		this->createSyncObjects();
 	}
 
@@ -158,7 +162,7 @@ private:
 
 	/* command.cpp */
 	void createCommandPool();
-	void createCommandBuffer();
+	void createCommandBuffers();
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
 	/* sync_objects.cpp */

@@ -13,9 +13,11 @@ static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMesse
 }
 
 void Application::cleanup() {
-	vkDestroySemaphore(this->device, this->renderFinishedSemaphore, nullptr);
-	vkDestroySemaphore(this->device, this->imageAvailableSemaphore, nullptr);
-	vkDestroyFence(this->device, this->inFlightFence, nullptr);
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		vkDestroySemaphore(this->device, this->renderFinishedSemaphores[i], nullptr);
+		vkDestroySemaphore(this->device, this->imageAvailableSemaphores[i], nullptr);
+		vkDestroyFence(this->device, this->inFlightFences[i], nullptr);
+	}
 
 	vkDestroyCommandPool(this->device, this->commandPool, nullptr);
 
