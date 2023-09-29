@@ -12,7 +12,21 @@ static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMesse
     }
 }
 
+void Application::cleanupSwapChain() {
+	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
+        vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
+    }
+
+    for (size_t i = 0; i < swapChainImageViews.size(); i++) {
+        vkDestroyImageView(device, swapChainImageViews[i], nullptr);
+    }
+
+    vkDestroySwapchainKHR(device, swapChain, nullptr);
+}
+
 void Application::cleanup() {
+	this->cleanupSwapChain();
+
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroySemaphore(this->device, this->renderFinishedSemaphores[i], nullptr);
 		vkDestroySemaphore(this->device, this->imageAvailableSemaphores[i], nullptr);
@@ -21,19 +35,10 @@ void Application::cleanup() {
 
 	vkDestroyCommandPool(this->device, this->commandPool, nullptr);
 
-	for (auto framebuffer : this->swapChainFramebuffers) {
-		vkDestroyFramebuffer(this->device, framebuffer, nullptr);
-	}
-
 	vkDestroyPipeline(this->device, this->graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(this->device, this->pipelineLayout, nullptr);
 	vkDestroyRenderPass(this->device, this->renderPass, nullptr);
 
-	for (auto imageView : this->swapChainImageViews) {
-		vkDestroyImageView(this->device, imageView, nullptr);
-	}
-
-	vkDestroySwapchainKHR(this->device, this->swapChain, nullptr);
 	vkDestroyDevice(this->device, nullptr);
 
 	if (enableValidationLayers) {

@@ -5,10 +5,19 @@ void Application::initWindow() {
 
 	/* Do not create openGL context */
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	this->window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
+
+	/* Set pointer to this class as user pointer */
+	glfwSetWindowUserPointer(window, this);
+	glfwSetFramebufferSizeCallback(window, this->framebufferResizeCallback);
 }
+
+void Application::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+    auto app = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
+    app->framebufferResized = true;
+}
+
 
 void Application::createSurface() {
 	if (glfwCreateWindowSurface(this->instance, this->window, nullptr, &this->surface) != VK_SUCCESS) {

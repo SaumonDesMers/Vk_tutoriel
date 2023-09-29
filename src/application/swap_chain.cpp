@@ -1,5 +1,28 @@
 #include "application.hpp"
 
+void Application::recreateSwapChain() {
+	/* TODO: Instead of waiting for the device to become idle, which force us to stop rendering,
+			we should recreate the swap chain while we are still rendering to the images of the old swap chain.
+			For that we need to pass the previous swap chain to the oldSwapChain field in the VkSwapchainCreateInfoKHR
+			struct and destroy the old swap chain as soon as we are done with it */
+	
+	/* If the window is minimized, wait until it is restored */
+	int width = 0, height = 0;
+    glfwGetFramebufferSize(window, &width, &height);
+    while (width == 0 || height == 0) {
+        glfwGetFramebufferSize(window, &width, &height);
+        glfwWaitEvents();
+    }
+
+	vkDeviceWaitIdle(this->device);
+
+	this->cleanupSwapChain();
+
+    this->createSwapChain();
+    this->createImageViews();
+    this->createFramebuffers();
+}
+
 void Application::createSwapChain() {
 	SwapChainSupportDetails swapChainSupport = this->querySwapChainSupport(this->physicalDevice);
 

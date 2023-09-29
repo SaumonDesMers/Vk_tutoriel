@@ -3,10 +3,21 @@
 void Application::drawFrame() {
 	/* Wait for the corresponding frame to be finished */
 	vkWaitForFences(this->device, 1, &this->inFlightFences[this->currentFrame], VK_TRUE, UINT64_MAX);
-	vkResetFences(this->device, 1, &this->inFlightFences[this->currentFrame]);
 
 	uint32_t imageIndex;
-	vkAcquireNextImageKHR(this->device, this->swapChain, UINT64_MAX, this->imageAvailableSemaphores[this->currentFrame], VK_NULL_HANDLE, &imageIndex);
+	VkResult result = vkAcquireNextImageKHR(this->device, this->swapChain, UINT64_MAX, this->imageAvailableSemaphores[this->currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+	/* Check if the swap chain is out of date (e.g. window was resized) and needs to be recreated */
+	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+		/* Recreate the swap chain and try again next frame */
+		this->recreateSwapChain();
+		return;
+	} else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { /* Don't recreate the swap chain if it is suboptimal because we already have an image to render to */
+		throw std::runtime_error("failed to acquire swap chain image!");
+	}
+	
+	/* Reset the fence only if we are submitting work to prevent a deadlock */
+	vkResetFences(this->device, 1, &this->inFlightFences[this->currentFrame]);
 
 	vkResetCommandBuffer(this->commandBuffers[this->currentFrame], 0);
 	this->recordCommandBuffer(this->commandBuffers[this->currentFrame], imageIndex);
@@ -44,7 +55,15 @@ void Application::drawFrame() {
 	/* Specify an array of VkResult values to check for every individual swap chain if presentation was successful */
 	presentInfo.pResults = nullptr; // Optional
 
-	vkQueuePresentKHR(this->presentQueue, &presentInfo);
+	result = vkQueuePresentKHR(this->presentQueue, &presentInfo);
+
+	/* Check if the swap chain is out of date or suboptimal and needs to be recreated */
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || this->framebufferResized) {
+		recreateSwapChain();
+		this->framebufferResized = false;
+	} else if (result != VK_SUCCESS) {
+		throw std::runtime_error("failed to present swap chain image!");
+	}
 
 	this->currentFrame = (this->currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
