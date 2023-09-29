@@ -82,11 +82,11 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 	/*
-		* vertexCount: The number of vertices to draw.
-		* instanceCount: Used for instanced rendering, use 1 if you're not doing that.
-		* firstVertex: Used as an offset into the vertex buffer, defines the lowest value of gl_VertexIndex.
-		* firstInstance: Used as an offset for instanced rendering, defines the lowest value of gl_InstanceIndex.
-		*/
+	 * vertexCount: The number of vertices to draw.
+	 * instanceCount: Used for instanced rendering, use 1 if you're not doing that.
+	 * firstVertex: Used as an offset into the vertex buffer, defines the lowest value of gl_VertexIndex.
+	 * firstInstance: Used as an offset for instanced rendering, defines the lowest value of gl_InstanceIndex.
+	 */
 	vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer);
