@@ -7,3 +7,5 @@ glslc
 *.spv
 
 *.json
+
+glm/*
