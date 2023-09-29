@@ -1,4 +1,5 @@
 #include "application.hpp"
+#include "vertex.hpp"
 
 void Application::createCommandPool() {
 	QueueFamilyIndices queueFamilyIndices = this->findQueueFamilies(this->physicalDevice);
@@ -81,13 +82,18 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	scissor.extent = this->swapChainExtent;
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+	/* Bind the vertex buffer */
+	VkBuffer vertexBuffers[] = {this->vertexBuffer};
+	VkDeviceSize offsets[] = {0};
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
 	/*
 	 * vertexCount: The number of vertices to draw.
 	 * instanceCount: Used for instanced rendering, use 1 if you're not doing that.
 	 * firstVertex: Used as an offset into the vertex buffer, defines the lowest value of gl_VertexIndex.
 	 * firstInstance: Used as an offset for instanced rendering, defines the lowest value of gl_InstanceIndex.
 	 */
-	vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+	vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer);
 

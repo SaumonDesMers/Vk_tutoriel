@@ -8,8 +8,8 @@ VPATH = src src/application
 SRCS = main.cpp window.cpp clean_up.cpp debug.cpp instance.cpp main_loop.cpp \
 		physical_device.cpp logical_device.cpp swap_chain.cpp image_view.cpp \
 		render_pass.cpp graphics_pipeline.cpp frame_buffer.cpp command.cpp \
-		sync_objects.cpp draw.cpp
-INC_DIR = -I include
+		sync_objects.cpp draw.cpp vertex_buffer.cpp
+INC_DIR = -I include -I glm
 
 OBJ_DIR = obj
 DEP_DIR = dep

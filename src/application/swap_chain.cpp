@@ -8,19 +8,19 @@ void Application::recreateSwapChain() {
 	
 	/* If the window is minimized, wait until it is restored */
 	int width = 0, height = 0;
-    glfwGetFramebufferSize(window, &width, &height);
-    while (width == 0 || height == 0) {
-        glfwGetFramebufferSize(window, &width, &height);
-        glfwWaitEvents();
-    }
+	glfwGetFramebufferSize(window, &width, &height);
+	while (width == 0 || height == 0) {
+		glfwGetFramebufferSize(window, &width, &height);
+		glfwWaitEvents();
+	}
 
 	vkDeviceWaitIdle(this->device);
 
 	this->cleanupSwapChain();
 
-    this->createSwapChain();
-    this->createImageViews();
-    this->createFramebuffers();
+	this->createSwapChain();
+	this->createImageViews();
+	this->createFramebuffers();
 }
 
 void Application::createSwapChain() {

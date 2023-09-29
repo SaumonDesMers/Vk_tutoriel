@@ -92,6 +92,9 @@ private:
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
 
+	VkBuffer vertexBuffer;
+	VkDeviceMemory vertexBufferMemory;
+
 	bool framebufferResized = false;
 
 	uint32_t currentFrame = 0;
@@ -108,6 +111,7 @@ private:
 		this->createGraphicsPipeline();
 		this->createFramebuffers();
 		this->createCommandPool();
+		this->createVertexBuffer();
 		this->createCommandBuffers();
 		this->createSyncObjects();
 	}
@@ -164,6 +168,10 @@ private:
 
 	/* frame_buffer.cpp */
 	void createFramebuffers();
+
+	/* vertex_buffer.cpp */
+	void createVertexBuffer();
+	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 	/* command.cpp */
 	void createCommandPool();

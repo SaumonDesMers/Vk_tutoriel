@@ -1,4 +1,5 @@
 #include "application.hpp"
+#include "vertex.hpp"
 
 void Application::createGraphicsPipeline() {
 	auto vertShaderCode = this->readFile("shaders/vert.spv");
@@ -25,10 +26,14 @@ void Application::createGraphicsPipeline() {
 	/* Specify the format of the vertex data passed to the vertex shader */
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.pVertexBindingDescriptions = nullptr; // Optional
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
-	vertexInputInfo.pVertexAttributeDescriptions = nullptr; // Optional
+	
+	auto bindingDescription = Vertex::getBindingDescription();
+	auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
+	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
 	/* Specify dynamic state that can be changed without recreating the pipeline. Here we specify the viewport and scissor rectangle */
 	std::vector<VkDynamicState> dynamicStates = {
