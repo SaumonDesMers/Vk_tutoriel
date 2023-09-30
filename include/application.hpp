@@ -94,6 +94,8 @@ private:
 
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
+	VkBuffer indexBuffer;
+	VkDeviceMemory indexBufferMemory;
 
 	bool framebufferResized = false;
 
@@ -112,6 +114,7 @@ private:
 		this->createFramebuffers();
 		this->createCommandPool();
 		this->createVertexBuffer();
+		this->createIndexBuffer();
 		this->createCommandBuffers();
 		this->createSyncObjects();
 	}
@@ -176,6 +179,9 @@ private:
 
 	/* vertex_buffer.cpp */
 	void createVertexBuffer();
+
+	/* index.cpp */
+	void createIndexBuffer();
 
 	/* command.cpp */
 	void createCommandPool();

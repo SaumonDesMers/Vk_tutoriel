@@ -16,7 +16,7 @@ void Application::createVertexBuffer() {
 	/* Map the vertex buffer memory to the staging buffer memory and copy the vertex data to it */
     void* data;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, vertices.data(), (size_t) bufferSize);
+    memcpy(data, vertices.data(), (size_t) bufferSize);
     vkUnmapMemory(device, stagingBufferMemory);
 
 	/* Create the vertex buffer:

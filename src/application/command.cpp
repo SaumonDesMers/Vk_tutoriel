@@ -86,6 +86,8 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	VkBuffer vertexBuffers[] = {this->vertexBuffer};
 	VkDeviceSize offsets[] = {0};
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+	/* Bind the index buffer */
+	vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
 	/*
 	 * vertexCount: The number of vertices to draw.
@@ -93,7 +95,9 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	 * firstVertex: Used as an offset into the vertex buffer, defines the lowest value of gl_VertexIndex.
 	 * firstInstance: Used as an offset for instanced rendering, defines the lowest value of gl_InstanceIndex.
 	 */
-	vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+	// vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+	
+	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer);
 

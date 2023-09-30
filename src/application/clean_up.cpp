@@ -14,21 +14,24 @@ static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMesse
 
 void Application::cleanupSwapChain() {
 	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
-		vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
+		vkDestroyFramebuffer(this->device, this->swapChainFramebuffers[i], nullptr);
 	}
 
 	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
-		vkDestroyImageView(device, swapChainImageViews[i], nullptr);
+		vkDestroyImageView(this->device, this->swapChainImageViews[i], nullptr);
 	}
 
-	vkDestroySwapchainKHR(device, swapChain, nullptr);
+	vkDestroySwapchainKHR(this->device, this->swapChain, nullptr);
 }
 
 void Application::cleanup() {
 	this->cleanupSwapChain();
 
-	vkDestroyBuffer(device, vertexBuffer, nullptr);
-	vkFreeMemory(device, vertexBufferMemory, nullptr);
+	vkDestroyBuffer(this->device, this->indexBuffer, nullptr);
+    vkFreeMemory(this->device, this->indexBufferMemory, nullptr);
+
+	vkDestroyBuffer(this->device, this->vertexBuffer, nullptr);
+	vkFreeMemory(this->device, this->vertexBufferMemory, nullptr);
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroySemaphore(this->device, this->renderFinishedSemaphores[i], nullptr);
