@@ -96,6 +96,9 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	 * firstInstance: Used as an offset for instanced rendering, defines the lowest value of gl_InstanceIndex.
 	 */
 	// vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+
+	/* Bind the descriptor sets */
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, this->pipelineLayout, 0, 1, &this->descriptorSets[this->currentFrame], 0, nullptr);
 	
 	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 

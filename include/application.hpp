@@ -81,6 +81,10 @@ private:
 	std::vector<VkImageView> swapChainImageViews;
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 
+	VkDescriptorSetLayout descriptorSetLayout;
+	VkDescriptorPool descriptorPool;
+	std::vector<VkDescriptorSet> descriptorSets;
+
 	VkRenderPass renderPass;
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
@@ -97,6 +101,10 @@ private:
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
 
+	std::vector<VkBuffer> uniformBuffers;
+	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	std::vector<void*> uniformBuffersMapped;
+
 	bool framebufferResized = false;
 
 	uint32_t currentFrame = 0;
@@ -110,11 +118,15 @@ private:
 		this->createSwapChain();
 		this->createImageViews();
 		this->createRenderPass();
+		this->createDescriptorSetLayout();
 		this->createGraphicsPipeline();
 		this->createFramebuffers();
 		this->createCommandPool();
 		this->createVertexBuffer();
 		this->createIndexBuffer();
+		this->createUniformBuffers();
+		this->createDescriptorPool();
+		this->createDescriptorSets();
 		this->createCommandBuffers();
 		this->createSyncObjects();
 	}
@@ -164,6 +176,11 @@ private:
 	/* render_pass.cpp */
 	void createRenderPass();
 
+	/* descriptor.cpp */
+	void createDescriptorSetLayout();
+	void createDescriptorPool();
+	void createDescriptorSets();
+
 	/* graphics_pipeline.cpp */
 	void createGraphicsPipeline();
 	static std::vector<char> readFile(const std::string& filename);
@@ -183,6 +200,9 @@ private:
 	/* index.cpp */
 	void createIndexBuffer();
 
+	/* uniform_buffer.cpp */
+	void createUniformBuffers();
+
 	/* command.cpp */
 	void createCommandPool();
 	void createCommandBuffers();
@@ -193,6 +213,7 @@ private:
 
 	/* draw.cpp */
 	void drawFrame();
+	void updateUniformBuffer(uint32_t currentImage);
 
 };
 

@@ -27,6 +27,14 @@ void Application::cleanupSwapChain() {
 void Application::cleanup() {
 	this->cleanupSwapChain();
 
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        vkDestroyBuffer(device, uniformBuffers[i], nullptr);
+        vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
+    }
+
+	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+
 	vkDestroyBuffer(this->device, this->indexBuffer, nullptr);
     vkFreeMemory(this->device, this->indexBufferMemory, nullptr);
 
