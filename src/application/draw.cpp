@@ -11,6 +11,7 @@ void Application::drawFrame() {
 	/* Wait for the corresponding frame to be finished */
 	vkWaitForFences(this->device, 1, &this->inFlightFences[this->currentFrame], VK_TRUE, UINT64_MAX);
 
+	/* Acquire an image from the swap chain */
 	uint32_t imageIndex;
 	VkResult result = vkAcquireNextImageKHR(this->device, this->swapChain, UINT64_MAX, this->imageAvailableSemaphores[this->currentFrame], VK_NULL_HANDLE, &imageIndex);
 
@@ -23,6 +24,7 @@ void Application::drawFrame() {
 		throw std::runtime_error("failed to acquire swap chain image!");
 	}
 
+	/* Update the uniform buffer */
 	this->updateUniformBuffer(this->currentFrame);
 	
 	/* Reset the fence only if we are submitting work to prevent a deadlock */
