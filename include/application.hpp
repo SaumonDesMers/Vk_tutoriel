@@ -22,8 +22,13 @@
 #include <fstream>
 #include <array>
 
+#include "vertex.hpp"
+
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
+
+const std::string MODEL_PATH = "models/viking_room.obj";
+const std::string TEXTURE_PATH = "textures/viking_room.png";
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -111,6 +116,9 @@ private:
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
 
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
+
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;
@@ -141,6 +149,7 @@ private:
 		this->createTextureImage();
 		this->createTextureImageView();
 		this->createTextureSampler();
+		this->loadModel();
 		this->createVertexBuffer();
 		this->createIndexBuffer();
 		this->createUniformBuffers();
@@ -250,6 +259,9 @@ private:
 	/* draw.cpp */
 	void drawFrame();
 	void updateUniformBuffer(uint32_t currentImage);
+
+	/* model_loading.cpp */
+	void loadModel();
 
 };
 
