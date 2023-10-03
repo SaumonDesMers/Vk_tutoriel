@@ -13,11 +13,15 @@ static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMesse
 }
 
 void Application::cleanupSwapChain() {
-	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
+	vkDestroyImageView(this->device, this->depthImageView, nullptr);
+    vkDestroyImage(this->device, this->depthImage, nullptr);
+    vkFreeMemory(this->device, this->depthImageMemory, nullptr);
+
+	for (size_t i = 0; i < this->swapChainFramebuffers.size(); i++) {
 		vkDestroyFramebuffer(this->device, this->swapChainFramebuffers[i], nullptr);
 	}
 
-	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
+	for (size_t i = 0; i < this->swapChainImageViews.size(); i++) {
 		vkDestroyImageView(this->device, this->swapChainImageViews[i], nullptr);
 	}
 

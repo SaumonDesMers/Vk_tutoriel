@@ -81,7 +81,7 @@ void Application::createTextureSampler() {
 }
 
 void Application::createTextureImageView() {
-	this->textureImageView = this->createImageView(this->textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+	this->textureImageView = this->createImageView(this->textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 void Application::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {

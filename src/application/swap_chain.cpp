@@ -20,6 +20,7 @@ void Application::recreateSwapChain() {
 
 	this->createSwapChain();
 	this->createImageViews();
+	this->createDepthResources();
 	this->createFramebuffers();
 }
 

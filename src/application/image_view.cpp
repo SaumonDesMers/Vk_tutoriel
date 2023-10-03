@@ -4,11 +4,11 @@ void Application::createImageViews() {
 	this->swapChainImageViews.resize(this->swapChainImages.size());
 
 	for (uint32_t i = 0; i < this->swapChainImages.size(); i++) {
-        this->swapChainImageViews[i] = createImageView(this->swapChainImages[i], this->swapChainImageFormat);
+        this->swapChainImageViews[i] = createImageView(this->swapChainImages[i], this->swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
     }
 }
 
-VkImageView Application::createImageView(VkImage image, VkFormat format) {
+VkImageView Application::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = image;
@@ -24,7 +24,7 @@ VkImageView Application::createImageView(VkImage image, VkFormat format) {
 	/* The subresourceRange field describes what the image's purpose is and which part of the image should be accessed.
 		Our images will be used as color targets without any mipmapping levels or multiple layers.
 		Basicly, we are not doing anything fancy here like stereoscopic 3D */
-    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.aspectMask = aspectFlags;
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;

@@ -4,6 +4,11 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
@@ -15,6 +20,7 @@
 #include <limits>
 #include <algorithm>
 #include <fstream>
+#include <array>
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -92,6 +98,10 @@ private:
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
 
+	VkImage depthImage;
+	VkDeviceMemory depthImageMemory;
+	VkImageView depthImageView;
+
 	VkImage textureImage;
 	VkDeviceMemory textureImageMemory;
 	VkImageView textureImageView;
@@ -125,8 +135,9 @@ private:
 		this->createRenderPass();
 		this->createDescriptorSetLayout();
 		this->createGraphicsPipeline();
-		this->createFramebuffers();
 		this->createCommandPool();
+		this->createDepthResources();
+		this->createFramebuffers();
 		this->createTextureImage();
 		this->createTextureImageView();
 		this->createTextureSampler();
@@ -180,7 +191,7 @@ private:
 
 	/* image_views.cpp */
 	void createImageViews();
-	VkImageView createImageView(VkImage image, VkFormat format);
+	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
 	/* render_pass.cpp */
 	void createRenderPass();
@@ -202,6 +213,12 @@ private:
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void createTextureImageView();
 	void createTextureSampler();
+
+	/* depth.cpp */
+	void createDepthResources();
+	VkFormat findDepthFormat();
+	bool hasStencilComponent(VkFormat format);
+	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
 	/* buffer.cpp */
 	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
