@@ -19,8 +19,9 @@ void Application::createLogicalDevice() {
 		queueCreateInfos.push_back(queueCreateInfo);
 	}
 
-	/* Specify which device features to enable (none for now) */
+	/* Specify which device features to enable */
 	VkPhysicalDeviceFeatures deviceFeatures{};
+	deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 	/* Set up information about the logical device */
 	VkDeviceCreateInfo createInfo{};

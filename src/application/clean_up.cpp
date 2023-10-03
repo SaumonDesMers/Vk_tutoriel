@@ -27,12 +27,16 @@ void Application::cleanupSwapChain() {
 void Application::cleanup() {
 	this->cleanupSwapChain();
 
-	vkDestroyImage(device, textureImage, nullptr);
-    vkFreeMemory(device, textureImageMemory, nullptr);
+	vkDestroySampler(device, textureSampler, nullptr);
+
+	vkDestroyImageView(this->device, this->textureImageView, nullptr);
+
+	vkDestroyImage(this->device, this->textureImage, nullptr);
+    vkFreeMemory(this->device, this->textureImageMemory, nullptr);
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        vkDestroyBuffer(device, uniformBuffers[i], nullptr);
-        vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
+        vkDestroyBuffer(this->device, this->uniformBuffers[i], nullptr);
+        vkFreeMemory(this->device, this->uniformBuffersMemory[i], nullptr);
     }
 
 	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
