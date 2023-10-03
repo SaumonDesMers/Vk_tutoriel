@@ -1,8 +1,11 @@
 #ifndef VERTEX_HPP
 #define VERTEX_HPP
 
+#include <vulkan/vulkan.h>
+
 #include <glm/glm.hpp>
 #include <array>
+#include <vector>
 
 struct Vertex {
 	glm::vec2 pos;
