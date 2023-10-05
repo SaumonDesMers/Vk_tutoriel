@@ -1,6 +1,8 @@
 #ifndef MODEL_LOADING_HPP
 #define MODEL_LOADING_HPP
 
+#include "vertex.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
