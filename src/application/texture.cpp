@@ -1,9 +1,6 @@
 #include "application.hpp"
 #include "image_loader.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 /* Step by step:
  * 0. Read the image data from a file
  * 1. Create a staging buffer
@@ -16,7 +13,7 @@
 void Application::createTextureImage() {
 	int texWidth, texHeight, texChannels;
 	ImageLoader imageLoader;
-	stbi_uc* pixels = imageLoader.loadImage(TEXTURE_PATH, &texWidth, &texHeight);
+	uint8_t* pixels = imageLoader.loadImage(TEXTURE_PATH, &texWidth, &texHeight);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 	if (!pixels) {
@@ -34,7 +31,7 @@ void Application::createTextureImage() {
 	memcpy(data, pixels, static_cast<size_t>(imageSize));
 	vkUnmapMemory(this->device, stagingBufferMemory);
 
-	stbi_image_free(pixels);
+	imageLoader.freeImage(pixels);
 
 	this->createImage(
 		texWidth, texHeight,
