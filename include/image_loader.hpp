@@ -55,12 +55,9 @@ private:
 
 		std::string extension = path.substr(path.find_last_of(".") + 1);
 
-		std::cout << "extension: " << extension << std::endl;
-
 		if (extension == "ppm") {
 			std::string line;
 			std::getline(file, line);
-			std::cout << "line: " << line << std::endl;
 			if (line == "P6") {
 				this->imageFormat = ImageFormat::PPM_P6;
 				return;
