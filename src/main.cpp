@@ -1,5 +1,4 @@
 #include "application.hpp"
-#include "model_loading.hpp"
 
 int main() {
 

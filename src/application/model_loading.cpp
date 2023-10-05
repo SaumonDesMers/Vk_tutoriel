@@ -1,5 +1,5 @@
 #include "application.hpp"
-#include "model_loading.hpp"
+#include "obj_loader.hpp"
 
 // #define TINYOBJLOADER_IMPLEMENTATION
 // #include <tiny_obj_loader.h>
@@ -8,7 +8,7 @@
 
 void Application::loadModel() {
 
-	ModelLoading modelLoading;
+	ObjLoader modelLoading;
 
 	modelLoading.loadModel(MODEL_PATH);
 	modelLoading.populateVerticesAndIndices(this->vertices, this->indices);

@@ -34,7 +34,7 @@ struct Face {
 	}
 };
 
-class ModelLoading {
+class ObjLoader {
 
 public:
 
