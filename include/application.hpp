@@ -28,7 +28,7 @@ const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
 const std::string MODEL_PATH = "models/cube.obj";
-const std::string TEXTURE_PATH = "textures/texture.jpg";
+const std::string TEXTURE_PATH = "textures/texture.ppm";
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 

@@ -1,9 +1,11 @@
 #include "application.hpp"
+#include "image_loader.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 /* Step by step:
+ * 0. Read the image data from a file
  * 1. Create a staging buffer
  * 2. Copy the pixel data to the staging buffer
  * 3. Create an image object
@@ -13,7 +15,8 @@
  */
 void Application::createTextureImage() {
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	ImageLoader imageLoader;
+	stbi_uc* pixels = imageLoader.loadImage(TEXTURE_PATH, &texWidth, &texHeight);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 	if (!pixels) {
