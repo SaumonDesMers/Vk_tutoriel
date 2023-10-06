@@ -21,6 +21,15 @@ namespace ft_glm {
 			memset(this->data, 0, sizeof(T) * ROWS * COLS);
 		}
 
+		/* Identity matrix */
+		Matrix(T value) {
+			for (size_t i = 0; i < ROWS; i++) {
+				for (size_t j = 0; j < COLS; j++) {
+					this->data[i][j] = i == j ? value : 0;
+				}
+			}
+		}
+
 		Matrix(const Matrix<ROWS, COLS, T>& other) {
 			memcpy(this->data, other.data, sizeof(T) * ROWS * COLS);
 		}
