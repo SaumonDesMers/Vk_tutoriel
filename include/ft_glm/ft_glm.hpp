@@ -1,11 +1,12 @@
 #ifndef FT_GLM_HPP
 #define FT_GLM_HPP
 
+#include "utils.hpp"
 #include "matrix.hpp"
 #include "vector.hpp"
 #include "matrix_utils.hpp"
 
-namespace ft_glm {
+namespace ft {
 
 	typedef Vector<2, float> vec2;
 	typedef Vector<3, float> vec3;

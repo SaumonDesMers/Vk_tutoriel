@@ -4,7 +4,7 @@
 #include <iostream>
 #include <type_traits>
 
-namespace ft_glm {
+namespace ft {
 
 	template<size_t SIZE, typename T>
 	class Vector {
@@ -34,6 +34,10 @@ namespace ft_glm {
 		}
 
 		T operator[](size_t index) const {
+			return this->data[index];
+		}
+
+		T &operator[](size_t index) {
 			return this->data[index];
 		}
 
@@ -78,7 +82,7 @@ namespace ft_glm {
 		}
 
 		template<typename U>
-		Vector<2, T> operator*(typename std::enable_if<std::is_arithmetic<U>::value, U>::type scalar) {
+		Vector<2, T> operator*(U scalar) {
 			Vector<2, T> result;
 			result[0] = this->data[0] * scalar;
 			result[1] = this->data[1] * scalar;
@@ -86,6 +90,10 @@ namespace ft_glm {
 		}
 
 		T operator[](size_t index) const {
+			return this->data[index];
+		}
+
+		T &operator[](size_t index) {
 			return this->data[index];
 		}
 
@@ -150,6 +158,10 @@ namespace ft_glm {
 		}
 
 		T operator[](size_t index) const {
+			return this->data[index];
+		}
+
+		T &operator[](size_t index) {
 			return this->data[index];
 		}
 
@@ -227,6 +239,10 @@ namespace ft_glm {
 		}
 
 		T operator[](size_t index) const {
+			return this->data[index];
+		}
+
+		T &operator[](size_t index) {
 			return this->data[index];
 		}
 

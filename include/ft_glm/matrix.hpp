@@ -6,7 +6,7 @@
 
 #include "vector.hpp"
 
-namespace ft_glm {
+namespace ft {
 
 	template<
 		size_t ROWS,
@@ -19,6 +19,14 @@ namespace ft_glm {
 
 		Matrix() {
 			memset(this->data, 0, sizeof(T) * ROWS * COLS);
+		}
+
+		Matrix(std::initializer_list<T> list) {
+			size_t i = 0;
+			for (auto it = list.begin(); it != list.end(); it++) {
+				this->data[i / COLS][i % COLS] = *it;
+				i++;
+			}
 		}
 
 		/* Identity matrix */
@@ -85,29 +93,30 @@ namespace ft_glm {
 
 	/* Matrix multiplication */
 	template<size_t ROWS, size_t COLS, typename T>
-	Matrix<ROWS, COLS, T> operator*(Matrix<ROWS, COLS, T>& left, Matrix<ROWS, COLS, T>& right) {
+	Matrix<ROWS, COLS, T> operator*(Matrix<ROWS, COLS, T> left, Matrix<ROWS, COLS, T> right) {
 		Matrix<ROWS, COLS, T> result;
 		for (size_t i = 0; i < ROWS; i++) {
 			for (size_t j = 0; j < COLS; j++) {
 				for (size_t k = 0; k < COLS; k++) {
-					result[i][j] += left[i][k] * right[k][j];
+					result[i][j] += right[i][k] * left[k][j];
 				}
 			}
 		}
 		return result;
 	}
 
+	/* TODO: fix this */
 	/* Matrix-vector multiplication */
-	template<size_t ROWS, size_t COLS, typename T>
-	Vector<ROWS, T> operator*(Matrix<ROWS, COLS, T>& matrix, Vector<COLS, T>& vector) {
-		Vector<ROWS, T> result;
-		for (size_t i = 0; i < ROWS; i++) {
-			for (size_t j = 0; j < COLS; j++) {
-				result[i] += matrix[i][j] * vector[j];
-			}
-		}
-		return result;
-	}
+	// template<size_t ROWS, size_t COLS, typename T>
+	// Vector<ROWS, T> operator*(Matrix<ROWS, COLS, T> matrix, Vector<COLS, T> vector) {
+	// 	Vector<ROWS, T> result;
+	// 	for (size_t i = 0; i < ROWS; i++) {
+	// 		for (size_t j = 0; j < COLS; j++) {
+	// 			result[i] += matrix[i][j] * vector[j];
+	// 		}
+	// 	}
+	// 	return result;
+	// }
 
 };
 
