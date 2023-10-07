@@ -6,8 +6,10 @@
 #include <bitset>
 
 /*
- * This is a testing function to see if ft_glm is working the same as glm.
+ * This is a testing file to see if ft_glm is working the same as glm.
  */
+
+#define MEMORY_TEST(arg1, arg2)
 
 std::string getMemoryBytes(void* ptr, size_t size) {
 
@@ -20,9 +22,29 @@ std::string getMemoryBytes(void* ptr, size_t size) {
 	return result;
 }
 
-template<typename T>
-std::string test_memory(T arg) {
-	return getMemoryBytes(&arg, sizeof(T));
+bool checkMemoryBytes(void* ptr1, size_t size1, void* ptr2, size_t size2) {
+
+	if (size1 != size2) {
+		return false;
+	}
+
+	uint8_t* ptr1_ = (uint8_t*)ptr1;
+	uint8_t* ptr2_ = (uint8_t*)ptr2;
+
+	for (size_t i = 0; i < size1; i++) {
+		if (ptr1_[i] != ptr2_[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+template<typename T, typename U>
+void test_memory(T arg1, U arg2) {
+	bool result = checkMemoryBytes(&arg1, sizeof(T), &arg2, sizeof(U));
+
+
 }
 
 
