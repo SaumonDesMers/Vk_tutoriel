@@ -33,6 +33,15 @@ namespace ft {
 			return result;
 		}
 
+		bool operator==(const Vector<SIZE, T>& other) const {
+			for (size_t i = 0; i < SIZE; i++) {
+				if (this->data[i] != other.data[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		T operator[](size_t index) const {
 			return this->data[index];
 		}
@@ -52,6 +61,10 @@ namespace ft {
 
 		T data[SIZE];
 	};
+
+	typedef Vector<2, float> vec2;
+	typedef Vector<3, float> vec3;
+	typedef Vector<4, float> vec4;
 
 
 
@@ -87,6 +100,11 @@ namespace ft {
 			result[0] = this->data[0] * scalar;
 			result[1] = this->data[1] * scalar;
 			return result;
+		}
+
+		bool operator==(const Vector<2, T>& other) const {
+			return this->data[0] == other.data[0]
+				&& this->data[1] == other.data[1];
 		}
 
 		T operator[](size_t index) const {
@@ -157,12 +175,32 @@ namespace ft {
 			return result;
 		}
 
+		bool operator==(const Vector<3, T>& other) const {
+			return this->data[0] == other.data[0]
+				&& this->data[1] == other.data[1]
+				&& this->data[2] == other.data[2];
+		}
+
 		T operator[](size_t index) const {
 			return this->data[index];
 		}
 
 		T &operator[](size_t index) {
 			return this->data[index];
+		}
+
+		T dot(const Vector<3, T>& other) {
+			return this->data[0] * other.data[0]
+				+ this->data[1] * other.data[1]
+				+ this->data[2] * other.data[2];
+		}
+
+		Vector<3, T> cross(const Vector<3, T>& other) {
+			Vector<3, T> result;
+			result[0] = this->data[1] * other.data[2] - this->data[2] * other.data[1];
+			result[1] = this->data[2] * other.data[0] - this->data[0] * other.data[2];
+			result[2] = this->data[0] * other.data[1] - this->data[1] * other.data[0];
+			return result;
 		}
 
 		void log() {
@@ -238,6 +276,13 @@ namespace ft {
 			return result;
 		}
 
+		bool operator==(const Vector<4, T>& other) const {
+			return this->data[0] == other.data[0]
+				&& this->data[1] == other.data[1]
+				&& this->data[2] == other.data[2]
+				&& this->data[3] == other.data[3];
+		}
+
 		T operator[](size_t index) const {
 			return this->data[index];
 		}
@@ -260,5 +305,18 @@ namespace ft {
 	};
 
 };
+
+/* Custom hash constructor for vectors */
+namespace std {
+	template<size_t SIZE, typename T> struct hash<ft::Vector<SIZE, T>> {
+		size_t operator()(ft::Vector<SIZE, T> const& vector) const {
+			size_t hash = 0;
+			for (size_t i = 0; i < SIZE; i++) {
+				hash ^= std::hash<T>()(vector[i]) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+			}
+			return hash;
+		}
+	};
+}
 
 #endif // VECTOR_HPP

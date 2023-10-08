@@ -7,13 +7,15 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
+#include <ft_glm/ft_glm.hpp>
+
 #include <array>
 #include <vector>
 
 struct Vertex {
-	glm::vec3 pos;
-	glm::vec3 color;
-	glm::vec2 texCoord;
+	ft::vec3 pos;
+	ft::vec3 color;
+	ft::vec2 texCoord;
 
 	/* The binding description describes at which rate to load data from memory throughout the vertices. */
 	static VkVertexInputBindingDescription getBindingDescription() {
@@ -71,13 +73,13 @@ struct Vertex {
 };
 
 namespace std {
-    template<> struct hash<Vertex> {
-        size_t operator()(Vertex const& vertex) const {
-            return ((hash<glm::vec3>()(vertex.pos) ^
-                   (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
-                   (hash<glm::vec2>()(vertex.texCoord) << 1);
-        }
-    };
+	template<> struct hash<Vertex> {
+		size_t operator()(Vertex const& vertex) const {
+			return ((hash<ft::vec3>()(vertex.pos) ^
+					(hash<ft::vec3>()(vertex.color) << 1)) >> 1) ^
+					(hash<ft::vec2>()(vertex.texCoord) << 1);
+		}
+	};
 }
 
 /* Always align uniform buffer objects to avoid issues with padding */

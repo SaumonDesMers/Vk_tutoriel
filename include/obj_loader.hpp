@@ -76,9 +76,9 @@ private:
 
 	std::vector<std::string> lines;
 
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec2> texCoords;
-	std::vector<glm::vec3> normals;
+	std::vector<ft::vec3> vertices;
+	std::vector<ft::vec2> texCoords;
+	std::vector<ft::vec3> normals;
 
 	std::vector<Face> faces;
 
@@ -164,15 +164,15 @@ private:
 	}
 
 	void parseVertex(const std::vector<std::string>& tokens) {
-		this->vertices.push_back(glm::vec3(std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3])));
+		this->vertices.push_back(ft::vec3(std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3])));
 	}
 
 	void parseTexCoord(const std::vector<std::string>& tokens) {
-		this->texCoords.push_back(glm::vec2(std::stof(tokens[1]), std::stof(tokens[2])));
+		this->texCoords.push_back(ft::vec2(std::stof(tokens[1]), std::stof(tokens[2])));
 	}
 
 	void parseNormal(const std::vector<std::string>& tokens) {
-		this->normals.push_back(glm::vec3(std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3])));
+		this->normals.push_back(ft::vec3(std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3])));
 	}
 
 	void parseFace_v(const std::vector<std::string>& tokens) {
