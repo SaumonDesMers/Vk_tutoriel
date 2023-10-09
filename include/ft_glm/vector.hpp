@@ -6,34 +6,46 @@
 
 namespace ft {
 
+	template<size_t S>
+	struct Empty {};
+
 	template<size_t SIZE, typename T>
-	class Vector {
+	union Vector {
+	
+	private:
+
+		T data[SIZE];
 	
 	public:
 
+		// struct {
+		// 	T x;
+		// 	T y;
+		// 	[[no_unique_address]] std::conditional_t<SIZE >= 3, T, Empty<0>> z;
+		// 	[[no_unique_address]] std::conditional_t<SIZE >= 4, T, Empty<1>> w;
+		// };
+
 		/*
 		 * Constructors with 2 arguments available only for size 2 vectors.
-		 * Which means that the following code will not compile for size 3 or 4 vectors but will compile for size 2 vectors
 		 */
 		template <size_t n = SIZE, std::enable_if_t<(n == 2)>* = nullptr>
-		Vector(const T& x, const T& y) {
+		Vector(const T& x, const T& y) {// requires (SIZE == 2) {
 			this->data[0] = x;
 			this->data[1] = y;
 		}
 
 		/*
 		 * Constructors with 3 arguments available only for size 3 vectors.
-		 * Which means that the following code will not compile for size 2 or 4 vectors but will compile for size 3 vectors
 		 */
 		template <size_t n = SIZE, std::enable_if_t<(n == 3)>* = nullptr>
-		Vector(const T& x, const T& y, const T& z) {
+		Vector(const T& x, const T& y, const T& z) {// requires (SIZE == 3) { /* Requires is c++20 */
 			this->data[0] = x;
 			this->data[1] = y;
 			this->data[2] = z;
 		}
 
 		template <size_t n = SIZE, std::enable_if_t<(n == 3)>* = nullptr>
-		Vector(const Vector<2, T>& other, const T& z) {
+		Vector(const Vector<2, T>& other, const T& z) {// requires (SIZE == 3) {
 			this->data[0] = other[0];
 			this->data[1] = other[1];
 			this->data[2] = z;
@@ -41,10 +53,9 @@ namespace ft {
 
 		/*
 		 * Constructors with 4 arguments available only for size 4 vectors.
-		 * Which means that the following code will not compile for size 2 or 3 vectors but will compile for size 4 vectors
 		 */
 		template <size_t n = SIZE, std::enable_if_t<(n == 4)>* = nullptr>
-		Vector(const T& x, const T& y, const T& z, const T& w) {
+		Vector(const T& x, const T& y, const T& z, const T& w) {// requires (SIZE == 4) {
 			this->data[0] = x;
 			this->data[1] = y;
 			this->data[2] = z;
@@ -52,7 +63,7 @@ namespace ft {
 		}
 
 		template <size_t n = SIZE, std::enable_if_t<(n == 4)>* = nullptr>
-		Vector(const Vector<3, T>& other, const T& w) {
+		Vector(const Vector<3, T>& other, const T& w) {// requires (SIZE == 4) {
 			this->data[0] = other[0];
 			this->data[1] = other[1];
 			this->data[2] = other[2];
@@ -60,7 +71,7 @@ namespace ft {
 		}
 
 		template <size_t n = SIZE, std::enable_if_t<(n == 4)>* = nullptr>
-		Vector(const Vector<2, T>& other, const T& z, const T& w) {
+		Vector(const Vector<2, T>& other, const T& z, const T& w) {// requires (SIZE == 4) {
 			this->data[0] = other[0];
 			this->data[1] = other[1];
 			this->data[2] = z;
@@ -68,7 +79,7 @@ namespace ft {
 		}
 
 		template <size_t n = SIZE, std::enable_if_t<(n == 4)>* = nullptr>
-		Vector(const Vector<2, T>& other, const Vector<2, T>& other2) {
+		Vector(const Vector<2, T>& other, const Vector<2, T>& other2) {// requires (SIZE == 4) {
 			this->data[0] = other[0];
 			this->data[1] = other[1];
 			this->data[2] = other2[0];
@@ -104,7 +115,7 @@ namespace ft {
 
 		bool operator==(const Vector<SIZE, T>& other) const {
 			for (size_t i = 0; i < SIZE; i++) {
-				if (this->data[i] != other.data[i]) {
+				if (this->data[i] != other[i]) {
 					return false;
 				}
 			}
@@ -119,16 +130,31 @@ namespace ft {
 			return this->data[index];
 		}
 
+		T dot(const Vector<SIZE, T>& other) const {
+			T result = 0;
+			for (size_t i = 0; i < SIZE; i++) {
+				result += this->data[i] * other[i];
+			}
+			return result;
+		}
+
+		template<size_t n = SIZE, std::enable_if_t<(n == 3)>* = nullptr>
+		Vector<SIZE, T> cross(const Vector<SIZE, T>& other) const {
+			double v1x = this->data[0], v1y = this->data[1], v1z = this->data[2];
+			double v2x = other[0], v2y = other[1], v2z = other[2];
+			return Vector<SIZE, T>(
+				v1y * v2z - v1z * v2y,
+				v1z * v2x - v1x * v2z,
+				v1x * v2y - v1y * v2x
+			);
+		}
+
 		void log() {
 			for (size_t i = 0; i < SIZE; i++) {
 				std::cout << this->data[i] << " ";
 			}
 			std::cout << std::endl;
 		}
-
-	private:
-
-		T data[SIZE];
 	};
 
 };

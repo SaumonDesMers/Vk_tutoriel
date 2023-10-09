@@ -66,25 +66,25 @@ bool memoryTest(T arg1, U arg2, std::string testName) {
 \
 	std::cout << "Memory tests vec" << size << ":" << std::endl;\
 \
-	memoryTest(ft_vec2(), glm_vec2(), "Default constructor");\
+	memoryTest(glm_vec2(), ft_vec2(), "Default constructor");\
 \
 	ft_vec2 ft_vec2_1(__VA_ARGS__);\
 	glm_vec2 glm_vec2_1(__VA_ARGS__);\
-	memoryTest(ft_vec2_1, glm_vec2_1, "Constructor with " + std::to_string(size) + " arguments");\
+	memoryTest(glm_vec2_1, ft_vec2_1, "Constructor with " + std::to_string(size) + " arguments");\
 \
 	ft_vec2 ft_vec2_2 = ft_vec2_1;\
 	glm_vec2 glm_vec2_2 = glm_vec2_1;\
-	memoryTest(ft_vec2_2, glm_vec2_2, "Copy constructor");\
+	memoryTest(glm_vec2_2, ft_vec2_2, "Copy constructor");\
 \
 	ft_vec2 ft_vec2_3;\
 	glm_vec2 glm_vec2_3;\
 	ft_vec2_3 = ft_vec2_1;\
 	glm_vec2_3 = glm_vec2_1;\
-	memoryTest(ft_vec2_3, glm_vec2_3, "Copy assignment operator");\
+	memoryTest(glm_vec2_3, ft_vec2_3, "Copy assignment operator");\
 \
 	ft_vec2 ft_vec2_4 = ft_vec2_1.operator*<float>(2.0f);\
 	glm_vec2 glm_vec2_4 = glm_vec2_1 * 2.0f;\
-	memoryTest(ft_vec2_4, glm_vec2_4, "Scalar multiplication");\
+	memoryTest(glm_vec2_4, ft_vec2_4, "Scalar multiplication");\
 }
 
 template<typename T>
