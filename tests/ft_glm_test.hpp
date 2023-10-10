@@ -1,3 +1,6 @@
+#ifndef FT_GLM_TEST_HPP
+#define FT_GLM_TEST_HPP
+
 #include "ft_glm/ft_glm.hpp"
 #include <glm/glm.hpp>
 
@@ -94,6 +97,16 @@ void log_vec4(T vec) {
 	std::cout << std::endl;
 }
 
+template<typename T>
+void log_mat4(T mat) {
+	for (size_t i = 0; i < 4; i++) {
+		for (size_t j = 0; j < 4; j++)
+			std::cout << mat[i][j] << " ";
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
+
 void test_mat4() {
 
 	std::cout << "Memory tests mat4:" << std::endl;
@@ -154,3 +167,5 @@ void test_ft_glm() {
 	test_vec(4, 1.0f, 2.0f, 3.0f, 4.0f);
 	test_mat4();
 }
+
+#endif // FT_GLM_TEST_HPP

@@ -82,10 +82,29 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
+	/* TODO: remove this */
+	// Glm_UniformBufferObject glm_ubo{};
+	// glm_ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	// glm_ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	// glm_ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
+
 	UniformBufferObject ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
+	ubo.model = ft::rotate(
+		time * ft::radians(90.0f), /* angle in radians */
+		ft::vec3(0.0f, 0.0f, 1.0f) /* axis of rotation */
+	);
+	ubo.view = ft::lookAt(
+		ft::vec3(2.0f, 2.0f, 2.0f), /* camera position */
+		ft::vec3(0.0f, 0.0f, 0.0f), /* target position */
+		ft::vec3(0.0f, 0.0f, 1.0f) /* up vector */
+	);
+	ubo.proj = ft::perspective<float>(
+		ft::radians(45.0f), /* field of view in radians */
+		(float) swapChainExtent.width / (float) swapChainExtent.height, /* aspect ratio */
+		0.1f, /* near plane */
+		10.0f /* far plane */
+	);
+
 	/* GLM was originally designed for OpenGL, where the Y coordinate of the clip coordinates is inverted.
 		The easiest way to compensate for that is to flip the sign on the scaling factor of the Y axis in the projection matrix. */
 	ubo.proj[1][1] *= -1;

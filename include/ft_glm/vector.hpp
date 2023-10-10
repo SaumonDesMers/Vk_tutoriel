@@ -14,6 +14,8 @@ namespace ft {
 	
 	private:
 
+		typedef typename ft::Vector<SIZE, T> vec;
+
 		T data[SIZE];
 	
 	public:
@@ -95,25 +97,41 @@ namespace ft {
 			memset(this->data, 0, sizeof(T) * SIZE);
 		}
 
-		Vector(const Vector<SIZE, T>& other) {
+		Vector(const vec& other) {
 			memcpy(this->data, other.data, sizeof(T) * SIZE);
 		}
 
-		Vector<SIZE, T>& operator=(const Vector<SIZE, T>& other) {
+		vec& operator=(const vec& other) {
 			memcpy(this->data, other.data, sizeof(T) * SIZE);
 			return *this;
 		}
 
+		vec operator+(const vec& other) const {
+			vec result;
+			for (size_t i = 0; i < SIZE; i++) {
+				result[i] = this->data[i] + other[i];
+			}
+			return result;
+		}
+
+		vec operator-(const vec& other) const {
+			vec result;
+			for (size_t i = 0; i < SIZE; i++) {
+				result[i] = this->data[i] - other[i];
+			}
+			return result;
+		}
+
 		template<typename U>
-		Vector<SIZE, T> operator*(typename std::enable_if<std::is_arithmetic<U>::value, U>::type scalar) {
-			Vector<SIZE, T> result;
+		vec operator*(typename std::enable_if<std::is_arithmetic<U>::value, U>::type scalar) const {
+			vec result;
 			for (size_t i = 0; i < SIZE; i++) {
 				result[i] = this->data[i] * scalar;
 			}
 			return result;
 		}
 
-		bool operator==(const Vector<SIZE, T>& other) const {
+		bool operator==(const vec& other) const {
 			for (size_t i = 0; i < SIZE; i++) {
 				if (this->data[i] != other[i]) {
 					return false;
@@ -130,7 +148,23 @@ namespace ft {
 			return this->data[index];
 		}
 
-		T dot(const Vector<SIZE, T>& other) const {
+		float lengthSquared() const {
+			float result = 0;
+			for (size_t i = 0; i < SIZE; i++) {
+				result += this->data[i] * this->data[i];
+			}
+			return result;
+		}
+
+		float length() const {
+			return sqrt(this->lengthSquared());
+		}
+
+		vec normalize() const {
+			return this->operator*<float>(1.0f / this->length());
+		}
+
+		T dot(const vec& other) const {
 			T result = 0;
 			for (size_t i = 0; i < SIZE; i++) {
 				result += this->data[i] * other[i];
@@ -139,17 +173,17 @@ namespace ft {
 		}
 
 		template<size_t n = SIZE, std::enable_if_t<(n == 3)>* = nullptr>
-		Vector<SIZE, T> cross(const Vector<SIZE, T>& other) const {
+		vec cross(const vec& other) const {
 			double v1x = this->data[0], v1y = this->data[1], v1z = this->data[2];
 			double v2x = other[0], v2y = other[1], v2z = other[2];
-			return Vector<SIZE, T>(
+			return vec(
 				v1y * v2z - v1z * v2y,
 				v1z * v2x - v1x * v2z,
 				v1x * v2y - v1y * v2x
 			);
 		}
 
-		void log() {
+		void log() const {
 			for (size_t i = 0; i < SIZE; i++) {
 				std::cout << this->data[i] << " ";
 			}

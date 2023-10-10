@@ -27,23 +27,61 @@ namespace ft {
 	}
 
 	/* Create a rotation matrix.
-		Angle must be in radians */
+	 * Angle must be in radians.
+
+		We want to rotate vector V around axis A normalized by theta T radians.
+
+			| cos T + (1 - cos T) * A.x^2				(1 - cos T) * A.x * A.y - sin T * A.z		(1 - cos T) * A.x * A.z + sin T * A.y	0 |
+		R = | (1 - cos T) * A.x * A.y + sin T * A.z		cos T + (1 - cos T) * A.y^2					(1 - cos T) * A.y * A.z - sin T * A.x	0 |
+			| (1 - cos T) * A.x * A.z - sin T * A.y		(1 - cos T) * A.y * A.z + sin T * A.x		cos T + (1 - cos T) * A.z^2				0 |
+
+	 */
 	template<typename T>
-	Matrix<4, 4, T> rotate(T angle, Vector<3, T> axis) {
-		Matrix<4, 4, T> result(1.0f);
-		T c = cos(angle);
-		T s = sin(angle);
+	Matrix<4, 4, T> rotate(float theta, Vector<3, T> a) {
+		a = a.normalize();
+		T c = cos(theta);
+		T s = sin(theta);
 		T omc = 1.0f - c;
-		result[0][0] = axis[0] * axis[0] * omc + c;
-		result[0][1] = axis[0] * axis[1] * omc - axis[2] * s;
-		result[0][2] = axis[0] * axis[2] * omc + axis[1] * s;
-		result[1][0] = axis[1] * axis[0] * omc + axis[2] * s;
-		result[1][1] = axis[1] * axis[1] * omc + c;
-		result[1][2] = axis[1] * axis[2] * omc - axis[0] * s;
-		result[2][0] = axis[2] * axis[0] * omc - axis[1] * s;
-		result[2][1] = axis[2] * axis[1] * omc + axis[0] * s;
-		result[2][2] = axis[2] * axis[2] * omc + c;
-		return result;
+		return Matrix<4, 4, T>({
+			a[0] * a[0] * omc + c,			a[0] * a[1] * omc - a[2] * s,	a[0] * a[2] * omc + a[1] * s,	0.0f,
+			a[1] * a[0] * omc + a[2] * s,	a[1] * a[1] * omc + c,			a[1] * a[2] * omc - a[0] * s,	0.0f,
+			a[2] * a[0] * omc - a[1] * s,	a[2] * a[1] * omc + a[0] * s,	a[2] * a[2] * omc + c,			0.0f,
+			0.0f,							0.0f,							0.0f,							1.0f
+		});
+	}
+
+	/* Create lookat matrix.
+	 * The camera is at position eye and looks at target.
+	 * The up vector is up.
+	 */
+	template<typename T>
+	Matrix<4, 4, T> lookAt(Vector<3, T> eye, Vector<3, T> target, Vector<3, T> up) {
+		Vector<3, T> dir = (eye - target).normalize();
+		Vector<3, T> right = up.cross(dir).normalize();
+		Vector<3, T> newUp = dir.cross(right);
+		return Matrix<4, 4, T>({
+			right[0],			newUp[0],			dir[0],			0.0f,
+			right[1],			newUp[1],			dir[1],			0.0f,
+			right[2],			newUp[2],			dir[2],			0.0f,
+			-right.dot(eye),	-newUp.dot(eye),	-dir.dot(eye),	1.0f
+		});
+	}
+
+	/* Create perspective projection matrix.
+	 * The field of view is fov in radians.
+	 * The aspect ratio is aspect.
+	 * The near plane is near.
+	 * The far plane is far.
+	 */
+	template<typename T>
+	Matrix<4, 4, T> perspective(float fov, float aspect, float near, float far) {
+		float tanHalfFov = tan(fov / 2.0f);
+		return Matrix<4, 4, T>({
+			1.0f / (aspect * tanHalfFov),	0.0f,				0.0f,									0.0f,
+			0.0f,							1.0f / tanHalfFov,	0.0f,									0.0f,
+			0.0f,							0.0f,				-(far + near) / (far - near),			-1.0f,
+			0.0f,							0.0f,				-(2.0f * far * near) / (far - near),	0.0f
+		});
 	}
 
 }

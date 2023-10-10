@@ -84,6 +84,13 @@ namespace std {
 
 /* Always align uniform buffer objects to avoid issues with padding */
 struct UniformBufferObject {
+	alignas(16) ft::mat4 model;
+	alignas(16) ft::mat4 view;
+	alignas(16) ft::mat4 proj;
+};
+
+/* TODO: remove this */
+struct Glm_UniformBufferObject {
 	alignas(16) glm::mat4 model;
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
