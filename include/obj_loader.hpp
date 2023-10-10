@@ -59,9 +59,9 @@ public:
 				if (this->hasTexCoords) {
 					vertex.texCoord = this->texCoords[face.texCoordIndex[i] - 1];
 				}
-				// if (this->hasNormals) {
-				// 	vertex.normal = this->normals[face.normalIndex[i] - 1];
-				// }
+				if (this->hasNormals) {
+					vertex.normal = this->normals[face.normalIndex[i] - 1];
+				}
 				if (uniqueVertices.count(vertex) == 0) {
 					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
 					vertices.push_back(vertex);

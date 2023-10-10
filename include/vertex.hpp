@@ -16,6 +16,7 @@ struct Vertex {
 	ft::vec3 pos;
 	ft::vec3 color;
 	ft::vec2 texCoord;
+	ft::vec3 normal;
 
 	/* The binding description describes at which rate to load data from memory throughout the vertices. */
 	static VkVertexInputBindingDescription getBindingDescription() {
@@ -34,8 +35,8 @@ struct Vertex {
 	}
 
 	/* The attribute descriptions describe how to extract a vertex attribute from a chunk of vertex data originating from a binding description. */
-	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-		std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+	static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
+		std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
 
 		/* The binding parameter specifies which binding the per-vertex data comes from */
 		attributeDescriptions[0].binding = 0;
@@ -64,20 +65,28 @@ struct Vertex {
 		attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
 		attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
 
+		attributeDescriptions[3].binding = 0;
+		attributeDescriptions[3].location = 3;
+		attributeDescriptions[3].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[3].offset = offsetof(Vertex, normal);
+
 		return attributeDescriptions;
 	}
 
 	bool operator==(const Vertex& other) const {
-		return pos == other.pos && color == other.color && texCoord == other.texCoord;
+		return pos == other.pos && color == other.color && texCoord == other.texCoord && normal == other.normal;
 	}
 };
 
 namespace std {
 	template<> struct hash<Vertex> {
 		size_t operator()(Vertex const& vertex) const {
-			return ((hash<ft::vec3>()(vertex.pos) ^
-					(hash<ft::vec3>()(vertex.color) << 1)) >> 1) ^
-					(hash<ft::vec2>()(vertex.texCoord) << 1);
+			return (
+				(hash<ft::vec3>()(vertex.pos) ^
+				(hash<ft::vec3>()(vertex.color) << 1)) >> 1) ^
+				(hash<ft::vec2>()(vertex.texCoord) << 1) ^
+				(hash<ft::vec3>()(vertex.normal) << 1
+			);
 		}
 	};
 }
