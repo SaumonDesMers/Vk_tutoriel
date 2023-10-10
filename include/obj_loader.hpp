@@ -43,7 +43,6 @@ public:
 
 		this->readFile(path);
 		this->removeComments();
-		this->removeEmptyLines();
 		this->parse();
 	}
 
@@ -109,16 +108,6 @@ private:
 		}
 	}
 
-	void removeEmptyLines() {
-		for (size_t i = 0; i < this->lines.size(); i++) {
-			std::string line = this->lines[i];
-			if (line.empty()) {
-				this->lines.erase(this->lines.begin() + i);
-				i--;
-			}
-		}
-	}
-
 	void parse() {
 
 		std::regex vertexRegex(R"(^v(\s-?(\d+\.)?\d+){3,4}$)");
@@ -130,6 +119,11 @@ private:
 		std::regex faceRegex_v_vt_vn(R"(^f(\s\d+\/\d+\/\d+){3,}$)");
 
 		for (uint32_t i = 0; i < this->lines.size(); i++) {
+
+			/* Skip empty lines or lines with only spaces */
+			if (std::all_of(this->lines[i].begin(), this->lines[i].end(), isspace)) {
+				continue;
+			}
 			
 			std::string line = this->lines[i];
 			std::vector<std::string> tokens = split(line, " ");
@@ -158,7 +152,7 @@ private:
 				this->parseFace_v_vt_vn(tokens);
 			}
 			else {
-				throw std::runtime_error("Parsing syntax error");
+				throw std::runtime_error("Line " + std::to_string(i) + ": Parsing syntax error");
 			}
 		}
 	}
