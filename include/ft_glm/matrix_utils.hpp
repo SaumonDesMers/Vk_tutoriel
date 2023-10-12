@@ -6,13 +6,29 @@
 
 namespace ft {
 
-	/* Create a translation matrix */
+	/* Create a translation matrix
+	 *
+	 * Should look like this:
+	 * 	| 1 0 0 x |
+	 * 	| 0 1 0 y |
+	 * 	| 0 0 1 z |
+	 * 	| 0 0 0 1 |
+	 * 
+	 * but it doesn't work for some reason.
+	 * So I'm copying the glm implementation which works and looks like this:
+	 * 	| 1 0 0 0 |
+	 * 	| 0 1 0 0 |
+	 * 	| 0 0 1 0 |
+	 * 	| x y z 1 |
+	 * 
+	 * I don't know why it works, but it does.
+	 */
 	template<typename T>
 	Matrix<4, 4, T> translate(Vector<3, T> translation) {
 		Matrix<4, 4, T> result(1.0f);
-		result[0][3] = translation[0];
-		result[1][3] = translation[1];
-		result[2][3] = translation[2];
+		result[3][0] = translation[0];
+		result[3][1] = translation[1];
+		result[3][2] = translation[2];
 		return result;
 	}
 
@@ -23,6 +39,15 @@ namespace ft {
 		result[0][0] = scalar_x;
 		result[1][1] = scalar_y;
 		result[2][2] = scalar_z;
+		return result;
+	}
+
+	template<typename T>
+	Matrix<4, 4, T> scale(Vector<3, T> scalar) {
+		Matrix<4, 4, T> result(1.0f);
+		result[0][0] = scalar[0];
+		result[1][1] = scalar[1];
+		result[2][2] = scalar[2];
 		return result;
 	}
 
@@ -82,6 +107,17 @@ namespace ft {
 			0.0f,							0.0f,				-(far + near) / (far - near),			-1.0f,
 			0.0f,							0.0f,				-(2.0f * far * near) / (far - near),	0.0f
 		});
+	}
+
+
+	template<typename T>
+	void log_mat4(T mat) {
+		for (size_t i = 0; i < 4; i++) {
+			for (size_t j = 0; j < 4; j++)
+				std::cout << mat[i][j] << " ";
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
 	}
 
 }

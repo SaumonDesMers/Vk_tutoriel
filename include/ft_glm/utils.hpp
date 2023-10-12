@@ -1,5 +1,5 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef FT_GLM_UTILS_HPP
+#define FT_GLM_UTILS_HPP
 
 namespace ft {
 
@@ -10,4 +10,4 @@ namespace ft {
 
 };
 
-#endif // UTILS_HPP
+#endif // FT_GLM_UTILS_HPP

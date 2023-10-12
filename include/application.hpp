@@ -27,7 +27,7 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-const std::string MODEL_PATH = "models/cube.obj";
+const std::string MODEL_PATH = "models/42.obj";
 const std::string TEXTURE_PATH = "textures/texture.ppm";
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -133,6 +133,8 @@ private:
 	uint32_t currentFrame = 0;
 
 	void initVulkan() {
+		this->loadModel();
+		
 		this->createInstance();
 		this->setupDebugMessenger();
 		this->createSurface();
@@ -149,7 +151,6 @@ private:
 		this->createTextureImage();
 		this->createTextureImageView();
 		this->createTextureSampler();
-		this->loadModel();
 		this->createVertexBuffer();
 		this->createIndexBuffer();
 		this->createUniformBuffers();

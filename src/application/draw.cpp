@@ -79,8 +79,8 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
 	/* Calculate the time in seconds since the application started */
 	static auto startTime = std::chrono::high_resolution_clock::now();
 
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 	/* TODO: remove this */
 	// Glm_UniformBufferObject glm_ubo{};
@@ -88,15 +88,16 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
 	// glm_ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	// glm_ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
 
+	ft::mat4 scale = ft::scale(ft::vec3(1.0f, 1.0f, 1.0f));
+	ft::mat4 rotate = ft::rotate(time * ft::radians(90.0f), ft::vec3(0.0f, 1.0f, 0.0f));
+	ft::mat4 translate = ft::translate(ft::vec3(0.0f, 0.0f, -1.0f));
+
 	UniformBufferObject ubo{};
-	ubo.model = ft::rotate(
-		time * ft::radians(90.0f), /* angle in radians */
-		ft::vec3(0.0f, 0.0f, 1.0f) /* axis of rotation */
-	);
+	ubo.model = rotate * translate * scale;
 	ubo.view = ft::lookAt(
-		ft::vec3(2.0f, 2.0f, 2.0f), /* camera position */
+		ft::vec3(7.0f, 0.0f, 0.0f), /* camera position */
 		ft::vec3(0.0f, 0.0f, 0.0f), /* target position */
-		ft::vec3(0.0f, 0.0f, 1.0f) /* up vector */
+		ft::vec3(0.0f, 1.0f, 0.0f) /* up vector */
 	);
 	ubo.proj = ft::perspective<float>(
 		ft::radians(45.0f), /* field of view in radians */

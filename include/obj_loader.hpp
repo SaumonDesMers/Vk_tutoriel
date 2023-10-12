@@ -2,12 +2,14 @@
 #define MODEL_LOADING_HPP
 
 #include "vertex.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <cstring>
 #include <regex>
+#include <random>
 
 static std::vector<std::string> split(std::string str, std::string delim) {
 	std::vector<std::string> tab;
@@ -53,9 +55,13 @@ public:
 		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 
 		for (const auto& face : this->faces) {
+
+			ft::vec3 color = randomColor();
+
 			for (size_t i = 0; i < 3; i++) {
 				Vertex vertex{};
 				vertex.pos = this->vertices[face.vertexIndex[i] - 1];
+				vertex.color = color;
 				if (this->hasTexCoords) {
 					vertex.texCoord = this->texCoords[face.texCoordIndex[i] - 1];
 				}
@@ -151,9 +157,9 @@ private:
 			else if (std::regex_match(line, faceRegex_v_vt_vn) && hasTexCoords && hasNormals) {
 				this->parseFace_v_vt_vn(tokens);
 			}
-			else {
-				throw std::runtime_error("Line " + std::to_string(i) + ": Parsing syntax error");
-			}
+			// else {
+			// 	throw std::runtime_error("Line " + std::to_string(i) + ": Parsing syntax error");
+			// }
 		}
 	}
 
