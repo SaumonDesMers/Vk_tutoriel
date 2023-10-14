@@ -147,8 +147,7 @@ namespace ft {
 			return result;
 		}
 
-		template<typename U>
-		vec operator*(typename std::enable_if<std::is_arithmetic<U>::value, U>::type scalar) const {
+		vec operator*(float scalar) const {
 			vec result;
 			for (size_t i = 0; i < SIZE; i++) {
 				result[i] = this->data[i] * scalar;
@@ -156,8 +155,7 @@ namespace ft {
 			return result;
 		}
 
-		template<typename U>
-		vec operator/(typename std::enable_if<std::is_arithmetic<U>::value, U>::type scalar) const {
+		vec operator/(float scalar) const {
 			vec result;
 			for (size_t i = 0; i < SIZE; i++) {
 				result[i] = this->data[i] / scalar;
@@ -166,12 +164,7 @@ namespace ft {
 		}
 
 		bool operator==(const vec& other) const {
-			for (size_t i = 0; i < SIZE; i++) {
-				if (this->data[i] != other[i]) {
-					return false;
-				}
-			}
-			return true;
+			return memcmp(this->data, other.data, sizeof(T) * SIZE) == 0;
 		}
 
 		T operator[](size_t index) const {
@@ -195,7 +188,7 @@ namespace ft {
 		}
 
 		vec normalize() const {
-			return this->operator*<float>(1.0f / this->length());
+			return *this / this->length();
 		}
 
 		T dot(const vec& other) const {

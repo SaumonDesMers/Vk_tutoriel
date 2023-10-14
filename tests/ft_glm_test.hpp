@@ -85,7 +85,7 @@ bool memoryTest(T arg1, U arg2, std::string testName) {
 	glm_vec2_3 = glm_vec2_1;\
 	memoryTest(glm_vec2_3, ft_vec2_3, "Copy assignment operator");\
 \
-	ft_vec2 ft_vec2_4 = ft_vec2_1.operator*<float>(2.0f);\
+	ft_vec2 ft_vec2_4 = ft_vec2_1 * 2.0f;\
 	glm_vec2 glm_vec2_4 = glm_vec2_1 * 2.0f;\
 	memoryTest(glm_vec2_4, ft_vec2_4, "Scalar multiplication");\
 }

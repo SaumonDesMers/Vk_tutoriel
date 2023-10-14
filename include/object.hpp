@@ -84,7 +84,7 @@ private:
 		for (const Vertex& vertex : this->vertices) {
 			sum += vertex.pos;
 		}
-		this->baricenter = sum.operator/<float>(static_cast<float>(this->vertices.size()));
+		this->baricenter = sum / static_cast<float>(this->vertices.size());
 	}
 
 };

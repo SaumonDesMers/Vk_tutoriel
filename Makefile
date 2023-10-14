@@ -18,7 +18,7 @@ SRCS = main.cpp window.cpp clean_up.cpp debug.cpp instance.cpp main_loop.cpp \
 		render_pass.cpp graphics_pipeline.cpp frame_buffer.cpp command.cpp \
 		sync_objects.cpp draw.cpp vertex_buffer.cpp buffer.cpp index.cpp \
 		descriptor.cpp uniform_buffer.cpp texture.cpp depth.cpp model_loading.cpp \
-		utils.cpp key_callback.cpp
+		utils.cpp key_callback.cpp mouse_callback.cpp
 INC_DIR = -I include -I glm
 
 OBJ_DIR = obj

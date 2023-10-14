@@ -98,9 +98,9 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
 	UniformBufferObject ubo{};
 	ubo.model = translateToPosition * rotate * translateToOrigin * scale;
 	ubo.view = ft::lookAt(
-		ft::vec3(0.0f, 0.0f, 7.0f), /* camera position */
-		ft::vec3(0.0f, 0.0f, 0.0f), /* target position */
-		ft::vec3(0.0f, 1.0f, 0.0f) /* up vector */
+		this->camera.getPosition(), /* camera position */
+		this->camera.getTarget(), /* target position */
+		this->camera.getUp() /* up vector */
 	);
 	ubo.proj = ft::perspective<float>(
 		ft::radians(45.0f), /* field of view in radians */

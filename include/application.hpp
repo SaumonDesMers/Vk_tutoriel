@@ -25,6 +25,7 @@
 
 #include "vertex.hpp"
 #include "object.hpp"
+#include "camera.hpp"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -122,6 +123,7 @@ private:
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
 
+	Camera camera = Camera(ft::vec3(0.0f, 0.0f, 7.0f), ft::vec3(0.0f, 0.0f, 0.0f), ft::vec3(0.0f, 1.0f, 0.0f));
 	std::unique_ptr<Object> object;
 
 	VkBuffer vertexBuffer;
@@ -178,6 +180,13 @@ private:
 	void arrowDown(int key, int scancode, int action, int mods);
 	void arrowLeft(int key, int scancode, int action, int mods);
 	void arrowRight(int key, int scancode, int action, int mods);
+	void key_a(int key, int scancode, int action, int mods);
+	void key_d(int key, int scancode, int action, int mods);
+	void key_w(int key, int scancode, int action, int mods);
+	void key_s(int key, int scancode, int action, int mods);
+
+	/* mouse_callback.cpp */
+	static void scrollCallback(GLFWwindow* window, double xpos, double ypos);
 
 	/* main_loop.cpp */
 	void mainLoop();
