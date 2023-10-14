@@ -106,6 +106,21 @@ namespace ft {
 			return *this;
 		}
 
+		vec& operator+=(const vec& other) {
+			for (size_t i = 0; i < SIZE; i++) {
+				this->data[i] += other[i];
+			}
+			return *this;
+		}
+
+		vec& operator-=(const vec& other) {
+			for (size_t i = 0; i < SIZE; i++) {
+				this->data[i] -= other[i];
+			}
+			return *this;
+		}
+
+		/* Binary plus operator */
 		vec operator+(const vec& other) const {
 			vec result;
 			for (size_t i = 0; i < SIZE; i++) {
@@ -114,10 +129,20 @@ namespace ft {
 			return result;
 		}
 
+		/* Binary minus operator */
 		vec operator-(const vec& other) const {
 			vec result;
 			for (size_t i = 0; i < SIZE; i++) {
 				result[i] = this->data[i] - other[i];
+			}
+			return result;
+		}
+
+		/* Unary minus operator */
+		vec operator-() {
+			vec result;
+			for (size_t i = 0; i < SIZE; i++) {
+				result[i] = -this->data[i];
 			}
 			return result;
 		}
@@ -127,6 +152,15 @@ namespace ft {
 			vec result;
 			for (size_t i = 0; i < SIZE; i++) {
 				result[i] = this->data[i] * scalar;
+			}
+			return result;
+		}
+
+		template<typename U>
+		vec operator/(typename std::enable_if<std::is_arithmetic<U>::value, U>::type scalar) const {
+			vec result;
+			for (size_t i = 0; i < SIZE; i++) {
+				result[i] = this->data[i] / scalar;
 			}
 			return result;
 		}

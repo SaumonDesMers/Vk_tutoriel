@@ -13,27 +13,35 @@ private:
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 
+	ft::vec3 baricenter;
+
 public:
+
+	ft::vec3 position;
+	ft::vec3 rotation;
+	ft::vec3 scale;
 
 	Object() = delete;
 	Object(const Object&) = delete;
 	Object& operator=(const Object&) = delete;
 
-	Object(Object&& other) {
-		this->vertices = std::move(other.vertices);
-		this->indices = std::move(other.indices);
-
-		// other.vertices.data() = nullptr;
-		// other.indices.data() = nullptr;
+	Object(Object&& other):
+		vertices(std::move(other.vertices)),
+		indices(std::move(other.indices)),
+		position(other.position),
+		rotation(other.rotation),
+		scale(other.scale),
+		baricenter(other.baricenter) {
 	}
 
 	Object& operator=(Object&& other) {
 		if (this != &other) {
 			this->vertices = std::move(other.vertices);
 			this->indices = std::move(other.indices);
-
-			// other.vertices.data() = nullptr;
-			// other.indices.data() = nullptr;
+			this->position = other.position;
+			this->rotation = other.rotation;
+			this->scale = other.scale;
+			this->baricenter = other.baricenter;
 		}
 		return *this;
 	}
@@ -41,21 +49,16 @@ public:
 	Object(std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices) {
 		this->vertices = vertices;
 		this->indices = indices;
-
-		// vertices.data() = nullptr;
-		// indices.data() = nullptr;
+		this->calculateBaricenter();
 	}
-
-	~Object() {}
 
 	void setVertices(std::vector<Vertex>&& vertices) {
 		this->vertices = vertices;
-		// vertices.data() = nullptr;
+		this->calculateBaricenter();
 	}
 
 	void setIndices(std::vector<uint32_t>&& indices) {
 		this->indices = indices;
-		// indices.data() = nullptr;
 	}
 
 	const std::vector<Vertex>& getVertices() const {
@@ -64,6 +67,24 @@ public:
 
 	const std::vector<uint32_t>& getIndices() const {
 		return this->indices;
+	}
+
+	const ft::vec3& getBaricenter() const {
+		return this->baricenter;
+	}
+
+	ft::vec3& getBaricenter() {
+		return this->baricenter;
+	}
+
+private:
+
+	void calculateBaricenter() {
+		ft::vec3 sum = ft::vec3(0.0f, 0.0f, 0.0f);
+		for (const Vertex& vertex : this->vertices) {
+			sum += vertex.pos;
+		}
+		this->baricenter = sum.operator/<float>(static_cast<float>(this->vertices.size()));
 	}
 
 };
