@@ -57,21 +57,34 @@ public:
 		for (const auto& face : this->faces) {
 
 			ft::vec3 color = randomColor();
+			ft::vec2 texCoordsReplace[3] = {
+				ft::vec2(0.0f, 0.0f),
+				ft::vec2(0.0f, 1.0f),
+				ft::vec2(1.0f, 1.0f)
+			};
 
 			for (size_t i = 0; i < 3; i++) {
 				Vertex vertex{};
+
 				vertex.pos = this->vertices[face.vertexIndex[i] - 1];
+
 				vertex.color = color;
+
 				if (this->hasTexCoords) {
 					vertex.texCoord = this->texCoords[face.texCoordIndex[i] - 1];
+				} else {
+					vertex.texCoord = texCoordsReplace[i];
 				}
+
 				if (this->hasNormals) {
 					vertex.normal = this->normals[face.normalIndex[i] - 1];
 				}
+
 				if (uniqueVertices.count(vertex) == 0) {
 					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
 					vertices.push_back(vertex);
 				}
+
 				indices.push_back(uniqueVertices[vertex]);
 			}
 		}
