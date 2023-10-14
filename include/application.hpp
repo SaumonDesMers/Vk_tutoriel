@@ -174,6 +174,10 @@ private:
 	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	void mapKeyCallback();
 	void escape(int key, int scancode, int action, int mods);
+	void arrowUp(int key, int scancode, int action, int mods);
+	void arrowDown(int key, int scancode, int action, int mods);
+	void arrowLeft(int key, int scancode, int action, int mods);
+	void arrowRight(int key, int scancode, int action, int mods);
 
 	/* main_loop.cpp */
 	void mainLoop();

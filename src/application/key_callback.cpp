@@ -10,10 +10,16 @@ void Application::keyCallback(GLFWwindow* window, int key, int scancode, int act
 
 	switch (key) {
 		CASE(GLFW_KEY_ESCAPE, escape)
+		CASE(GLFW_KEY_UP, arrowUp)
+		CASE(GLFW_KEY_DOWN, arrowDown)
+		CASE(GLFW_KEY_LEFT, arrowLeft)
+		CASE(GLFW_KEY_RIGHT, arrowRight)
 		default:
 			break;
 	}
 }
+
+#undef CASE
 
 void Application::mapKeyCallback() {
 	this->key_callbacks[GLFW_KEY_ESCAPE] = &Application::escape;
@@ -22,5 +28,29 @@ void Application::mapKeyCallback() {
 void Application::escape(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(this->window, GLFW_TRUE);
+	}
+}
+
+void Application::arrowUp(int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		this->object->position[1] += 0.1f;
+	}
+}
+
+void Application::arrowDown(int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		this->object->position[1] -= 0.1f;
+	}
+}
+
+void Application::arrowLeft(int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		this->object->position[0] -= 0.1f;
+	}
+}
+
+void Application::arrowRight(int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		this->object->position[0] += 0.1f;
 	}
 }

@@ -88,17 +88,17 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
 	// glm_ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	// glm_ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
 
-	/* To rotate an object around itself, we need to move it to the center, rotate it, and then move it back */
+	/* To rotate an object around itself, we need to move it to the center, rotate it, and then move it to the new position */
 	ft::mat4 translateToOrigin = ft::translate(-this->object->getBaricenter());
 	ft::mat4 rotate = ft::rotate(time * ft::radians(90.0f), ft::vec3(0.0f, 1.0f, 0.0f));
-	ft::mat4 translateBack = ft::translate(this->object->getBaricenter());
+	ft::mat4 translateToPosition = ft::translate(this->object->position);
 
 	ft::mat4 scale = ft::scale(ft::vec3(1.0f, 1.0f, 1.0f));
 
 	UniformBufferObject ubo{};
-	ubo.model = translateBack * rotate * translateToOrigin * scale;
+	ubo.model = translateToPosition * rotate * translateToOrigin * scale;
 	ubo.view = ft::lookAt(
-		ft::vec3(7.0f, 0.0f, 0.0f), /* camera position */
+		ft::vec3(0.0f, 0.0f, 7.0f), /* camera position */
 		ft::vec3(0.0f, 0.0f, 0.0f), /* target position */
 		ft::vec3(0.0f, 1.0f, 0.0f) /* up vector */
 	);
