@@ -77,6 +77,10 @@ public:
 private:
 	GLFWwindow* window;
 
+	/* Callback function for keyboard events */
+	typedef void (Application::*key_callback)(int, int, int, int);
+	key_callback key_callbacks[GLFW_KEY_LAST];
+
 	VkInstance instance;
 	VkDebugUtilsMessengerEXT debugMessenger;
 	VkSurfaceKHR surface;
@@ -165,6 +169,11 @@ private:
 	void initWindow();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	void createSurface();
+
+	/* key_callback.cpp */
+	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	void mapKeyCallback();
+	void escape(int key, int scancode, int action, int mods);
 
 	/* main_loop.cpp */
 	void mainLoop();
