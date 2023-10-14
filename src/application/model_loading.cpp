@@ -11,6 +11,7 @@ void Application::loadModel() {
 	ObjLoader modelLoading;
 
 	modelLoading.loadModel(MODEL_PATH);
-	modelLoading.populateVerticesAndIndices(this->vertices, this->indices);
+	// modelLoading.populateVerticesAndIndices(this->vertices, this->indices);
+	this->object = modelLoading.createObject();
 
 }

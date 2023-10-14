@@ -21,8 +21,10 @@
 #include <algorithm>
 #include <fstream>
 #include <array>
+#include <memory>
 
 #include "vertex.hpp"
+#include "object.hpp"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -116,8 +118,7 @@ private:
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
 
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
+	std::unique_ptr<Object> object;
 
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;

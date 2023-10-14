@@ -48,46 +48,13 @@ public:
 		this->parse();
 	}
 
-	void populateVerticesAndIndices(
-		std::vector<Vertex>& vertices,
-		std::vector<uint32_t>& indices
-	) {
-		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+	std::unique_ptr<Object> createObject() {
+		std::vector<Vertex> vertices;
+		std::vector<uint32_t> indices;
 
-		for (const auto& face : this->faces) {
+		this->populateVerticesAndIndices(vertices, indices);
 
-			ft::vec3 color = randomColor();
-			ft::vec2 texCoordsReplace[3] = {
-				ft::vec2(0.0f, 0.0f),
-				ft::vec2(0.0f, 1.0f),
-				ft::vec2(1.0f, 1.0f)
-			};
-
-			for (size_t i = 0; i < 3; i++) {
-				Vertex vertex{};
-
-				vertex.pos = this->vertices[face.vertexIndex[i] - 1];
-
-				vertex.color = color;
-
-				if (this->hasTexCoords) {
-					vertex.texCoord = this->texCoords[face.texCoordIndex[i] - 1];
-				} else {
-					vertex.texCoord = texCoordsReplace[i];
-				}
-
-				if (this->hasNormals) {
-					vertex.normal = this->normals[face.normalIndex[i] - 1];
-				}
-
-				if (uniqueVertices.count(vertex) == 0) {
-					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-					vertices.push_back(vertex);
-				}
-
-				indices.push_back(uniqueVertices[vertex]);
-			}
-		}
+		return std::make_unique<Object>(std::move(vertices), std::move(indices));
 	}
 
 private:
@@ -265,6 +232,48 @@ private:
 			face.normalIndex[1] = std::stoi(subTokens[i + 1][2]);
 			face.normalIndex[2] = std::stoi(subTokens[i + 2][2]);
 			this->faces.push_back(face);
+		}
+	}
+
+	void populateVerticesAndIndices(
+		std::vector<Vertex>& vertices,
+		std::vector<uint32_t>& indices
+	) {
+		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+		for (const auto& face : this->faces) {
+
+			ft::vec3 randomFaceColor = randomColor();
+			ft::vec2 arbitraryTexCoords[3] = {
+				ft::vec2(0.0f, 0.0f),
+				ft::vec2(0.0f, 1.0f),
+				ft::vec2(1.0f, 1.0f)
+			};
+
+			for (size_t i = 0; i < 3; i++) {
+				Vertex vertex{};
+
+				vertex.pos = this->vertices[face.vertexIndex[i] - 1];
+
+				vertex.color = randomFaceColor;
+
+				if (this->hasTexCoords) {
+					vertex.texCoord = this->texCoords[face.texCoordIndex[i] - 1];
+				} else {
+					vertex.texCoord = arbitraryTexCoords[i];
+				}
+
+				if (this->hasNormals) {
+					vertex.normal = this->normals[face.normalIndex[i] - 1];
+				}
+
+				if (uniqueVertices.count(vertex) == 0) {
+					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+					vertices.push_back(vertex);
+				}
+
+				indices.push_back(uniqueVertices[vertex]);
+			}
 		}
 	}
 

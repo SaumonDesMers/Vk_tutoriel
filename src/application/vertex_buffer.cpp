@@ -2,7 +2,7 @@
 #include "vertex.hpp"
 
 void Application::createVertexBuffer() {
-	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+	VkDeviceSize bufferSize = sizeof(this->object->getVertices()[0]) * this->object->getVertices().size();
 
 	/* Create a temporary buffer to hold the vertex data to be copied to the device local buffer which is optimized for device access but is not accessible by the CPU.
 	 * VK_BUFFER_USAGE_TRANSFER_SRC_BIT: Buffer can be used as source in a memory transfer operation.
@@ -16,7 +16,7 @@ void Application::createVertexBuffer() {
 	/* Map the vertex buffer memory to the staging buffer memory and copy the vertex data to it */
     void* data;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, vertices.data(), (size_t) bufferSize);
+    memcpy(data, this->object->getVertices().data(), (size_t) bufferSize);
     vkUnmapMemory(device, stagingBufferMemory);
 
 	/* Create the vertex buffer:
