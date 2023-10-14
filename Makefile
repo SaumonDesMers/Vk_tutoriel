@@ -4,6 +4,14 @@ CXX = clang++
 CXXFLAGS = -std=c++17 -O2 -g# -Wall -Wextra -Werror
 LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
+ifeq ($(NDEBUG), 1)
+	CXXFLAGS += -DNDEBUG
+endif
+
+ifeq ($(SANITIZE), 1)
+	VALGRIND = valgrind --tool=memcheck --leak-check=full --leak-resolution=high --track-origins=yes --show-reachable=yes --log-file=valgrind.log
+endif
+
 VPATH = src src/application
 SRCS = main.cpp window.cpp clean_up.cpp debug.cpp instance.cpp main_loop.cpp \
 		physical_device.cpp logical_device.cpp swap_chain.cpp image_view.cpp \
@@ -33,13 +41,13 @@ $(OBJ_DIR)/%.o : %.cpp
 	$(CXX) $(CXXFLAGS) -o $@ -MMD -MF $(DEP_DIR)/$*.d $(INC_DIR) -c $<
 
 test: all
-	@./$(target)
+	$(VALGRIND) ./$(target)
 
 clean :
-	$(RM) -rf $(OBJ_DIR)/*.o $(DEP_DIR)/*.d
+	$(RM) $(OBJS) $(DEPS)
 
 fclean : clean
-	$(RM) -rf $(target)
+	$(RM) $(target)
 
 re : fclean
 	@$(MAKE) all --no-print-directory
