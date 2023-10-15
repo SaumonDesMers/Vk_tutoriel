@@ -196,6 +196,8 @@ private:
 	void key_d(int key, int scancode, int action, int mods);
 	void key_w(int key, int scancode, int action, int mods);
 	void key_s(int key, int scancode, int action, int mods);
+	void key_q(int key, int scancode, int action, int mods);
+	void key_e(int key, int scancode, int action, int mods);
 	void key_t(int key, int scancode, int action, int mods);
 
 	/* mouse_callback.cpp */

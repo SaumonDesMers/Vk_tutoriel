@@ -103,7 +103,7 @@ void Application::updateMvpUniformBuffer(uint32_t currentImage) {
 		ft::radians(45.0f), /* field of view in radians */
 		(float) swapChainExtent.width / (float) swapChainExtent.height, /* aspect ratio */
 		0.1f, /* near plane */
-		10.0f /* far plane */
+		100.0f /* far plane */
 	);
 
 	/* GLM was originally designed for OpenGL, where the Y coordinate of the clip coordinates is inverted.

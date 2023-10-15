@@ -18,6 +18,8 @@ void Application::keyCallback(GLFWwindow* window, int key, int scancode, int act
 		CASE(GLFW_KEY_D, key_d)
 		CASE(GLFW_KEY_W, key_w)
 		CASE(GLFW_KEY_S, key_s)
+		CASE(GLFW_KEY_Q, key_q)
+		CASE(GLFW_KEY_E, key_e)
 		CASE(GLFW_KEY_T, key_t)
 		default:
 			break;
@@ -38,49 +40,61 @@ void Application::escape(int key, int scancode, int action, int mods) {
 
 void Application::arrowUp(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-		this->object->position[1] += 0.1f;
+		this->camera.moveUp(0.1f);
 	}
 }
 
 void Application::arrowDown(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-		this->object->position[1] -= 0.1f;
+		this->camera.moveDown(0.1f);
 	}
 }
 
 void Application::arrowLeft(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-		this->object->position[0] -= 0.1f;
+		this->camera.moveLeft(0.1f);
 	}
 }
 
 void Application::arrowRight(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-		this->object->position[0] += 0.1f;
+		this->camera.moveRight(0.1f);
 	}
 }
 
 void Application::key_a(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-		this->camera.moveLeft(0.1f);
+		this->object->position[0] -= 0.1f;
 	}
 }
 
 void Application::key_d(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-		this->camera.moveRight(0.1f);
+		this->object->position[0] += 0.1f;
 	}
 }
 
 void Application::key_w(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-		this->camera.moveUp(0.1f);
+		this->object->position[1] += 0.1f;
 	}
 }
 
 void Application::key_s(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-		this->camera.moveDown(0.1f);
+		this->object->position[1] -= 0.1f;
+	}
+}
+
+void Application::key_q(int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+		this->object->position[2] += 0.1f;
+	}
+}
+
+void Application::key_e(int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+		this->object->position[2] -= 0.1f;
 	}
 }
 
