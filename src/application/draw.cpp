@@ -16,7 +16,7 @@ void Application::drawFrame() {
 		/* Recreate the swap chain and try again next frame */
 		this->recreateSwapChain();
 		return;
-	} else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { /* Don't recreate the swap chain if it is suboptimal because we already have an image to render to */
+	} else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { /* Don't recreate the swap chain if it is smvpptimal because we already have an image to render to */
 		throw std::runtime_error("failed to acquire swap chain image!");
 	}
 
@@ -64,7 +64,7 @@ void Application::drawFrame() {
 
 	result = vkQueuePresentKHR(this->presentQueue, &presentInfo);
 
-	/* Check if the swap chain is out of date or suboptimal and needs to be recreated */
+	/* Check if the swap chain is out of date or smvpptimal and needs to be recreated */
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || this->framebufferResized) {
 		recreateSwapChain();
 		this->framebufferResized = false;
@@ -83,10 +83,10 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 	/* TODO: remove this */
-	// Glm_UniformBufferObject glm_ubo{};
-	// glm_ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	// glm_ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	// glm_ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
+	// Glm_ModelViewPerspective glm_mvp{};
+	// glm_mvp.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	// glm_mvp.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	// glm_mvp.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
 
 	/* To rotate an object around itself, we need to move it to the center, rotate it, and then move it to the new position */
 	ft::mat4 translateToOrigin = ft::translate(-this->object->getBaricenter());
@@ -95,14 +95,14 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
 
 	ft::mat4 scale = ft::scale(ft::vec3(1.0f, 1.0f, 1.0f));
 
-	UniformBufferObject ubo{};
-	ubo.model = translateToPosition * rotate * translateToOrigin * scale;
-	ubo.view = ft::lookAt(
+	ModelViewPerspective mvp{};
+	mvp.model = translateToPosition * rotate * translateToOrigin * scale;
+	mvp.view = ft::lookAt(
 		this->camera.getPosition(), /* camera position */
 		this->camera.getTarget(), /* target position */
 		this->camera.getUp() /* up vector */
 	);
-	ubo.proj = ft::perspective<float>(
+	mvp.proj = ft::perspective<float>(
 		ft::radians(45.0f), /* field of view in radians */
 		(float) swapChainExtent.width / (float) swapChainExtent.height, /* aspect ratio */
 		0.1f, /* near plane */
@@ -111,7 +111,7 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
 
 	/* GLM was originally designed for OpenGL, where the Y coordinate of the clip coordinates is inverted.
 		The easiest way to compensate for that is to flip the sign on the scaling factor of the Y axis in the projection matrix. */
-	ubo.proj[1][1] *= -1;
+	mvp.proj[1][1] *= -1;
 
-	memcpy(this->uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+	memcpy(this->uniformBuffersMapped[currentImage], &mvp, sizeof(mvp));
 }

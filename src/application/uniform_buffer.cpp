@@ -2,7 +2,7 @@
 #include "vertex.hpp"
 
 void Application::createUniformBuffers() {
-    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+    VkDeviceSize bufferSize = sizeof(ModelViewPerspective);
 
     this->uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     this->uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
