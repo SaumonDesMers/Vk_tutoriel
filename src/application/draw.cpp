@@ -20,8 +20,9 @@ void Application::drawFrame() {
 		throw std::runtime_error("failed to acquire swap chain image!");
 	}
 
-	/* Update the uniform buffer */
-	this->updateUniformBuffer(this->currentFrame);
+	/* Update the uniforms buffers */
+	this->updateMvpUniformBuffer(this->currentFrame);
+	this->updateTextureEnabledBuffer(this->currentFrame);
 	
 	/* Reset the fence only if we are submitting work to prevent a deadlock */
 	vkResetFences(this->device, 1, &this->inFlightFences[this->currentFrame]);
@@ -75,12 +76,8 @@ void Application::drawFrame() {
 	this->currentFrame = (this->currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void Application::updateUniformBuffer(uint32_t currentImage) {
-	/* Calculate the time in seconds since the application started */
-	static auto startTime = std::chrono::high_resolution_clock::now();
-
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+void Application::updateMvpUniformBuffer(uint32_t currentImage) {
+	float time = this->getTime();
 
 	/* TODO: remove this */
 	// Glm_ModelViewPerspective glm_mvp{};
@@ -114,4 +111,22 @@ void Application::updateUniformBuffer(uint32_t currentImage) {
 	mvp.proj[1][1] *= -1;
 
 	memcpy(this->uniformBuffersMapped[currentImage], &mvp, sizeof(mvp));
+}
+
+void Application::updateTextureEnabledBuffer(uint32_t currentImage) {
+	static float lastFrameTime = this->getTime();
+	float currentFrameTime = this->getTime();
+
+	float transitionDuration = 1.0f;
+
+	float deltaRatio = 1.0f * ((currentFrameTime - lastFrameTime) / transitionDuration);
+
+	if (this->textureEnabled) {
+		this->colorTextureBlending.ratio = fmin(1.0f, this->colorTextureBlending.ratio + deltaRatio);
+	} else {
+		this->colorTextureBlending.ratio = fmax(0.0f, this->colorTextureBlending.ratio - deltaRatio);
+	}
+
+	lastFrameTime = currentFrameTime;
+	memcpy(this->textureEnabledBufferMapped[currentImage], &this->colorTextureBlending, sizeof(this->colorTextureBlending));
 }

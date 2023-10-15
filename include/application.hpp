@@ -66,6 +66,10 @@ struct SwapChainSupportDetails {
 	std::vector<VkPresentModeKHR> presentModes;
 };
 
+typedef struct {
+	float ratio;
+} ColorTextureBlending;
+
 class Application {
 public:
 	void run() {
@@ -135,6 +139,13 @@ private:
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
 	std::vector<void*> uniformBuffersMapped;
 
+	/* float passed to the fragment shader to switch between color and texture rendering */
+	bool textureEnabled = false;
+	ColorTextureBlending colorTextureBlending;
+	std::vector<VkBuffer> textureEnabledBuffers;
+	std::vector<VkDeviceMemory> textureEnabledBufferMemory;
+	std::vector<void*> textureEnabledBufferMapped;
+
 	bool framebufferResized = false;
 
 	uint32_t currentFrame = 0;
@@ -160,7 +171,8 @@ private:
 		this->createTextureSampler();
 		this->createVertexBuffer();
 		this->createIndexBuffer();
-		this->createUniformBuffers();
+		this->createMvpUniformBuffers();
+		this->createColorTextureBlendingBuffer();
 		this->createDescriptorPool();
 		this->createDescriptorSets();
 		this->createCommandBuffers();
@@ -184,6 +196,7 @@ private:
 	void key_d(int key, int scancode, int action, int mods);
 	void key_w(int key, int scancode, int action, int mods);
 	void key_s(int key, int scancode, int action, int mods);
+	void key_t(int key, int scancode, int action, int mods);
 
 	/* mouse_callback.cpp */
 	static void scrollCallback(GLFWwindow* window, double xpos, double ypos);
@@ -268,7 +281,8 @@ private:
 	void createIndexBuffer();
 
 	/* uniform_buffer.cpp */
-	void createUniformBuffers();
+	void createMvpUniformBuffers();
+	void createColorTextureBlendingBuffer();
 
 	/* command.cpp */
 	void createCommandPool();
@@ -282,7 +296,11 @@ private:
 
 	/* draw.cpp */
 	void drawFrame();
-	void updateUniformBuffer(uint32_t currentImage);
+	void updateMvpUniformBuffer(uint32_t currentImage);
+	void updateTextureEnabledBuffer(uint32_t currentImage);
+
+	/* time.cpp */
+	float getTime();
 
 	/* model_loading.cpp */
 	void loadModel();

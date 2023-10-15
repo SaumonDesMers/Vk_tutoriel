@@ -18,6 +18,7 @@ void Application::keyCallback(GLFWwindow* window, int key, int scancode, int act
 		CASE(GLFW_KEY_D, key_d)
 		CASE(GLFW_KEY_W, key_w)
 		CASE(GLFW_KEY_S, key_s)
+		CASE(GLFW_KEY_T, key_t)
 		default:
 			break;
 	}
@@ -80,5 +81,11 @@ void Application::key_w(int key, int scancode, int action, int mods) {
 void Application::key_s(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
 		this->camera.moveDown(0.1f);
+	}
+}
+
+void Application::key_t(int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		this->textureEnabled = !this->textureEnabled;
 	}
 }
