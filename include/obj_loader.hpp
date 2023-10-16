@@ -235,8 +235,8 @@ private:
 			ft::vec3 randomFaceColor = randomColor();
 			ft::vec2 arbitraryTexCoords[3] = {
 				ft::vec2(0.0f, 0.0f),
-				ft::vec2(0.0f, 1.0f),
-				ft::vec2(1.0f, 1.0f)
+				ft::vec2(1.0f, 0.0f),
+				ft::vec2(0.0f, 1.0f)
 			};
 
 			for (size_t i = 0; i < 3; i++) {
