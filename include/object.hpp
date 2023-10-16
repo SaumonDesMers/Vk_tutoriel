@@ -28,10 +28,10 @@ public:
 	Object(Object&& other):
 		vertices(std::move(other.vertices)),
 		indices(std::move(other.indices)),
+		baricenter(other.baricenter),
 		position(other.position),
 		rotation(other.rotation),
-		scale(other.scale),
-		baricenter(other.baricenter) {
+		scale(other.scale) {
 	}
 
 	Object& operator=(Object&& other) {

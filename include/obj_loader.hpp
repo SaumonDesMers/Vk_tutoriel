@@ -11,6 +11,7 @@
 #include <cstring>
 #include <regex>
 #include <random>
+#include <unordered_map>
 
 static std::vector<std::string> split(std::string str, std::string delim) {
 	std::vector<std::string> tab;
