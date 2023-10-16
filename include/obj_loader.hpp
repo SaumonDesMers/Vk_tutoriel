@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <cstring>
 #include <regex>
@@ -23,9 +24,9 @@ static std::vector<std::string> split(std::string str, std::string delim) {
 }
 
 struct Face {
-	uint32_t vertexIndex[3];
-	uint32_t texCoordIndex[3];
-	uint32_t normalIndex[3];
+	uint32_t vertexIndex[3] = {0};
+	uint32_t texCoordIndex[3] = {0};
+	uint32_t normalIndex[3] = {0};
 
 	void log() const {
 		std::cout << "f";
@@ -41,9 +42,9 @@ class ObjLoader {
 public:
 
 	void loadModel(const std::string& path) {
-		std::cout << "Loading model from " << path << std::endl;
+		this->path = path;
 
-		this->readFile(path);
+		this->readFile();
 		this->removeComments();
 		this->parse();
 	}
@@ -59,6 +60,7 @@ public:
 
 private:
 
+	std::string path;
 	std::vector<std::string> lines;
 
 	std::vector<ft::vec3> vertices;
@@ -71,8 +73,8 @@ private:
 	bool hasNormals = false;
 
 
-	void readFile(const std::string& path) {
-		std::ifstream file(path);
+	void readFile() {
+		std::ifstream file(this->path);
 		if (!file.is_open()) {
 			throw std::runtime_error("Failed to open file");
 		}
@@ -96,9 +98,6 @@ private:
 
 	void parse() {
 
-		std::regex vertexRegex(R"(^v(\s-?(\d+\.)?\d+){3,4}$)");
-		std::regex texCoordRegex(R"(^vt(\s-?(\d+\.)?\d+){2}$)");
-		std::regex normalRegex(R"(^vn(\s-?(\d+\.)?\d+){3}$)");
 		std::regex faceRegex_v(R"(^f(\s\d+){3,}$)");
 		std::regex faceRegex_v_vt(R"(^f(\s\d+\/\d+){3,}$)");
 		std::regex faceRegex_v_vn(R"(^f(\s\d+\/\/\d+){3,}$)");
@@ -112,127 +111,117 @@ private:
 			}
 			
 			std::string line = this->lines[i];
-			std::vector<std::string> tokens = split(line, " ");
+			std::stringstream ss(line);
+			ss.exceptions(std::ios_base::failbit | std::ios_base::badbit);
 
-			if (std::regex_match(line, vertexRegex)) {
-				this->parseVertex(tokens);
+			try {
+			
+			if (memcmp(line.c_str(), "v ", 2) == 0) {
+				ft::vec3 vertex;
+				ss.ignore(2);
+				ss >> vertex[0] >> vertex[1] >> vertex[2];
+				this->vertices.push_back(vertex);
 			}
-			else if (std::regex_match(line, texCoordRegex)) {
-				this->parseTexCoord(tokens);
+			else if (memcmp(line.c_str(), "vt ", 3) == 0) {
+				ft::vec2 texCoord;
+				ss.ignore(3);
+				ss >> texCoord[0] >> texCoord[1];
+				this->texCoords.push_back(texCoord);
 				this->hasTexCoords = true;
 			}
-			else if (std::regex_match(line, normalRegex)) {
-				this->parseNormal(tokens);
+			else if (memcmp(line.c_str(), "vn ", 3) == 0) {
+				ft::vec3 normal;
+				ss.ignore(3);
+				ss >> normal[0] >> normal[1] >> normal[2];
+				this->normals.push_back(normal);
 				this->hasNormals = true;
 			}
-			else if (std::regex_match(line, faceRegex_v)) {
-				this->parseFace_v(tokens);
+			else if (memcmp(line.c_str(), "f ", 2) == 0) {
+				std::vector<Face> tmp_faces;
+
+				/* Check which face regex matches */
+				bool v = false, v_vt = false, v_vn = false, v_vt_vn = false;
+				if (std::regex_match(line, faceRegex_v))
+					v = true;
+				else if (std::regex_match(line, faceRegex_v_vt) && hasTexCoords)
+					v_vt = true;
+				else if (std::regex_match(line, faceRegex_v_vn) && hasNormals)
+					v_vn = true;
+				else if (std::regex_match(line, faceRegex_v_vt_vn) && hasTexCoords && hasNormals)
+					v_vt_vn = true;
+				else
+					throw std::string("Parsing syntax error: Invalid face format");
+
+				ss.ignore(2);
+
+				/* Read each vertex of the face */
+				size_t j = 0;
+				while (ss.rdstate() == std::ios_base::goodbit) {
+					Face face;
+					char c;
+					if (v)
+						ss >> face.vertexIndex[0];
+					else if (v_vt)
+						ss >> face.vertexIndex[0] >> c >> face.texCoordIndex[0];
+					else if (v_vn)
+						ss >> face.vertexIndex[0] >> c >> c >> face.normalIndex[0];
+					else if (v_vt_vn)
+						ss >> face.vertexIndex[0] >> c >> face.texCoordIndex[0] >> c >> face.normalIndex[0];
+
+					if (this->checkIndices(face) == false) {
+						throw std::string("Parsing value error");
+					}
+
+					tmp_faces.push_back(face);
+					j++;
+				}
+
+				/* Construct a face for each triangle (e.i. 3 vertices) */
+				for (j = 1; j + 1 < tmp_faces.size(); j++) {
+					Face face;
+					face.vertexIndex[0] = tmp_faces[0].vertexIndex[0];
+					face.vertexIndex[1] = tmp_faces[j].vertexIndex[0];
+					face.vertexIndex[2] = tmp_faces[j + 1].vertexIndex[0];
+					if (v_vt || v_vt_vn) {
+						face.texCoordIndex[0] = tmp_faces[0].texCoordIndex[0];
+						face.texCoordIndex[1] = tmp_faces[j].texCoordIndex[0];
+						face.texCoordIndex[2] = tmp_faces[j + 1].texCoordIndex[0];
+					}
+					if (v_vn || v_vt_vn) {
+						face.normalIndex[0] = tmp_faces[0].normalIndex[0];
+						face.normalIndex[1] = tmp_faces[j].normalIndex[0];
+						face.normalIndex[2] = tmp_faces[j + 1].normalIndex[0];
+					}
+					this->faces.push_back(face);
+				}
 			}
-			else if (std::regex_match(line, faceRegex_v_vt) && hasTexCoords) {
-				this->parseFace_v_vt(tokens);
+			else if (
+				memcmp(line.c_str(), "mtllib ", 7) != 0
+				&& memcmp(line.c_str(), "usemtl ", 7) != 0
+				&& memcmp(line.c_str(), "s ", 2) != 0
+				&& memcmp(line.c_str(), "g ", 2) != 0
+				&& memcmp(line.c_str(), "o ", 2) != 0
+			) {
+				throw std::string("Parsing syntax error: Unknown line type");
 			}
-			else if (std::regex_match(line, faceRegex_v_vn) && hasNormals) {
-				this->parseFace_v_vn(tokens);
+
+			} catch (std::string& e) {
+				throw std::runtime_error(this->path + ": line " + std::to_string(i + 1) + ": " + e);
 			}
-			else if (std::regex_match(line, faceRegex_v_vt_vn) && hasTexCoords && hasNormals) {
-				this->parseFace_v_vt_vn(tokens);
-			}
-			// else {
-			// 	throw std::runtime_error("Line " + std::to_string(i) + ": Parsing syntax error");
-			// }
 		}
 	}
 
-	void parseVertex(const std::vector<std::string>& tokens) {
-		this->vertices.push_back(ft::vec3(std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3])));
-	}
-
-	void parseTexCoord(const std::vector<std::string>& tokens) {
-		this->texCoords.push_back(ft::vec2(std::stof(tokens[1]), std::stof(tokens[2])));
-	}
-
-	void parseNormal(const std::vector<std::string>& tokens) {
-		this->normals.push_back(ft::vec3(std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3])));
-	}
-
-	void parseFace_v(const std::vector<std::string>& tokens) {
-		/* Construct a face for each triangle (e.i. 3 vertices) */
-		for (size_t i = 1; i < tokens.size() - 2; i++) {
-			Face face;
-			face.vertexIndex[0] = std::stoi(tokens[1]);
-			face.vertexIndex[1] = std::stoi(tokens[i + 1]);
-			face.vertexIndex[2] = std::stoi(tokens[i + 2]);
-			this->faces.push_back(face);
+	bool checkIndices(const Face& face) {
+		if (face.vertexIndex[0] > this->vertices.size() || face.vertexIndex[0] <= 0) {
+			return false;
 		}
-	}
-
-	void parseFace_v_vt(const std::vector<std::string>& tokens) {
-		std::vector<std::vector<std::string>> subTokens;
-		for (size_t i = 1; i < tokens.size(); i++) {
-			/* tokens[i] is of the form vertexIndex/texCoordIndex */
-			std::vector<std::string> tmp = split(tokens[i], "/");
-			subTokens.push_back(tmp);
+		if (this->hasTexCoords && (face.texCoordIndex[0] > this->texCoords.size() || face.texCoordIndex[0] <= 0)) {
+			return false;
 		}
-
-		/* Construct a face for each triangle (e.i. 3 vertices) */
-		for (size_t i = 0; i < subTokens.size() - 2; i++) {
-			Face face;
-			/* subToken[i] is of the form {vertexIndex, texCoordIndex} */
-			face.vertexIndex[0] = std::stoi(subTokens[i][0]);
-			face.vertexIndex[1] = std::stoi(subTokens[i + 1][0]);
-			face.vertexIndex[2] = std::stoi(subTokens[i + 2][0]);
-			face.texCoordIndex[0] = std::stoi(subTokens[i][1]);
-			face.texCoordIndex[1] = std::stoi(subTokens[i + 1][1]);
-			face.texCoordIndex[2] = std::stoi(subTokens[i + 2][1]);
-			this->faces.push_back(face);
+		if (this->hasNormals && (face.normalIndex[0] > this->normals.size() || face.normalIndex[0] <= 0)) {
+			return false;
 		}
-	}
-
-	void parseFace_v_vn(const std::vector<std::string>& tokens) {
-		std::vector<std::vector<std::string>> subTokens;
-		for (size_t i = 1; i < tokens.size(); i++) {
-			/* tokens[i] is of the form vertexIndex//normalIndex */
-			std::vector<std::string> tmp = split(tokens[i], "//");
-			subTokens.push_back(tmp);
-		}
-
-		/* Construct a face for each triangle (e.i. 3 vertices) */
-		for (size_t i = 0; i < subTokens.size() - 2; i++) {
-			Face face;
-			/* subToken[i] is of the form {vertexIndex, normalIndex} */
-			face.vertexIndex[0] = std::stoi(subTokens[i][0]);
-			face.vertexIndex[1] = std::stoi(subTokens[i + 1][0]);
-			face.vertexIndex[2] = std::stoi(subTokens[i + 2][0]);
-			face.normalIndex[0] = std::stoi(subTokens[i][1]);
-			face.normalIndex[1] = std::stoi(subTokens[i + 1][1]);
-			face.normalIndex[2] = std::stoi(subTokens[i + 2][1]);
-			this->faces.push_back(face);
-		}
-	}
-
-	void parseFace_v_vt_vn(const std::vector<std::string>& tokens) {
-		std::vector<std::vector<std::string>> subTokens;
-		for (size_t i = 1; i < tokens.size(); i++) {
-			/* tokens[i] is of the form vertexIndex/texCoordIndex/normalIndex */
-			std::vector<std::string> tmp = split(tokens[i], "/");
-			subTokens.push_back(tmp);
-		}
-
-		/* Construct a face for each triangle (e.i. 3 vertices) */
-		for (size_t i = 0; i < subTokens.size() - 2; i++) {
-			Face face;
-			/* subToken[i] is of the form {vertexIndex, texCoordIndex, normalIndex} */
-			face.vertexIndex[0] = std::stoi(subTokens[i][0]);
-			face.vertexIndex[1] = std::stoi(subTokens[i + 1][0]);
-			face.vertexIndex[2] = std::stoi(subTokens[i + 2][0]);
-			face.texCoordIndex[0] = std::stoi(subTokens[i][1]);
-			face.texCoordIndex[1] = std::stoi(subTokens[i + 1][1]);
-			face.texCoordIndex[2] = std::stoi(subTokens[i + 2][1]);
-			face.normalIndex[0] = std::stoi(subTokens[i][2]);
-			face.normalIndex[1] = std::stoi(subTokens[i + 1][2]);
-			face.normalIndex[2] = std::stoi(subTokens[i + 2][2]);
-			this->faces.push_back(face);
-		}
+		return true;
 	}
 
 	void populateVerticesAndIndices(
