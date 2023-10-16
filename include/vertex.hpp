@@ -76,6 +76,14 @@ struct Vertex {
 	bool operator==(const Vertex& other) const {
 		return pos == other.pos && color == other.color && texCoord == other.texCoord && normal == other.normal;
 	}
+
+	void log() const {
+		std::cout << "Vertex: " << std::endl;
+		std::cout << "\tpos: " << pos[0] << ", " << pos[1] << ", " << pos[2] << std::endl;
+		// std::cout << "\tcolor: " << color[0] << ", " << color[1] << ", " << color[2] << std::endl;
+		// std::cout << "\ttexCoord: " << texCoord[0] << ", " << texCoord[1] << std::endl;
+		// std::cout << "\tnormal: " << normal[0] << ", " << normal[1] << ", " << normal[2] << std::endl;
+	}
 };
 
 namespace std {
