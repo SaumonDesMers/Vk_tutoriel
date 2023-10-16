@@ -30,8 +30,8 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-const std::string MODEL_PATH = "models/42.obj";
-const std::string TEXTURE_PATH = "textures/unicorn.ppm";
+// const std::string MODEL_PATH = "models/42.obj";
+// const std::string TEXTURE_PATH = "textures/unicorn.ppm";
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -79,7 +79,19 @@ public:
 		this->cleanup();
 	}
 
+	void setModelPath(const std::string& model_path) {
+		this->model_path = model_path;
+	}
+
+	void setTexturePath(const std::string& texture_path) {
+		this->texture_path = texture_path;
+	}
+
 private:
+
+	std::string model_path;
+	std::string texture_path;
+
 	GLFWwindow* window;
 
 	/* Callback function for keyboard events */

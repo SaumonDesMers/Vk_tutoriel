@@ -13,7 +13,7 @@
 void Application::createTextureImage() {
 	int texWidth, texHeight, texChannels;
 	ImageLoader imageLoader;
-	uint8_t* pixels = imageLoader.loadImage(TEXTURE_PATH, &texWidth, &texHeight);
+	uint8_t* pixels = imageLoader.loadImage(this->texture_path, &texWidth, &texHeight);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 	if (!pixels) {
