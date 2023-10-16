@@ -1,9 +1,6 @@
 #include "application.hpp"
 
 void Application::createRenderPass() {
-	/*
-	 * TODO: J'ai pas encore compris à quoi ça sert
-	 */
 	VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = this->swapChainImageFormat;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
