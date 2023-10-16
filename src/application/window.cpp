@@ -13,7 +13,6 @@ void Application::initWindow() {
 	glfwSetFramebufferSizeCallback(window, this->framebufferResizeCallback);
 
 	/* Set event callback */
-	this->mapKeyCallback();
 	glfwSetKeyCallback(window, &Application::keyCallback);
 	glfwSetScrollCallback(window, &Application::scrollCallback);
 }

@@ -28,10 +28,6 @@ void Application::keyCallback(GLFWwindow* window, int key, int scancode, int act
 
 #undef CASE
 
-void Application::mapKeyCallback() {
-	this->key_callbacks[GLFW_KEY_ESCAPE] = &Application::escape;
-}
-
 void Application::escape(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(this->window, GLFW_TRUE);
