@@ -2,6 +2,7 @@
 #define MODEL_LOADING_HPP
 
 #include "vertex.hpp"
+#include "vertices.hpp"
 #include "utils.hpp"
 
 #include <iostream>
@@ -51,7 +52,7 @@ public:
 	}
 
 	std::unique_ptr<Object> createObject() {
-		std::vector<Vertex> vertices;
+		Vertices vertices;
 		std::vector<uint32_t> indices;
 
 		this->populateVerticesAndIndices(vertices, indices);
@@ -64,7 +65,7 @@ private:
 	std::string path;
 	std::vector<std::string> lines;
 
-	std::vector<ft::vec3> vertices;
+	std::vector<ft::vec3> vertexPos;
 	std::vector<ft::vec2> texCoords;
 	std::vector<ft::vec3> normals;
 
@@ -121,7 +122,7 @@ private:
 				ft::vec3 vertex;
 				ss.ignore(2);
 				ss >> vertex[0] >> vertex[1] >> vertex[2];
-				this->vertices.push_back(vertex);
+				this->vertexPos.push_back(vertex);
 			}
 			else if (memcmp(line.c_str(), "vt ", 3) == 0) {
 				ft::vec2 texCoord;
@@ -213,7 +214,7 @@ private:
 	}
 
 	bool checkIndices(const Face& face) {
-		if (face.vertexIndex[0] > this->vertices.size() || face.vertexIndex[0] <= 0) {
+		if (face.vertexIndex[0] > this->vertexPos.size() || face.vertexIndex[0] <= 0) {
 			return false;
 		}
 		if (this->hasTexCoords && (face.texCoordIndex[0] > this->texCoords.size() || face.texCoordIndex[0] <= 0)) {
@@ -226,7 +227,7 @@ private:
 	}
 
 	void populateVerticesAndIndices(
-		std::vector<Vertex>& vertices,
+		Vertices& vertices,
 		std::vector<uint32_t>& indices
 	) {
 		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
@@ -243,7 +244,7 @@ private:
 			for (size_t i = 0; i < 3; i++) {
 				Vertex vertex{};
 
-				vertex.pos = this->vertices[face.vertexIndex[i] - 1];
+				vertex.pos = this->vertexPos[face.vertexIndex[i] - 1];
 
 				vertex.color = randomFaceColor;
 

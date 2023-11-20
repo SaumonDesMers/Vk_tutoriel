@@ -2,6 +2,7 @@
 #define OBJECT_HPP
 
 #include "vertex.hpp"
+#include "vertices.hpp"
 
 #include <iostream>
 #include <vector>
@@ -10,7 +11,7 @@ class Object {
 
 private:
 
-	std::vector<Vertex> vertices;
+	Vertices vertices;
 	std::vector<uint32_t> indices;
 
 	ft::vec3 baricenter;
@@ -46,14 +47,14 @@ public:
 		return *this;
 	}
 
-	Object(std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices) {
-		this->vertices = vertices;
+	Object(Vertices&& vertices, std::vector<uint32_t>&& indices) {
+		this->vertices = std::move(vertices);
 		this->indices = indices;
 		this->calculateBaricenter();
 	}
 
-	void setVertices(std::vector<Vertex>&& vertices) {
-		this->vertices = vertices;
+	void setVertices(Vertices&& vertices) {
+		this->vertices = std::move(vertices);
 		this->calculateBaricenter();
 	}
 
@@ -61,7 +62,7 @@ public:
 		this->indices = indices;
 	}
 
-	const std::vector<Vertex>& getVertices() const {
+	const Vertices& getVertices() const {
 		return this->vertices;
 	}
 
