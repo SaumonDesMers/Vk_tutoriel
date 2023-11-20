@@ -13,7 +13,7 @@ ifeq ($(SANITIZE), 1)
 endif
 
 VPATH = src src/application
-SRCS = main.cpp window.cpp clean_up.cpp debug.cpp instance.cpp main_loop.cpp \
+SRCS = main.cpp #window.cpp clean_up.cpp debug.cpp instance.cpp main_loop.cpp \
 		physical_device.cpp logical_device.cpp swap_chain.cpp image_view.cpp \
 		render_pass.cpp graphics_pipeline.cpp frame_buffer.cpp command.cpp \
 		sync_objects.cpp draw.cpp vertex_buffer.cpp buffer.cpp index.cpp \
