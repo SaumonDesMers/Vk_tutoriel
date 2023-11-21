@@ -8,9 +8,11 @@
 
 int main(int argc, char **argv) {
 
-	ft::Application app;
+	ft::log.setTimestamp(false);
 
 	try {
+		ft::Application app;
+
 		app.run();
 	} catch (const std::exception &e) {
 		ft::log << ft::Logger::Level::ERROR << e.what() << std::endl;

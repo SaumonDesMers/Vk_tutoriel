@@ -5,7 +5,7 @@ CXXFLAGS = -std=c++17 -O2 -g# -Wall -Wextra -Werror
 LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
 VPATH = src src/app
-SRCS = main.cpp logger.cpp application.cpp window.cpp
+SRCS = main.cpp logger.cpp application.cpp window.cpp pipeline.cpp device.cpp
 INC_DIR = -I include -I glm
 
 OBJ_DIR = obj

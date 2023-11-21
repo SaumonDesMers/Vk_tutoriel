@@ -24,4 +24,12 @@ namespace ft
 
 		m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
 	}
+
+	void Window::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface)
+	{
+		if (glfwCreateWindowSurface(instance, m_window, nullptr, surface) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create window surface.");
+		}
+	}
 }

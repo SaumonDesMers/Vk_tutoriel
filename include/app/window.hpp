@@ -22,6 +22,8 @@ namespace ft
 
 		bool shouldClose() const { return glfwWindowShouldClose(m_window); }
 
+		void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+
 	private:
 
 		GLFWwindow *m_window;
