@@ -1,8 +1,24 @@
 #pragma once
 
-class Application {
+#include "window.hpp"
 
-public:
+namespace ft
+{
 
-	void run() {}
-};
+	class Application
+	{
+
+	public:
+
+		void run();
+	
+	private:
+
+		static constexpr int WIDTH = 800;
+		static constexpr int HEIGHT = 600;
+
+		Window m_window{"Vulkan", WIDTH, HEIGHT};
+
+	};
+
+}

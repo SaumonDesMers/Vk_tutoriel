@@ -1,3 +1,7 @@
 #include "logger.hpp"
 
-Logger logger = Logger();
+namespace ft {
+	
+	Logger log = Logger();
+	
+}

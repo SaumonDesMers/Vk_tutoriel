@@ -1,21 +1,19 @@
 #include "app/application.hpp"
 #include "ft_glm/ft_glm.hpp"
 
+#include "logger.hpp"
+
+#include <iostream>
+#include <stdexcept>
 
 int main(int argc, char **argv) {
 
-
-	if (argc != 3) {
-		std::cerr << "Usage: " << argv[0] << " <model_path>" << " <texture_path>" << std::endl;
-		return EXIT_FAILURE;
-	}
-
-	Application app;
+	ft::Application app;
 
 	try {
 		app.run();
-	} catch (const std::exception& e) {
-		std::cerr << e.what() << std::endl;
+	} catch (const std::exception &e) {
+		ft::log << ft::Logger::Level::ERROR << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
 
