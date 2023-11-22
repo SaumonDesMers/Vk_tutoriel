@@ -4,6 +4,7 @@
 #include <iostream>
 #include <type_traits>
 #include <cmath>
+#include <cstring>
 
 namespace ft {
 

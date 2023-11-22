@@ -3,6 +3,11 @@
 #include "window.hpp"
 #include "pipeline.hpp"
 #include "device.hpp"
+#include "swap_chain.hpp"
+#include "model.hpp"
+
+#include <memory>
+#include <vector>
 
 namespace ft
 {
@@ -12,7 +17,15 @@ namespace ft
 
 	public:
 
+		Application();
+		~Application();
+
+		Application(const Application &) = delete;
+		Application &operator=(const Application &) = delete;
+
 		void run();
+
+		void loadModels();
 	
 	private:
 
@@ -21,12 +34,19 @@ namespace ft
 
 		Window m_window{"Vulkan", WIDTH, HEIGHT};
 		Device m_device{m_window};
-		Pipeline m_pipeline{
-			m_device,
-			"shaders/vert.spv",
-			"shaders/frag.spv",
-			Pipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)
-		};
+		std::unique_ptr<SwapChain> m_swapChain;
+		std::unique_ptr<Pipeline> m_pipeline;
+		VkPipelineLayout m_pipelineLayout;
+		std::vector<VkCommandBuffer> m_commandBuffers;
+		std::unique_ptr<Model> m_model;
+
+		void createPipelineLayout();
+		void createPipeline();
+		void createCommandBuffers();
+		void freeCommandBuffers();
+		void drawFrame();
+		void recreateSwapChain();
+		void recordCommandBuffer(int imageIndex);
 
 	};
 

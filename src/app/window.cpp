@@ -20,9 +20,12 @@ namespace ft
 		glfwInit();
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 		m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
+
+		glfwSetWindowUserPointer(m_window, this);
+		glfwSetFramebufferSizeCallback(m_window, framebufferResizeCallback);
 	}
 
 	void Window::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface)
@@ -31,5 +34,13 @@ namespace ft
 		{
 			throw std::runtime_error("failed to create window surface.");
 		}
+	}
+
+	void Window::framebufferResizeCallback(GLFWwindow *GLFWwindow, int width, int height)
+	{
+		auto window = reinterpret_cast<Window *>(glfwGetWindowUserPointer(GLFWwindow));
+		window->m_framebufferResized = true;
+		window->m_width = width;
+		window->m_height = height;
 	}
 }
