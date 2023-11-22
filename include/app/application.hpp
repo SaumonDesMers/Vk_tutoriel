@@ -6,6 +6,8 @@
 #include "swap_chain.hpp"
 #include "model.hpp"
 
+#include "ft_glm/ft_glm.hpp"
+
 #include <memory>
 #include <vector>
 

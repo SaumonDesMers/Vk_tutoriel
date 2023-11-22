@@ -6,6 +6,12 @@
 namespace ft
 {
 
+	struct PushConstantData
+	{
+		ft::vec2 offset;
+		alignas(16) ft::vec3 color;
+	};
+
 	Application::Application()
 	{
 		loadModels();
@@ -44,13 +50,21 @@ namespace ft
 
 	void Application::createPipelineLayout()
 	{
+
+		VkPushConstantRange pushConstantRange
+		{
+			.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+			.offset = 0,
+			.size = sizeof(PushConstantData)
+		};
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 			.setLayoutCount = 0,
 			.pSetLayouts = nullptr,
-			.pushConstantRangeCount = 0,
-			.pPushConstantRanges = nullptr
+			.pushConstantRangeCount = 1,
+			.pPushConstantRanges = &pushConstantRange
 		};
 
 		if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
@@ -137,6 +151,9 @@ namespace ft
 
 	void Application::recordCommandBuffer(int imageIndex)
 	{
+		static int frame = 0;
+		frame = (frame + 1) % 100;
+
 		VkCommandBufferBeginInfo beginInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -187,7 +204,25 @@ namespace ft
 
 		m_pipeline->bind(m_commandBuffers[imageIndex]);
 		m_model->bind(m_commandBuffers[imageIndex]);
-		m_model->draw(m_commandBuffers[imageIndex]);
+
+		for (int i = 0; i < 3; i++)
+		{
+			PushConstantData push
+			{
+				.offset = {-0.5f + frame * 0.02f * i, -0.4f + i * 0.25f},
+				.color = {0.0f, 0.0f, 0.2f + i * 0.2f}
+			};
+
+			vkCmdPushConstants(
+				m_commandBuffers[imageIndex],
+				m_pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(PushConstantData),
+				&push
+			);
+			m_model->draw(m_commandBuffers[imageIndex]);
+		}
 
 		vkCmdEndRenderPass(m_commandBuffers[imageIndex]);
 
