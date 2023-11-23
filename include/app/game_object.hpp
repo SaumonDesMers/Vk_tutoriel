@@ -13,9 +13,9 @@ namespace ft
 
 	struct TransformComponent
 	{
-		glm::vec3 translation;
+		glm::vec3 translation{};
 		glm::vec3 scale{1.0f, 1.0f, 1.0f};
-		glm::vec3 rotation;
+		glm::vec3 rotation{};
 
 		// Matrix corrsponds to Translate * Ry * Rx * Rz * Scale
 		// Rotations correspond to Tait-bryan angles of Y(1), X(2), Z(3)
@@ -65,7 +65,7 @@ namespace ft
 
 		std::shared_ptr<Model> model;
 		glm::vec3 color;
-		TransformComponent transform;
+		TransformComponent transform{};
 
 		static GameObject create()
 		{

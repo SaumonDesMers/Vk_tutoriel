@@ -22,9 +22,9 @@ namespace ft
 
 		bool shouldClose() const { return glfwWindowShouldClose(m_window); }
 		VkExtent2D getExtent() const { return {static_cast<uint32_t>(m_width), static_cast<uint32_t>(m_height)}; }
-
 		bool wasWindowResized() { return m_framebufferResized; }
 		void resetWindowResizedFlag() { m_framebufferResized = false; }
+		GLFWwindow *getGLFWwindow() const { return m_window; }
 
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 
