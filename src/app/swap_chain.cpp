@@ -324,6 +324,7 @@ void SwapChain::createFramebuffers()
 void SwapChain::createDepthResources()
 {
 	VkFormat depthFormat = findDepthFormat();
+	swapChainDepthFormat = depthFormat;
 	VkExtent2D swapChainExtent = getSwapChainExtent();
 
 	depthImages.resize(imageCount());
@@ -415,17 +416,16 @@ VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(
 	return availableFormats[0];
 }
 
-VkPresentModeKHR SwapChain::chooseSwapPresentMode(
-		const std::vector<VkPresentModeKHR> &availablePresentModes)
-		{
-	for (const auto &availablePresentMode : availablePresentModes)
-	{
-		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-		{
-			ft::log << ft::Logger::Level::INFO << "Present mode: Mailbox" << std::endl;
-			return availablePresentMode;
-		}
-	}
+VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes)
+{
+	// for (const auto &availablePresentMode : availablePresentModes)
+	// {
+	// 	if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+	// 	{
+	// 		ft::log << ft::Logger::Level::INFO << "Present mode: Mailbox" << std::endl;
+	// 		return availablePresentMode;
+	// 	}
+	// }
 
 	// for (const auto &availablePresentMode : availablePresentModes)
 	// {
