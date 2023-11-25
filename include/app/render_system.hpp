@@ -4,6 +4,7 @@
 #include "device.hpp"
 #include "game_object.hpp"
 #include "camera.hpp"
+#include "frame_info.hpp"
 
 #include "ft_glm/ft_glm.hpp"
 
@@ -25,9 +26,8 @@ namespace ft
 		RenderSystem &operator=(const RenderSystem &) = delete;
 	
 		void rendergameObjects(
-			VkCommandBuffer commandBuffer,
-			std::vector<GameObject> &gameObjects,
-			const Camera &camera
+			FrameInfo &frameInfo,
+			std::vector<GameObject> &gameObjects
 		);
 
 	private:

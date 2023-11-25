@@ -70,13 +70,12 @@ namespace ft
 	}
 
 	void RenderSystem::rendergameObjects(
-		VkCommandBuffer commandBuffer,
-		std::vector<GameObject> &gameObjects, 
-		const Camera &camera
+		FrameInfo &frameInfo,
+		std::vector<GameObject> &gameObjects
 	) {
-		m_pipeline->bind(commandBuffer);
+		m_pipeline->bind(frameInfo.commandBuffer);
 
-		auto projectionView = camera.getProjection() * camera.getView();
+		auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
 
 		for (auto &gameObject : gameObjects)
 		{
@@ -86,7 +85,7 @@ namespace ft
 			push.normalMatrix = gameObject.transform.normalMatrix();
 
 			vkCmdPushConstants(
-				commandBuffer,
+				frameInfo.commandBuffer,
 				m_pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
@@ -94,8 +93,8 @@ namespace ft
 				&push
 			);
 
-			gameObject.model->bind(commandBuffer);
-			gameObject.model->draw(commandBuffer);
+			gameObject.model->bind(frameInfo.commandBuffer);
+			gameObject.model->draw(frameInfo.commandBuffer);
 		}
 	}
 

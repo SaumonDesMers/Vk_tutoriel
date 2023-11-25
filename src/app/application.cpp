@@ -3,6 +3,7 @@
 #include "app/camera.hpp"
 #include "app/render_system.hpp"
 #include "app/keyboard_movement_controller.hpp"
+#include "app/buffer.hpp"
 
 #include "ft_glm/ft_glm.hpp"
 
@@ -15,6 +16,12 @@
 namespace ft
 {
 
+	struct GlobalUBO
+	{
+		glm::mat4 viewProj{1.0f};
+		glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+	};
+
 	Application::Application()
 	{
 		loadGameObjects();
@@ -24,6 +31,19 @@ namespace ft
 
 	void Application::run()
 	{
+		std::vector<std::unique_ptr<Buffer>> uniformBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (size_t i = 0; i < uniformBuffers.size(); i++)
+		{
+			uniformBuffers[i] = std::make_unique<Buffer>(
+				m_device,
+				sizeof(GlobalUBO),
+				1,
+				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+			);
+			uniformBuffers[i]->map();
+		}
+
 		RenderSystem renderSystem(m_device, m_renderer.getSwapChainRenderPass());
 		Camera camera{};
 		// camera.setViewDirection(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -50,8 +70,24 @@ namespace ft
 
 			if (auto commandBuffer = m_renderer.beginFrame())
 			{
+				int frameIndex = m_renderer.getFrameIndex();
+				FrameInfo frameInfo
+				{
+					.frameIndex = frameIndex,
+					.frameTime = frameTime,
+					.commandBuffer = commandBuffer,
+					.camera = camera
+				};
+
+				// update
+				GlobalUBO globalUBO{};
+				globalUBO.viewProj = camera.getProjection() * camera.getView();
+				uniformBuffers[frameIndex]->writeToBuffer(&globalUBO);
+				uniformBuffers[frameIndex]->flush();
+
+				// render
 				m_renderer.beginSwapChainRenderPass(commandBuffer);
-				renderSystem.rendergameObjects(commandBuffer, m_gameObjects, camera);
+				renderSystem.rendergameObjects(frameInfo, m_gameObjects);
 				m_renderer.endSwapChainRenderPass(commandBuffer);
 				m_renderer.endFrame();
 			}
