@@ -62,14 +62,22 @@ namespace ft
 
 	void Application::loadGameObjects()
 	{
-		std::shared_ptr<Model> model = Model::createModelFromFile(m_device, "models/smooth_vase.obj");
+		std::shared_ptr<Model> model = Model::createModelFromFile(m_device, "models/flat_vase.obj");
+		auto gameObj1 = GameObject::create();
+		gameObj1.model = model;
+		gameObj1.transform.translation = {-0.5f, 0.5f, 2.5f};
+		gameObj1.transform.scale = glm::vec3(3.0f, 2.0f, 3.0f);
 
-		auto gameObj = GameObject::create();
-		gameObj.model = model;
-		gameObj.transform.translation = {0.0f, 0.0f, 2.5f};
-		gameObj.transform.scale = glm::vec3(3.0f);
+		m_gameObjects.push_back(std::move(gameObj1));
 
-		m_gameObjects.push_back(std::move(gameObj));
+
+		model = Model::createModelFromFile(m_device, "models/smooth_vase.obj");
+		auto gameObj2 = GameObject::create();
+		gameObj2.model = model;
+		gameObj2.transform.translation = {0.5f, 0.5f, 2.5f};
+		gameObj2.transform.scale = glm::vec3(3.0f, 2.0f, 3.0f);
+
+		m_gameObjects.push_back(std::move(gameObj2));
 	}
 
 }

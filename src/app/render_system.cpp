@@ -13,7 +13,7 @@ namespace ft
 	struct PushConstantData
 	{
 		glm::mat4 transform{1.0f};
-		alignas(16) glm::vec3 color;
+		alignas(16) glm::mat4 normalMatrix;
 	};
 
 	RenderSystem::RenderSystem(Device &device, VkRenderPass renderPass)
@@ -81,8 +81,9 @@ namespace ft
 		for (auto &gameObject : gameObjects)
 		{
 			PushConstantData push{};
-			push.transform = projectionView * gameObject.transform.mat4();
-			push.color = gameObject.color;
+			auto modelMatrix = gameObject.transform.mat4();
+			push.transform = projectionView * modelMatrix;
+			push.normalMatrix = gameObject.transform.normalMatrix();
 
 			vkCmdPushConstants(
 				commandBuffer,
