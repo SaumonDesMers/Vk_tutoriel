@@ -8,7 +8,7 @@ VPATH = src src/app
 SRCS = main.cpp logger.cpp application.cpp window.cpp pipeline.cpp device.cpp \
 	   swap_chain.cpp model.cpp renderer.cpp render_system.cpp camera.cpp \
 	   keyboard_movement_controller.cpp
-INC_DIR = -I include -I glm
+INC_DIR = -I include -I glm -I libs
 
 OBJ_DIR = obj
 DEP_DIR = dep
