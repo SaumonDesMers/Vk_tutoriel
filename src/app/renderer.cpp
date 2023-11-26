@@ -1,4 +1,4 @@
-#include "app/renderer.hpp"
+#include "renderer.hpp"
 
 #include <stdexcept>
 #include <array>

@@ -1,4 +1,4 @@
-#include "app/camera.hpp"
+#include "camera.hpp"
 
 #include <cassert>
 

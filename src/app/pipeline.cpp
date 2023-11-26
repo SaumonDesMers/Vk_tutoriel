@@ -1,5 +1,5 @@
-#include "app/pipeline.hpp"
-#include "app/model.hpp"
+#include "pipeline.hpp"
+#include "model.hpp"
 #include "logger.hpp"
 
 #include <fstream>

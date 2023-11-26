@@ -1,4 +1,4 @@
-#include "app/window.hpp"
+#include "window.hpp"
 
 namespace ft
 {

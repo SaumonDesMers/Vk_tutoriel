@@ -1,9 +1,9 @@
-#include "app/application.hpp"
+#include "application.hpp"
 
-#include "app/camera.hpp"
-#include "app/render_system.hpp"
-#include "app/keyboard_movement_controller.hpp"
-#include "app/buffer.hpp"
+#include "camera.hpp"
+#include "simple_render_system.hpp"
+#include "keyboard_movement_controller.hpp"
+#include "buffer.hpp"
 
 #include "ft_glm/ft_glm.hpp"
 

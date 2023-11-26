@@ -4,12 +4,12 @@ CXX = clang++
 CXXFLAGS = -std=c++17 -O2 -g# -Wall -Wextra -Werror
 LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
-VPATH = src src/app
+VPATH = src src/app src/app/systems
 SRCS = main.cpp logger.cpp application.cpp window.cpp pipeline.cpp device.cpp \
-	   swap_chain.cpp model.cpp renderer.cpp render_system.cpp camera.cpp \
+	   swap_chain.cpp model.cpp renderer.cpp simple_render_system.cpp camera.cpp \
 	   keyboard_movement_controller.cpp game_object.cpp buffer.cpp \
 	   descriptors.cpp
-INC_DIR = -I include -I glm -I libs
+INC_DIR = -I include -I include/app -I include/app/systems -I glm -I libs
 
 OBJ_DIR = obj
 DEP_DIR = dep

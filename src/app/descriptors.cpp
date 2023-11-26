@@ -1,4 +1,4 @@
-#include "app/descriptors.hpp"
+#include "descriptors.hpp"
 
 // std
 #include <cassert>

@@ -1,4 +1,4 @@
-#include "app/application.hpp"
+#include "application.hpp"
 #include "ft_glm/ft_glm.hpp"
 
 #include "logger.hpp"

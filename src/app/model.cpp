@@ -1,4 +1,4 @@
-#include "app/model.hpp"
+#include "model.hpp"
 #include "logger.hpp"
 #include "utils.hpp"
 
