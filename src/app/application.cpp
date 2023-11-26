@@ -19,7 +19,9 @@ namespace ft
 	struct GlobalUBO
 	{
 		glm::mat4 viewProj{1.0f};
-		glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+		glm::vec4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f};
+		glm::vec3 lightPosition{-1.0f};
+		alignas(16) glm::vec4 lightColor{1.0f};
 	};
 
 	Application::Application()
@@ -49,7 +51,7 @@ namespace ft
 		}
 
 		auto globalSetLayout = DescriptorSetLayout::Builder(m_device)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 		
 		std::vector<VkDescriptorSet> globalDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -67,6 +69,7 @@ namespace ft
 		camera.setViewTarget(glm::vec3(-1.f, -2.f, -2.f), glm::vec3(0.0f, 0.0f, 2.5f));
 
 		auto viewerObject = GameObject::create();
+		viewerObject.transform.translation.z = -2.5f;
 		KeyboardMovementController cameraController{};
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
@@ -83,7 +86,7 @@ namespace ft
 			camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 			
 			float aspect = m_renderer.getAspectRatio();
-			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
 			if (auto commandBuffer = m_renderer.beginFrame())
 			{
@@ -117,21 +120,26 @@ namespace ft
 	void Application::loadGameObjects()
 	{
 		std::shared_ptr<Model> model = Model::createModelFromFile(m_device, "models/flat_vase.obj");
-		auto gameObj1 = GameObject::create();
-		gameObj1.model = model;
-		gameObj1.transform.translation = {-0.5f, 0.5f, 2.5f};
-		gameObj1.transform.scale = glm::vec3(3.0f, 2.0f, 3.0f);
-
-		m_gameObjects.push_back(std::move(gameObj1));
+		auto flatVase = GameObject::create();
+		flatVase.model = model;
+		flatVase.transform.translation = {-0.5f, 0.5f, 0.0f};
+		flatVase.transform.scale = glm::vec3(3.0f, 2.0f, 3.0f);
+		m_gameObjects.push_back(std::move(flatVase));
 
 
 		model = Model::createModelFromFile(m_device, "models/smooth_vase.obj");
-		auto gameObj2 = GameObject::create();
-		gameObj2.model = model;
-		gameObj2.transform.translation = {0.5f, 0.5f, 2.5f};
-		gameObj2.transform.scale = glm::vec3(3.0f, 2.0f, 3.0f);
+		auto smoothVase = GameObject::create();
+		smoothVase.model = model;
+		smoothVase.transform.translation = {0.5f, 0.5f, 0.0f};
+		smoothVase.transform.scale = glm::vec3(3.0f, 2.0f, 3.0f);
+		m_gameObjects.push_back(std::move(smoothVase));
 
-		m_gameObjects.push_back(std::move(gameObj2));
+		model = Model::createModelFromFile(m_device, "models/quad.obj");
+		auto quad = GameObject::create();
+		quad.model = model;
+		quad.transform.translation = {0.0f, 0.5f, 0.0f};
+		quad.transform.scale = glm::vec3(3.0f, 1.0f, 3.0f);
+		m_gameObjects.push_back(std::move(quad));
 	}
 
 }
