@@ -25,6 +25,11 @@ namespace ft
 		glm::mat3 normalMatrix();
 	};
 
+	struct LightPointComponent
+	{
+		float intensity = 1.0f;
+	};
+
 	class GameObject
 	{
 
@@ -33,15 +38,24 @@ namespace ft
 		using id_t = uint32_t;
 		using Map = std::unordered_map<id_t, GameObject>;
 
-		std::shared_ptr<Model> model;
 		glm::vec3 color;
 		TransformComponent transform{};
+
+		// optional components
+		std::shared_ptr<Model> model;
+		std::unique_ptr<LightPointComponent> lightPoint = nullptr;
 
 		static GameObject create()
 		{
 			static id_t id = 0;
 			return GameObject(id++);
 		}
+
+		static GameObject createLightPoint(
+			float intensity = 1.0f,
+			float radius = 0.1f,
+			glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f)
+		);
 
 		GameObject(const GameObject &) = delete;
 		GameObject &operator=(const GameObject &) = delete;

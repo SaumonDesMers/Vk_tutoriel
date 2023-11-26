@@ -17,15 +17,6 @@
 namespace ft
 {
 
-	struct GlobalUBO
-	{
-		glm::mat4 projection{1.0f};
-		glm::mat4 view{1.0f};
-		glm::vec4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f};
-		glm::vec3 lightPosition{-1.0f};
-		alignas(16) glm::vec4 lightColor{1.0f};
-	};
-
 	Application::Application()
 	{
 		m_globalPool = DescriptorPool::Builder(m_device)
@@ -114,10 +105,11 @@ namespace ft
 				};
 
 				// update
-				GlobalUBO globalUBO{};
-				globalUBO.projection = camera.getProjection();
-				globalUBO.view = camera.getView();
-				uniformBuffers[frameIndex]->writeToBuffer(&globalUBO);
+				GlobalUBO ubo{};
+				ubo.projection = camera.getProjection();
+				ubo.view = camera.getView();
+				pointLightSystem.update(frameInfo, ubo);
+				uniformBuffers[frameIndex]->writeToBuffer(&ubo);
 				uniformBuffers[frameIndex]->flush();
 
 				// render
@@ -155,6 +147,28 @@ namespace ft
 		quad.transform.translation = {0.0f, 0.5f, 0.0f};
 		quad.transform.scale = glm::vec3(3.0f, 1.0f, 3.0f);
 		m_gameObjects.emplace(quad.id(), std::move(quad));
+
+		std::vector<glm::vec3> lightColors{
+			{1.f, .1f, .1f},
+			{.1f, .1f, 1.f},
+			{.1f, 1.f, .1f},
+			{1.f, 1.f, .1f},
+			{.1f, 1.f, 1.f},
+			{1.f, 1.f, 1.f}
+		};
+
+		for (size_t i = 0; i < lightColors.size(); i++)
+		{
+			auto light = GameObject::createLightPoint(1.0f, 0.1f, lightColors[i]);
+			light.color = lightColors[i];
+			auto rotateLight = glm::rotate(
+				glm::mat4(1.0f),
+				(i * glm::two_pi<float>()) / lightColors.size(),
+				glm::vec3(0.0f, -1.0f, 0.0f)
+			);
+			light.transform.translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
+			m_gameObjects.emplace(light.id(), std::move(light));
+		}
 	}
 
 }

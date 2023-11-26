@@ -69,4 +69,13 @@ namespace ft
 		};
 	}
 	
+	GameObject GameObject::createLightPoint(float intensity, float radius, glm::vec3 color)
+	{
+		GameObject gameObject = GameObject::create();
+		gameObject.color = color;
+		gameObject.transform.scale.x = radius;
+		gameObject.lightPoint = std::make_unique<LightPointComponent>();
+		gameObject.lightPoint->intensity = intensity;
+		return gameObject;
+	}
 }
