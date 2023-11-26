@@ -25,10 +25,7 @@ namespace ft
 		RenderSystem(const RenderSystem &) = delete;
 		RenderSystem &operator=(const RenderSystem &) = delete;
 	
-		void rendergameObjects(
-			FrameInfo &frameInfo,
-			std::vector<GameObject> &gameObjects
-		);
+		void rendergameObjects(FrameInfo &frameInfo);
 
 	private:
 

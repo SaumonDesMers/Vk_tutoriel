@@ -71,10 +71,8 @@ namespace ft
 		);
 	}
 
-	void RenderSystem::rendergameObjects(
-		FrameInfo &frameInfo,
-		std::vector<GameObject> &gameObjects
-	) {
+	void RenderSystem::rendergameObjects(FrameInfo &frameInfo)
+	{
 		m_pipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(
@@ -88,8 +86,15 @@ namespace ft
 			nullptr
 		);
 
-		for (auto &gameObject : gameObjects)
+		for (auto &kv : frameInfo.gameObjects)
 		{
+			auto &gameObject = kv.second;
+
+			if (!gameObject.model)
+			{
+				continue;
+			}
+
 			PushConstantData push{};
 			push.modelMatrix = gameObject.transform.mat4();
 			push.normalMatrix = gameObject.transform.normalMatrix();

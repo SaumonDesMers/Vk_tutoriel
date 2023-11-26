@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <memory>
+#include <unordered_map>
 
 namespace ft
 {
@@ -30,6 +31,7 @@ namespace ft
 	public:
 
 		using id_t = uint32_t;
+		using Map = std::unordered_map<id_t, GameObject>;
 
 		std::shared_ptr<Model> model;
 		glm::vec3 color;

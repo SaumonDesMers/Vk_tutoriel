@@ -18,7 +18,8 @@ namespace ft
 
 	struct GlobalUBO
 	{
-		glm::mat4 viewProj{1.0f};
+		glm::mat4 projection{1.0f};
+		glm::mat4 view{1.0f};
 		glm::vec4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f};
 		glm::vec3 lightPosition{-1.0f};
 		alignas(16) glm::vec4 lightColor{1.0f};
@@ -97,18 +98,20 @@ namespace ft
 					.frameTime = frameTime,
 					.commandBuffer = commandBuffer,
 					.camera = camera,
-					.globalDescriptorSet = globalDescriptorSets[frameIndex]
+					.globalDescriptorSet = globalDescriptorSets[frameIndex],
+					.gameObjects = m_gameObjects
 				};
 
 				// update
 				GlobalUBO globalUBO{};
-				globalUBO.viewProj = camera.getProjection() * camera.getView();
+				globalUBO.projection = camera.getProjection();
+				globalUBO.view = camera.getView();
 				uniformBuffers[frameIndex]->writeToBuffer(&globalUBO);
 				uniformBuffers[frameIndex]->flush();
 
 				// render
 				m_renderer.beginSwapChainRenderPass(commandBuffer);
-				renderSystem.rendergameObjects(frameInfo, m_gameObjects);
+				renderSystem.rendergameObjects(frameInfo);
 				m_renderer.endSwapChainRenderPass(commandBuffer);
 				m_renderer.endFrame();
 			}
@@ -124,7 +127,7 @@ namespace ft
 		flatVase.model = model;
 		flatVase.transform.translation = {-0.5f, 0.5f, 0.0f};
 		flatVase.transform.scale = glm::vec3(3.0f, 2.0f, 3.0f);
-		m_gameObjects.push_back(std::move(flatVase));
+		m_gameObjects.emplace(flatVase.id(), std::move(flatVase));
 
 
 		model = Model::createModelFromFile(m_device, "models/smooth_vase.obj");
@@ -132,14 +135,14 @@ namespace ft
 		smoothVase.model = model;
 		smoothVase.transform.translation = {0.5f, 0.5f, 0.0f};
 		smoothVase.transform.scale = glm::vec3(3.0f, 2.0f, 3.0f);
-		m_gameObjects.push_back(std::move(smoothVase));
+		m_gameObjects.emplace(smoothVase.id(), std::move(smoothVase));
 
 		model = Model::createModelFromFile(m_device, "models/quad.obj");
 		auto quad = GameObject::create();
 		quad.model = model;
 		quad.transform.translation = {0.0f, 0.5f, 0.0f};
 		quad.transform.scale = glm::vec3(3.0f, 1.0f, 3.0f);
-		m_gameObjects.push_back(std::move(quad));
+		m_gameObjects.emplace(quad.id(), std::move(quad));
 	}
 
 }

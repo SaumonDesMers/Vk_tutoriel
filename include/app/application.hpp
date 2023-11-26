@@ -37,7 +37,7 @@ namespace ft
 		Renderer m_renderer{m_window, m_device};
 		
 		std::unique_ptr<DescriptorPool> m_globalPool;
-		std::vector<GameObject> m_gameObjects;
+		GameObject::Map m_gameObjects;
 
 		void loadGameObjects();
 
