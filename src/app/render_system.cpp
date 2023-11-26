@@ -12,14 +12,14 @@ namespace ft
 
 	struct PushConstantData
 	{
-		glm::mat4 transform{1.0f};
-		alignas(16) glm::mat4 normalMatrix;
+		glm::mat4 modelMatrix{1.0f};
+		glm::mat4 normalMatrix;
 	};
 
-	RenderSystem::RenderSystem(Device &device, VkRenderPass renderPass)
+	RenderSystem::RenderSystem(Device &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
 		: m_device(device)
 	{
-		createPipelineLayout();
+		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 	}
 
@@ -28,7 +28,7 @@ namespace ft
 		vkDestroyPipelineLayout(m_device.device(), m_pipelineLayout, nullptr);
 	}
 
-	void RenderSystem::createPipelineLayout()
+	void RenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
 	{
 
 		VkPushConstantRange pushConstantRange
@@ -38,11 +38,13 @@ namespace ft
 			.size = sizeof(PushConstantData)
 		};
 
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{globalSetLayout};
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-			.setLayoutCount = 0,
-			.pSetLayouts = nullptr,
+			.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size()),
+			.pSetLayouts = descriptorSetLayouts.data(),
 			.pushConstantRangeCount = 1,
 			.pPushConstantRanges = &pushConstantRange
 		};
@@ -75,13 +77,21 @@ namespace ft
 	) {
 		m_pipeline->bind(frameInfo.commandBuffer);
 
-		auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
+		vkCmdBindDescriptorSets(
+			frameInfo.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			m_pipelineLayout,
+			0,
+			1,
+			&frameInfo.globalDescriptorSet,
+			0,
+			nullptr
+		);
 
 		for (auto &gameObject : gameObjects)
 		{
 			PushConstantData push{};
-			auto modelMatrix = gameObject.transform.mat4();
-			push.transform = projectionView * modelMatrix;
+			push.modelMatrix = gameObject.transform.mat4();
 			push.normalMatrix = gameObject.transform.normalMatrix();
 
 			vkCmdPushConstants(

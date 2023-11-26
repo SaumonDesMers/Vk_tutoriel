@@ -7,7 +7,8 @@ LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 VPATH = src src/app
 SRCS = main.cpp logger.cpp application.cpp window.cpp pipeline.cpp device.cpp \
 	   swap_chain.cpp model.cpp renderer.cpp render_system.cpp camera.cpp \
-	   keyboard_movement_controller.cpp game_object.cpp buffer.cpp
+	   keyboard_movement_controller.cpp game_object.cpp buffer.cpp \
+	   descriptors.cpp
 INC_DIR = -I include -I glm -I libs
 
 OBJ_DIR = obj

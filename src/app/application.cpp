@@ -24,6 +24,10 @@ namespace ft
 
 	Application::Application()
 	{
+		m_globalPool = DescriptorPool::Builder(m_device)
+			.setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+			.build();
 		loadGameObjects();
 	}
 
@@ -44,7 +48,20 @@ namespace ft
 			uniformBuffers[i]->map();
 		}
 
-		RenderSystem renderSystem(m_device, m_renderer.getSwapChainRenderPass());
+		auto globalSetLayout = DescriptorSetLayout::Builder(m_device)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.build();
+		
+		std::vector<VkDescriptorSet> globalDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (size_t i = 0; i < globalDescriptorSets.size(); i++)
+		{
+			auto bufferInfo = uniformBuffers[i]->descriptorInfo();
+			DescriptorWriter(*globalSetLayout, *m_globalPool)
+				.writeBuffer(0, &bufferInfo)
+				.build(globalDescriptorSets[i]);
+		}
+
+		RenderSystem renderSystem(m_device, m_renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout());
 		Camera camera{};
 		// camera.setViewDirection(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		camera.setViewTarget(glm::vec3(-1.f, -2.f, -2.f), glm::vec3(0.0f, 0.0f, 2.5f));
@@ -76,7 +93,8 @@ namespace ft
 					.frameIndex = frameIndex,
 					.frameTime = frameTime,
 					.commandBuffer = commandBuffer,
-					.camera = camera
+					.camera = camera,
+					.globalDescriptorSet = globalDescriptorSets[frameIndex]
 				};
 
 				// update

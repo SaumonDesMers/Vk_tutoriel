@@ -19,7 +19,7 @@ namespace ft
 
 	public:
 
-		RenderSystem(Device &device, VkRenderPass renderPass);
+		RenderSystem(Device &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~RenderSystem();
 
 		RenderSystem(const RenderSystem &) = delete;
@@ -37,7 +37,7 @@ namespace ft
 		std::unique_ptr<Pipeline> m_pipeline;
 		VkPipelineLayout m_pipelineLayout;
 
-		void createPipelineLayout();
+		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
 	};

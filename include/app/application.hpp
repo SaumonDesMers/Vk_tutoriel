@@ -4,6 +4,7 @@
 #include "device.hpp"
 #include "renderer.hpp"
 #include "game_object.hpp"
+#include "descriptors.hpp"
 
 #include "ft_glm/ft_glm.hpp"
 
@@ -35,6 +36,7 @@ namespace ft
 		Device m_device{m_window};
 		Renderer m_renderer{m_window, m_device};
 		
+		std::unique_ptr<DescriptorPool> m_globalPool;
 		std::vector<GameObject> m_gameObjects;
 
 		void loadGameObjects();
