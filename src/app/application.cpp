@@ -2,6 +2,7 @@
 
 #include "camera.hpp"
 #include "simple_render_system.hpp"
+#include "point_light_system.hpp"
 #include "keyboard_movement_controller.hpp"
 #include "buffer.hpp"
 
@@ -64,7 +65,17 @@ namespace ft
 				.build(globalDescriptorSets[i]);
 		}
 
-		RenderSystem renderSystem(m_device, m_renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout());
+		SimpleRenderSystem simpleRenderSystem(
+			m_device,
+			m_renderer.getSwapChainRenderPass(),
+			globalSetLayout->getDescriptorSetLayout()
+		);
+		PointLightSystem pointLightSystem(
+			m_device,
+			m_renderer.getSwapChainRenderPass(),
+			globalSetLayout->getDescriptorSetLayout()
+		);
+
 		Camera camera{};
 		// camera.setViewDirection(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		camera.setViewTarget(glm::vec3(-1.f, -2.f, -2.f), glm::vec3(0.0f, 0.0f, 2.5f));
@@ -111,7 +122,8 @@ namespace ft
 
 				// render
 				m_renderer.beginSwapChainRenderPass(commandBuffer);
-				renderSystem.rendergameObjects(frameInfo);
+				simpleRenderSystem.rendergameObjects(frameInfo);
+				pointLightSystem.render(frameInfo);
 				m_renderer.endSwapChainRenderPass(commandBuffer);
 				m_renderer.endFrame();
 			}

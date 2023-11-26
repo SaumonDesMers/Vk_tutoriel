@@ -33,6 +33,9 @@ namespace ft
 
 	void Pipeline::defaultPipelineConfigInfo(PipelineConfigInfo &configInfo)
 	{
+		configInfo.bindingDescriptions = Model::Vertex::getBindingDescriptions();
+		configInfo.attributeDescriptions = Model::Vertex::getAttributeDescriptions();
+
 		configInfo.viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 		configInfo.viewportInfo.viewportCount = 1;
 		configInfo.viewportInfo.pViewports = nullptr;
@@ -153,8 +156,8 @@ namespace ft
 			}
 		};
 
-		auto bindingDescriptions = Model::Vertex::getBindingDescriptions();
-		auto attributeDescriptions = Model::Vertex::getAttributeDescriptions();
+		auto &bindingDescriptions = configInfo.bindingDescriptions;
+		auto &attributeDescriptions = configInfo.attributeDescriptions;
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,

@@ -14,18 +14,18 @@
 namespace ft
 {
 
-	class SimpleRenderSystem
+	class PointLightSystem
 	{
 
 	public:
 
-		SimpleRenderSystem(Device &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
-		~SimpleRenderSystem();
+		PointLightSystem(Device &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		~PointLightSystem();
 
-		SimpleRenderSystem(const SimpleRenderSystem &) = delete;
-		SimpleRenderSystem &operator=(const SimpleRenderSystem &) = delete;
+		PointLightSystem(const PointLightSystem &) = delete;
+		PointLightSystem &operator=(const PointLightSystem &) = delete;
 	
-		void rendergameObjects(FrameInfo &frameInfo);
+		void render(FrameInfo &frameInfo);
 
 	private:
 
