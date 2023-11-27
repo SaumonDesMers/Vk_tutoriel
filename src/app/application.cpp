@@ -133,7 +133,6 @@ namespace ft
 		flatVase.transform.scale = glm::vec3(3.0f, 2.0f, 3.0f);
 		m_gameObjects.emplace(flatVase.id(), std::move(flatVase));
 
-
 		model = Model::createModelFromFile(m_device, "models/smooth_vase.obj");
 		auto smoothVase = GameObject::create();
 		smoothVase.model = model;
