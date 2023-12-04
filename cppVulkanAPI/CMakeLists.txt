@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 3.15)
+
+project(cppVulkanAPI
+	VERSION 0.1
+	DESCRIPTION "Wrapper for c++ vulkan API"
+	LANGUAGES CXX
+)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_library(${PROJECT_NAME} SHARED)
+
+target_compile_options(${PROJECT_NAME}
+	PRIVATE
+		-Wall
+		-Wextra
+		-Werror
+		-Wpedantic
+)
+
+target_sources(${PROJECT_NAME}
+	PUBLIC
+		src/window_manager.cpp
+		src/window.cpp
+		src/instance.cpp
+)
+
+target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)
+
+target_include_directories(${PROJECT_NAME}
+	INTERFACE
+		${CMAKE_CURRENT_SOURCE_DIR}/include
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/external/glm
+		${CMAKE_CURRENT_SOURCE_DIR}/src
+)

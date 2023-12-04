@@ -1,11 +1,17 @@
 obj/*.o
 dep/*.d
 
-vulkan_test
+*.so
 
 glslc
 *.spv
 
-*.json
+external
+glm
 
-glm/*
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+play
