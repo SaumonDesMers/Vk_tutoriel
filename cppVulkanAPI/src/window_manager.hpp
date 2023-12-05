@@ -10,19 +10,19 @@
 namespace LIB_NAMESPACE
 {
 
-class WindowManager
-{
-public:
+	class WindowManager
+	{
+	public:
 
-	WindowManager();
+		WindowManager();
 
-	~WindowManager();
+		~WindowManager();
 
-	std::unique_ptr<Window> createWindow(const WindowCreateInfo& createInfo);
+		std::unique_ptr<Window> createWindow(const WindowCreateInfo& createInfo);
 
-	void pollEvents();
+		void pollEvents();
 
-	
-};
+		
+	};
 
 }

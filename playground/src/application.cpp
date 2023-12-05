@@ -1,18 +1,10 @@
 #include "application.hpp"
 
+#include <vulkan/vulkan.h>
+
 Application::Application()
 {
-	ft::ApplicationInfo appInfo = {};
-	appInfo.pApplicationName = "Playground";
-	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.pEngineName = "cppVulkanAPI";
-	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.apiVersion = VK_API_VERSION_1_2;
-
-	ft::InstanceCreateInfo createInfo = {};
-	createInfo.pApplicationInfo = &appInfo;
-
-	m_instance = std::make_unique<ft::Instance>(createInfo);
+	
 }
 
 Application::~Application()
@@ -54,25 +46,29 @@ void Application::createWindow()
 
 void Application::createInstance()
 {
+	if (enableValidationLayers && ft::Instance::checkValidationLayerSupport(validationLayers) == false)
+	{
+		throw std::runtime_error("Validation layers requested, but not available");
+	}
 	ft::ApplicationInfo appInfo = {};
 	appInfo.pApplicationName = "Playground";
 	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.pEngineName = "cppVulkanAPI";
+	appInfo.pEngineName = "Playground Engine";
 	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 	appInfo.apiVersion = VK_API_VERSION_1_2;
 
 	ft::InstanceCreateInfo createInfo = {};
 	createInfo.pApplicationInfo = &appInfo;
 
-	uint32_t glfwExtensionCount = 0;
-	const char** glfwExtensions;
-
-	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-	std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
-
-	createInfo.enabledExtensionCount = glfwExtensionCount;
-	createInfo.ppEnabledExtensionNames = glfwExtensions;
+	if (enableValidationLayers)
+	{
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
+	}
+	else
+	{
+		createInfo.enabledLayerCount = 0;
+	}
 
 	m_instance = std::make_unique<ft::Instance>(createInfo);
 }

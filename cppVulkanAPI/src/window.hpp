@@ -9,34 +9,34 @@
 namespace LIB_NAMESPACE
 {
 
-struct WindowCreateInfo
-{
-	std::string title = "Default title";
-	int width = 800;
-	int height = 600;
-};
-
-class Window
-{
-
-public:
-
-	Window(const ft::WindowCreateInfo& createInfo);
-
-	~Window();
-
-	bool shouldClose() const
+	struct WindowCreateInfo
 	{
-		return glfwWindowShouldClose(m_window);
-	}
+		std::string title = "Default title";
+		int width = 800;
+		int height = 600;
+	};
 
-private:
+	class Window
+	{
 
-	GLFWwindow* m_window;
+	public:
 
-	std::string m_title;
-	int m_width;
-	int m_height;
-};
+		Window(const ft::WindowCreateInfo& createInfo);
+
+		~Window();
+
+		bool shouldClose() const
+		{
+			return glfwWindowShouldClose(m_window);
+		}
+
+	private:
+
+		GLFWwindow* m_window;
+
+		std::string m_title;
+		int m_width;
+		int m_height;
+	};
 
 }

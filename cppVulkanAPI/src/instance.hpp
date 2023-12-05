@@ -2,31 +2,37 @@
 
 #include "defines.hpp"
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
+
+#include <memory>
+#include <vector>
 
 namespace LIB_NAMESPACE
 {
 
-struct ApplicationInfo: public vk::ApplicationInfo
-{
-};
+	struct ApplicationInfo: public VkApplicationInfo
+	{
+	};
 
-struct InstanceCreateInfo: public vk::InstanceCreateInfo
-{
-};
+	struct InstanceCreateInfo: public VkInstanceCreateInfo
+	{
+	};
 
-class Instance: public vk::Instance
-{
+	class Instance
+	{
 
-public:
+	public:
 
-	Instance(const ft::InstanceCreateInfo& createInfo);
+		Instance(const ft::InstanceCreateInfo & createInfo);
 
-	~Instance();
+		~Instance();
 
-private:
+		static bool checkValidationLayerSupport(const std::vector<const char*>& validationLayers);
 
+	private:
 
-};
+		VkInstance m_instance;
+
+	};
 
 }
