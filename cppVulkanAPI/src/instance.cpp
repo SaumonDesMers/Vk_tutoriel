@@ -3,13 +3,13 @@
 
 #include <stdexcept>
 #include <cstring>
+#include <iostream>
 
 namespace LIB_NAMESPACE
 {
 
-	Instance::Instance(const ft::InstanceCreateInfo& createInfo)
+	Instance::Instance(const ft::Instance::CreateInfo& createInfo)
 	{
-		// Create instance
 		VkResult result = vkCreateInstance(&createInfo, nullptr, &m_instance);
 		if (result != VK_SUCCESS)
 		{

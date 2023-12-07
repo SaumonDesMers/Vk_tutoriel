@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 
 #include <memory>
+#include <vector>
 
 namespace LIB_NAMESPACE
 {
@@ -22,6 +23,7 @@ namespace LIB_NAMESPACE
 
 		void pollEvents();
 
+		std::vector<const char *> getRequiredInstanceExtensions();
 		
 	};
 

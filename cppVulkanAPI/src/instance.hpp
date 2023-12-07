@@ -9,13 +9,12 @@
 
 namespace LIB_NAMESPACE
 {
-
 	struct ApplicationInfo: public VkApplicationInfo
 	{
-	};
-
-	struct InstanceCreateInfo: public VkInstanceCreateInfo
-	{
+		ApplicationInfo(): VkApplicationInfo()
+		{
+			sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+		}
 	};
 
 	class Instance
@@ -23,9 +22,20 @@ namespace LIB_NAMESPACE
 
 	public:
 
-		Instance(const ft::InstanceCreateInfo & createInfo);
+
+		struct CreateInfo: public VkInstanceCreateInfo
+		{
+			CreateInfo(): VkInstanceCreateInfo()
+			{
+				sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+			}
+		};
+
+		Instance(const ft::Instance::CreateInfo & createInfo);
 
 		~Instance();
+
+		VkInstance getVk() const { return m_instance; }
 
 		static bool checkValidationLayerSupport(const std::vector<const char*>& validationLayers);
 

@@ -3,7 +3,7 @@
 
 int main(void)
 {
-	log.setTimestamp(false);
+	logger.setTimestamp(false);
 	try
 	{
 		Application app;

@@ -13,6 +13,7 @@ add_library(${PROJECT_NAME} SHARED)
 
 target_compile_options(${PROJECT_NAME}
 	PRIVATE
+		-g
 		-Wall
 		-Wextra
 		-Werror
@@ -24,6 +25,7 @@ target_sources(${PROJECT_NAME}
 		src/window_manager.cpp
 		src/window.cpp
 		src/instance.cpp
+		src/debug.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)

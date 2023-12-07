@@ -7,12 +7,12 @@
 #include <iomanip>
 #include <filesystem>
 
-#define FT_CRITICAL(...) log << Logger::Level::CRITICAL << __VA_ARGS__ << std::endl
-#define FT_ERROR(...) log << Logger::Level::ERROR << __VA_ARGS__ << std::endl
-#define FT_WARNING(...) log << Logger::Level::WARNING << __VA_ARGS__ << std::endl
-#define FT_INFO(...) log << Logger::Level::INFO << __VA_ARGS__ << std::endl
-#define FT_DEBUG(...) log << Logger::Level::DEBUG << __VA_ARGS__ << std::endl
-#define FT_TRACE(...) log << Logger::Level::TRACE << __VA_ARGS__ << std::endl
+#define FT_CRITICAL(...) logger << Logger::Level::CRITICAL << __VA_ARGS__ << std::endl
+#define FT_ERROR(...) logger << Logger::Level::ERROR << __VA_ARGS__ << std::endl
+#define FT_WARNING(...) logger << Logger::Level::WARNING << __VA_ARGS__ << std::endl
+#define FT_INFO(...) logger << Logger::Level::INFO << __VA_ARGS__ << std::endl
+#define FT_DEBUG(...) logger << Logger::Level::DEBUG << __VA_ARGS__ << std::endl
+#define FT_TRACE(...) logger << Logger::Level::TRACE << __VA_ARGS__ << std::endl
 
 /**
  * @brief A class that represents a file.
@@ -329,4 +329,4 @@ private:
 
 };
 
-extern Logger log;
+extern Logger logger;

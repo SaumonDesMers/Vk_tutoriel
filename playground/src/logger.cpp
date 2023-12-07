@@ -1,3 +1,3 @@
 #include "logger.hpp"
 
-Logger log = Logger();
+Logger logger = Logger();

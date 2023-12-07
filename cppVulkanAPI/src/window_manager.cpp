@@ -3,24 +3,35 @@
 namespace LIB_NAMESPACE
 {
 
-WindowManager::WindowManager()
-{
-	glfwInit();
-}
+	WindowManager::WindowManager()
+	{
+		glfwInit();
+	}
 
-WindowManager::~WindowManager()
-{
-	glfwTerminate();
-}
+	WindowManager::~WindowManager()
+	{
+		glfwTerminate();
+	}
 
-std::unique_ptr<Window> WindowManager::createWindow(const WindowCreateInfo& createInfo)
-{
-	return std::make_unique<Window>(createInfo);
-}
+	std::unique_ptr<Window> WindowManager::createWindow(const WindowCreateInfo& createInfo)
+	{
+		return std::make_unique<Window>(createInfo);
+	}
 
-void WindowManager::pollEvents()
-{
-	glfwPollEvents();
-}
+	void WindowManager::pollEvents()
+	{
+		glfwPollEvents();
+	}
+
+	std::vector<const char *> WindowManager::getRequiredInstanceExtensions()
+	{
+		uint32_t glfwExtensionCount = 0;
+		const char ** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+		std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+		return extensions;
+	}
+
 
 }

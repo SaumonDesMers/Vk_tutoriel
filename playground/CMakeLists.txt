@@ -11,6 +11,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(${PROJECT_NAME})
 
+target_compile_options(${PROJECT_NAME}
+	PRIVATE
+		-g
+)
+
 target_sources(${PROJECT_NAME}
 	PRIVATE
 		src/main.cpp
