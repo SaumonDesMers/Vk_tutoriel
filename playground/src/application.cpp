@@ -3,6 +3,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <set>
+
 Application::Application()
 {
 	
@@ -29,9 +31,11 @@ void Application::init()
 	createWindow();
 	createInstance();
 	setupDebugMessenger();
+	createSurface();
 	pickPhysicalDevice();
 	createLogicalDevice();
-	createSurface();
+
+	FT_INFO("Application initialized");
 }
 
 void Application::createWindowManager()
@@ -103,10 +107,22 @@ void Application::setupDebugMessenger()
 
 void Application::pickPhysicalDevice()
 {
-	VkPhysicalDevice physicalDevice = ft::PhysicalDevice::pickSuitablePhysicalDevice(
-		m_instance->getVk(),
-		&Application::isDeviceSuitable
-	);
+	std::vector<VkPhysicalDevice> physicalDevices = m_instance->getPhysicalDevices();
+
+	if (physicalDevices.empty())
+	{
+		throw std::runtime_error("Failed to find GPUs with Vulkan support");
+	}
+
+	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	for (const auto& phyDev : physicalDevices)
+	{
+		if (isDeviceSuitable(phyDev))
+		{
+			physicalDevice = phyDev;
+			break;
+		}
+	}
 
 	if (physicalDevice == VK_NULL_HANDLE)
 	{
@@ -120,18 +136,24 @@ void Application::createLogicalDevice()
 {
 	QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice->getVk());
 
-	ft::Queue::CreateInfo queueCreateInfo = {};
-	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-	queueCreateInfo.queueCount = 1;
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 	float queuePriority = 1.0f;
-	queueCreateInfo.pQueuePriorities = &queuePriority;
+	for (uint32_t queueFamily : uniqueQueueFamilies)
+	{
+		ft::Queue::CreateInfo queueCreateInfo = {};
+		queueCreateInfo.queueFamilyIndex = queueFamily;
+		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
 
 	ft::PhysicalDevice::Features deviceFeatures = {};
 
 	ft::Device::CreateInfo createInfo = {};
-	createInfo.queueCreateInfoCount = 1;
-	createInfo.pQueueCreateInfos = &queueCreateInfo;
+	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
@@ -150,6 +172,7 @@ void Application::createLogicalDevice()
 	m_device = std::make_unique<ft::Device>(m_physicalDevice->getVk(), createInfo);
 
 	m_graphicsQueue = std::make_unique<ft::Queue>(m_device->getVk(), indices.graphicsFamily.value());
+	m_presentQueue = std::make_unique<ft::Queue>(m_device->getVk(), indices.presentFamily.value());
 }
 
 void Application::createSurface()
@@ -212,6 +235,13 @@ QueueFamilyIndices Application::findQueueFamilies(const VkPhysicalDevice& physic
 		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
 			indices.graphicsFamily = i;
+		}
+
+		VkBool32 presentSupport = ft::PhysicalDevice::getSurfaceSupport(physicalDevice, i, m_surface->getVk());
+
+		if (presentSupport)
+		{
+			indices.presentFamily = i;
 		}
 
 		if (indices.isComplete())

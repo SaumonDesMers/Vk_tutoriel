@@ -36,6 +36,8 @@ namespace LIB_NAMESPACE
 
 		VkInstance getVk() const { return m_instance; }
 
+		std::vector<VkPhysicalDevice> getPhysicalDevices() const;
+
 		static bool checkValidationLayerSupport(const std::vector<const char*>& validationLayers);
 
 	private:

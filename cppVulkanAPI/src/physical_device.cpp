@@ -5,21 +5,12 @@ namespace LIB_NAMESPACE
 	PhysicalDevice::PhysicalDevice(VkPhysicalDevice physicalDevice)
 		: m_physicalDevice(physicalDevice)
 	{
+
 	}
 
 	PhysicalDevice::~PhysicalDevice()
 	{
-	}
 
-	std::vector<VkPhysicalDevice> PhysicalDevice::enumeratePhysicalDevices(VkInstance instance)
-	{
-		uint32_t deviceCount = 0;
-		vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
-
-		std::vector<VkPhysicalDevice> devices(deviceCount);
-		vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
-
-		return devices;
 	}
 
 	std::vector<VkQueueFamilyProperties> PhysicalDevice::getQueueFamilyProperties(VkPhysicalDevice physicalDevice)
@@ -31,5 +22,17 @@ namespace LIB_NAMESPACE
 		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilyProperties.data());
 
 		return queueFamilyProperties;
+	}
+
+	bool PhysicalDevice::getSurfaceSupport(
+		VkPhysicalDevice physicalDevice,
+		uint32_t queueFamilyIndex,
+		VkSurfaceKHR surface
+	)
+	{
+		VkBool32 surfaceSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamilyIndex, surface, &surfaceSupport);
+
+		return surfaceSupport;
 	}
 }

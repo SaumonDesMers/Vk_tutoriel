@@ -14,9 +14,10 @@
 
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
+	std::optional<uint32_t> presentFamily;
 
     bool isComplete() {
-        return graphicsFamily.has_value();
+        return graphicsFamily.has_value() && presentFamily.has_value();
     }
 };
 
@@ -45,6 +46,7 @@ private:
 	std::unique_ptr<ft::PhysicalDevice> m_physicalDevice;
 	std::unique_ptr<ft::Device> m_device;
 	std::unique_ptr<ft::Queue> m_graphicsQueue;
+	std::unique_ptr<ft::Queue> m_presentQueue;
 
 	void init();
 
@@ -58,6 +60,6 @@ private:
 
 	std::vector<const char*> getRequiredExtensions();
 	void populateDebugMessengerCreateInfo(ft::DebugMessenger::CreateInfo& createInfo);
-	static bool isDeviceSuitable(const VkPhysicalDevice& physicalDevice);
-	static QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
+	bool isDeviceSuitable(const VkPhysicalDevice& physicalDevice);
+	QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
 };

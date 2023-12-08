@@ -40,28 +40,13 @@ namespace LIB_NAMESPACE
 
 		VkPhysicalDevice getVk() const { return m_physicalDevice; }
 
-		static std::vector<VkPhysicalDevice> enumeratePhysicalDevices(VkInstance instance);
-
-		template <typename UnaryPredicate>
-		static VkPhysicalDevice pickSuitablePhysicalDevice(
-			VkInstance instance,
-			UnaryPredicate isDeviceSuitable
-		)
-		{
-			std::vector<VkPhysicalDevice> devices = PhysicalDevice::enumeratePhysicalDevices(instance);
-
-			for (const auto& device : devices)
-			{
-				if (isDeviceSuitable(device))
-				{
-					return device;
-				}
-			}
-
-			return VK_NULL_HANDLE;
-		}
-
 		static std::vector<VkQueueFamilyProperties> getQueueFamilyProperties(VkPhysicalDevice physicalDevice);
+
+		static bool getSurfaceSupport(
+			VkPhysicalDevice physicalDevice,
+			uint32_t queueFamilyIndex,
+			VkSurfaceKHR surface
+		);
 
 	private:
 
