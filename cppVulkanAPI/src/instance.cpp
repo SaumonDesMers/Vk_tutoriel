@@ -8,7 +8,7 @@
 namespace LIB_NAMESPACE
 {
 
-	Instance::Instance(const ft::Instance::CreateInfo& createInfo)
+	Instance::Instance(const CreateInfo& createInfo)
 	{
 		VkResult result = vkCreateInstance(&createInfo, nullptr, &m_instance);
 		if (result != VK_SUCCESS)

@@ -31,7 +31,7 @@ namespace LIB_NAMESPACE
 			}
 		};
 
-		Instance(const ft::Instance::CreateInfo & createInfo);
+		Instance(const CreateInfo & createInfo);
 
 		~Instance();
 
