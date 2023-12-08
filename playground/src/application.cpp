@@ -31,6 +31,7 @@ void Application::init()
 	setupDebugMessenger();
 	pickPhysicalDevice();
 	createLogicalDevice();
+	createSurface();
 }
 
 void Application::createWindowManager()
@@ -149,6 +150,11 @@ void Application::createLogicalDevice()
 	m_device = std::make_unique<ft::Device>(m_physicalDevice->getVk(), createInfo);
 
 	m_graphicsQueue = std::make_unique<ft::Queue>(m_device->getVk(), indices.graphicsFamily.value());
+}
+
+void Application::createSurface()
+{
+	m_surface = std::make_unique<ft::Window::Surface>(m_instance->getVk(), m_window->getGLFWwindow());
 }
 
 std::vector<const char*> Application::getRequiredExtensions() {

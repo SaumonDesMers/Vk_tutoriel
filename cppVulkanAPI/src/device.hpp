@@ -20,7 +20,6 @@ namespace LIB_NAMESPACE
 		};
 
 		Device(VkPhysicalDevice physicalDevice, const CreateInfo & createInfo);
-
 		~Device();
 
 		VkDevice getVk() const { return m_device; }

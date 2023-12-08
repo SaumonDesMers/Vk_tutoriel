@@ -20,7 +20,6 @@ namespace LIB_NAMESPACE
 		};
 
 		Queue(VkDevice device, uint32_t queueFamilyIndex, uint32_t queueIndex = 0);
-
 		~Queue();
 
 		VkQueue getVk() const { return m_queue; }

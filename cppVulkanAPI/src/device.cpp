@@ -11,7 +11,6 @@ namespace LIB_NAMESPACE
 		{
 			throw std::runtime_error("failed to create logical device!");
 		}
-		std::cout << "Created logical device" << std::endl;
 	}
 
 	Device::~Device()

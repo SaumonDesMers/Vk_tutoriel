@@ -41,6 +41,7 @@ private:
 	std::unique_ptr<ft::Window> m_window;
 	std::unique_ptr<ft::Instance> m_instance;
 	std::unique_ptr<ft::DebugMessenger> m_debugMessenger;
+	std::unique_ptr<ft::Window::Surface> m_surface;
 	std::unique_ptr<ft::PhysicalDevice> m_physicalDevice;
 	std::unique_ptr<ft::Device> m_device;
 	std::unique_ptr<ft::Queue> m_graphicsQueue;
@@ -53,6 +54,7 @@ private:
 	void setupDebugMessenger();
 	void pickPhysicalDevice();
 	void createLogicalDevice();
+	void createSurface();
 
 	std::vector<const char*> getRequiredExtensions();
 	void populateDebugMessengerCreateInfo(ft::DebugMessenger::CreateInfo& createInfo);

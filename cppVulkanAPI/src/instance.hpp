@@ -32,7 +32,6 @@ namespace LIB_NAMESPACE
 		};
 
 		Instance(const CreateInfo & createInfo);
-
 		~Instance();
 
 		VkInstance getVk() const { return m_instance; }

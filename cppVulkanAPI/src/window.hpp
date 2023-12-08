@@ -2,6 +2,7 @@
 
 #include "defines.hpp"
 
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <string>
@@ -21,9 +22,26 @@ namespace LIB_NAMESPACE
 
 	public:
 
-		Window(const ft::WindowCreateInfo& createInfo);
+		class Surface
+		{
 
+		public:
+
+			Surface(VkInstance instance, GLFWwindow* window);
+			~Surface();
+
+			VkSurfaceKHR getVk() const { return m_surface; }
+
+		private:
+
+			VkSurfaceKHR m_surface;
+			VkInstance m_instance;
+		};
+
+		Window(const ft::WindowCreateInfo& createInfo);
 		~Window();
+
+		GLFWwindow* getGLFWwindow() const { return m_window; }
 
 		bool shouldClose() const
 		{
