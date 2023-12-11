@@ -1,5 +1,8 @@
 #include "physical_device.hpp"
 
+#include <string>
+#include <set>
+
 namespace LIB_NAMESPACE
 {
 	PhysicalDevice::PhysicalDevice(VkPhysicalDevice physicalDevice)
@@ -34,5 +37,26 @@ namespace LIB_NAMESPACE
 		vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamilyIndex, surface, &surfaceSupport);
 
 		return surfaceSupport;
+	}
+
+	bool PhysicalDevice::checkExtensionSupport(
+		const VkPhysicalDevice& physicalDevice,
+		const std::vector<const char*>& extensions
+	)
+	{
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
+
+		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableExtensions.data());
+
+		std::set<std::string> requiredExtensions(extensions.begin(), extensions.end());
+
+		for (const auto& extension : availableExtensions)
+		{
+			requiredExtensions.erase(extension.extensionName);
+		}
+
+		return requiredExtensions.empty();
 	}
 }

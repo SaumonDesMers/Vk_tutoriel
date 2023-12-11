@@ -38,6 +38,10 @@ private:
 		"VK_LAYER_KHRONOS_validation"
 	};
 
+	const std::vector<const char*> deviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
+
 	std::unique_ptr<ft::WindowManager> m_windowManager;
 	std::unique_ptr<ft::Window> m_window;
 	std::unique_ptr<ft::Instance> m_instance;
@@ -54,9 +58,9 @@ private:
 	void createWindow();
 	void createInstance();
 	void setupDebugMessenger();
+	void createSurface();
 	void pickPhysicalDevice();
 	void createLogicalDevice();
-	void createSurface();
 
 	std::vector<const char*> getRequiredExtensions();
 	void populateDebugMessengerCreateInfo(ft::DebugMessenger::CreateInfo& createInfo);

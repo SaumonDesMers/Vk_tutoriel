@@ -105,6 +105,11 @@ void Application::setupDebugMessenger()
 	m_debugMessenger = std::make_unique<ft::DebugMessenger>(m_instance.get(), &createInfo);
 }
 
+void Application::createSurface()
+{
+	m_surface = std::make_unique<ft::Window::Surface>(m_instance->getVk(), m_window->getGLFWwindow());
+}
+
 void Application::pickPhysicalDevice()
 {
 	std::vector<VkPhysicalDevice> physicalDevices = m_instance->getPhysicalDevices();
@@ -157,7 +162,8 @@ void Application::createLogicalDevice()
 
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
-	createInfo.enabledExtensionCount = 0;
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 	if (enableValidationLayers)
 	{
@@ -173,11 +179,6 @@ void Application::createLogicalDevice()
 
 	m_graphicsQueue = std::make_unique<ft::Queue>(m_device->getVk(), indices.graphicsFamily.value());
 	m_presentQueue = std::make_unique<ft::Queue>(m_device->getVk(), indices.presentFamily.value());
-}
-
-void Application::createSurface()
-{
-	m_surface = std::make_unique<ft::Window::Surface>(m_instance->getVk(), m_window->getGLFWwindow());
 }
 
 std::vector<const char*> Application::getRequiredExtensions() {
@@ -220,7 +221,9 @@ bool Application::isDeviceSuitable(const VkPhysicalDevice& physicalDevice)
 {
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
-	return indices.isComplete();
+	bool extensionsSupported = ft::PhysicalDevice::checkExtensionSupport(physicalDevice, deviceExtensions);
+
+	return indices.isComplete() && extensionsSupported;
 }
 
 QueueFamilyIndices Application::findQueueFamilies(const VkPhysicalDevice& physicalDevice)

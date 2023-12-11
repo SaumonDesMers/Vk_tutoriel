@@ -17,6 +17,8 @@ namespace LIB_NAMESPACE
 
 		struct Properties: public VkPhysicalDeviceProperties
 		{
+			Properties() : VkPhysicalDeviceProperties() {}
+
 			Properties(const VkPhysicalDevice& physicalDevice)
 			{
 				vkGetPhysicalDeviceProperties(physicalDevice, this);
@@ -46,6 +48,11 @@ namespace LIB_NAMESPACE
 			VkPhysicalDevice physicalDevice,
 			uint32_t queueFamilyIndex,
 			VkSurfaceKHR surface
+		);
+
+		static bool checkExtensionSupport(
+			const VkPhysicalDevice& physicalDevice,
+			const std::vector<const char*>& extensions
 		);
 
 	private:
