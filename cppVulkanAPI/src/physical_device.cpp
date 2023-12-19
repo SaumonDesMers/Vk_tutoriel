@@ -39,6 +39,45 @@ namespace LIB_NAMESPACE
 		return surfaceSupport;
 	}
 
+	VkSurfaceCapabilitiesKHR PhysicalDevice::getSurfaceCapabilities(
+		VkPhysicalDevice physicalDevice,
+		VkSurfaceKHR surface
+	)
+	{
+		VkSurfaceCapabilitiesKHR surfaceCapabilities;
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities);
+
+		return surfaceCapabilities;
+	}
+
+	std::vector<VkSurfaceFormatKHR> PhysicalDevice::getSurfaceFormats(
+		VkPhysicalDevice physicalDevice,
+		VkSurfaceKHR surface
+	)
+	{
+		uint32_t formatCount;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
+
+		std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data());
+
+		return surfaceFormats;
+	}
+
+	std::vector<VkPresentModeKHR> PhysicalDevice::getSurfacePresentModes(
+		VkPhysicalDevice physicalDevice,
+		VkSurfaceKHR surface
+	)
+	{
+		uint32_t presentModeCount;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
+
+		std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data());
+
+		return presentModes;
+	}
+
 	bool PhysicalDevice::checkExtensionSupport(
 		const VkPhysicalDevice& physicalDevice,
 		const std::vector<const char*>& extensions

@@ -48,6 +48,11 @@ namespace LIB_NAMESPACE
 			return glfwWindowShouldClose(m_window);
 		}
 
+		void getFramebufferSize(int* width, int* height) const
+		{
+			glfwGetFramebufferSize(m_window, width, height);
+		}
+
 	private:
 
 		GLFWwindow* m_window;

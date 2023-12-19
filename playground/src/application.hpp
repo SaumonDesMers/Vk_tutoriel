@@ -21,6 +21,13 @@ struct QueueFamilyIndices {
     }
 };
 
+struct SwapChainSupportDetails
+{
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+};
+
 class Application
 {
 
@@ -51,6 +58,7 @@ private:
 	std::unique_ptr<ft::Device> m_device;
 	std::unique_ptr<ft::Queue> m_graphicsQueue;
 	std::unique_ptr<ft::Queue> m_presentQueue;
+	std::unique_ptr<ft::Swapchain> m_swapchain;
 
 	void init();
 
@@ -61,9 +69,15 @@ private:
 	void createSurface();
 	void pickPhysicalDevice();
 	void createLogicalDevice();
+	void createSwapChain();
 
 	std::vector<const char*> getRequiredExtensions();
 	void populateDebugMessengerCreateInfo(ft::DebugMessenger::CreateInfo& createInfo);
 	bool isDeviceSuitable(const VkPhysicalDevice& physicalDevice);
 	QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
+
+	SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice& device);
+	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 };

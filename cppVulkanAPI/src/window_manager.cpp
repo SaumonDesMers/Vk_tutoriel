@@ -32,6 +32,4 @@ namespace LIB_NAMESPACE
 
 		return extensions;
 	}
-
-
 }

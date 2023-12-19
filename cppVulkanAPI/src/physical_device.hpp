@@ -50,6 +50,21 @@ namespace LIB_NAMESPACE
 			VkSurfaceKHR surface
 		);
 
+		static VkSurfaceCapabilitiesKHR getSurfaceCapabilities(
+			VkPhysicalDevice physicalDevice,
+			VkSurfaceKHR surface
+		);
+
+		static std::vector<VkSurfaceFormatKHR> getSurfaceFormats(
+			VkPhysicalDevice physicalDevice,
+			VkSurfaceKHR surface
+		);
+
+		static std::vector<VkPresentModeKHR> getSurfacePresentModes(
+			VkPhysicalDevice physicalDevice,
+			VkSurfaceKHR surface
+		);
+
 		static bool checkExtensionSupport(
 			const VkPhysicalDevice& physicalDevice,
 			const std::vector<const char*>& extensions
