@@ -9,3 +9,4 @@
 #include "../src/device.hpp"
 #include "../src/queue.hpp"
 #include "../src/swapchain.hpp"
+#include "../src/image_view.hpp"

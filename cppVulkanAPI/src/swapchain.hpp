@@ -28,6 +28,7 @@ namespace LIB_NAMESPACE
 		VkSwapchainKHR getVk() const { return m_swapchain; }
 
 		VkImage getImage(uint32_t index) const { return m_images[index]; }
+		uint32_t getImageCount() const { return m_images.size(); }
 		VkFormat getImageFormat() const { return m_imageFormat; }
 		VkExtent2D getExtent() const { return m_extent; }
 

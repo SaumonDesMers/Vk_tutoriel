@@ -35,6 +35,7 @@ void Application::init()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapChain();
+	createImageViews();
 
 	FT_INFO("Application initialized");
 }
@@ -233,6 +234,30 @@ void Application::createSwapChain()
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
 	m_swapchain = std::make_unique<ft::Swapchain>(m_device->getVk(), createInfo);
+}
+
+void Application::createImageViews()
+{
+	m_swapchainImageViews.resize(m_swapchain->getImageCount());
+
+	for (size_t i = 0; i < m_swapchain->getImageCount(); i++)
+	{
+		ft::ImageView::CreateInfo createInfo = {};
+		createInfo.image = m_swapchain->getImage(i);
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		createInfo.format = m_swapchain->getImageFormat();
+		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		createInfo.subresourceRange.baseMipLevel = 0;
+		createInfo.subresourceRange.levelCount = 1;
+		createInfo.subresourceRange.baseArrayLayer = 0;
+		createInfo.subresourceRange.layerCount = 1;
+
+		m_swapchainImageViews[i] = std::make_unique<ft::ImageView>(m_device->getVk(), createInfo);
+	}
 }
 
 std::vector<const char*> Application::getRequiredExtensions() {

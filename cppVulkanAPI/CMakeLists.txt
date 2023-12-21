@@ -30,6 +30,7 @@ target_sources(${PROJECT_NAME}
 		src/device.cpp
 		src/queue.cpp
 		src/swapchain.cpp
+		src/image_view.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)

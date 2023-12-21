@@ -59,6 +59,7 @@ private:
 	std::unique_ptr<ft::Queue> m_graphicsQueue;
 	std::unique_ptr<ft::Queue> m_presentQueue;
 	std::unique_ptr<ft::Swapchain> m_swapchain;
+	std::vector<std::unique_ptr<ft::ImageView>> m_swapchainImageViews;
 
 	void init();
 
@@ -70,6 +71,7 @@ private:
 	void pickPhysicalDevice();
 	void createLogicalDevice();
 	void createSwapChain();
+	void createImageViews();
 
 	std::vector<const char*> getRequiredExtensions();
 	void populateDebugMessengerCreateInfo(ft::DebugMessenger::CreateInfo& createInfo);
