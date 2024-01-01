@@ -36,6 +36,7 @@ void Application::init()
 	createLogicalDevice();
 	createSwapChain();
 	createImageViews();
+	createGraphicsPipeline();
 
 	FT_INFO("Application initialized");
 }
@@ -259,6 +260,10 @@ void Application::createImageViews()
 		m_swapchainImageViews[i] = std::make_unique<ft::ImageView>(m_device->getVk(), createInfo);
 	}
 }
+
+void Application::createGraphicsPipeline()
+{
+}	
 
 std::vector<const char*> Application::getRequiredExtensions() {
     std::vector<const char*> extensions = m_windowManager->getRequiredInstanceExtensions();

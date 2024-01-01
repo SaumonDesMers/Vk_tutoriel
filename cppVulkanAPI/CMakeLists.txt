@@ -31,6 +31,7 @@ target_sources(${PROJECT_NAME}
 		src/queue.cpp
 		src/swapchain.cpp
 		src/image_view.cpp
+		src/graphic_pipeline.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)

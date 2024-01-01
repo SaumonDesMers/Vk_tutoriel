@@ -10,3 +10,4 @@
 #include "../src/queue.hpp"
 #include "../src/swapchain.hpp"
 #include "../src/image_view.hpp"
+#include "../src/graphic_pipeline.hpp"
