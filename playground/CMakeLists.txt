@@ -16,6 +16,14 @@ target_compile_options(${PROJECT_NAME}
 		-g
 )
 
+#compile shaders with ./shaders/compile.sh
+add_custom_target(
+	shaders
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/shaders/compile.sh
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders
+)
+add_dependencies(${PROJECT_NAME} shaders)
+
 target_sources(${PROJECT_NAME}
 	PRIVATE
 		src/main.cpp
