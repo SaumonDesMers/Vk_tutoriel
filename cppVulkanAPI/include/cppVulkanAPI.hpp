@@ -10,5 +10,6 @@
 #include "../src/queue.hpp"
 #include "../src/swapchain.hpp"
 #include "../src/image_view.hpp"
-#include "../src/graphic_pipeline.hpp"
-#include "../src/shader_module.hpp"
+#include "../src/pipeline/graphic_pipeline.hpp"
+#include "../src/pipeline/shader_module.hpp"
+#include "../src/pipeline/pipeline_layout.hpp"

@@ -61,6 +61,8 @@ private:
 	std::unique_ptr<ft::Swapchain> m_swapchain;
 	std::vector<std::unique_ptr<ft::ImageView>> m_swapchainImageViews;
 	std::unique_ptr<ft::GraphicPipeline> m_graphicPipeline;
+	std::unique_ptr<ft::PipelineLayout> m_pipelineLayout;
+
 
 	void init();
 
