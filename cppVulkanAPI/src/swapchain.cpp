@@ -1,5 +1,7 @@
 #include "swapchain.hpp"
 
+#include <stdexcept>
+
 namespace LIB_NAMESPACE
 {
 	Swapchain::Swapchain(VkDevice device, const CreateInfo& createInfo)
@@ -7,7 +9,7 @@ namespace LIB_NAMESPACE
 	{
 		if (vkCreateSwapchainKHR(m_device, &createInfo, nullptr, &m_swapchain) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create swap chain!");
+			throw std::runtime_error("failed to create swap chain.");
 		}
 
 		uint32_t imageCount;

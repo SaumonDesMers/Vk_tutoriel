@@ -9,7 +9,7 @@ namespace LIB_NAMESPACE
 	{
 		if (vkCreateImageView(m_device, &createInfo, nullptr, &m_imageView) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create image view!");
+			throw std::runtime_error("failed to create image view.");
 		}
 	}
 

@@ -61,6 +61,7 @@ private:
 	std::unique_ptr<ft::Swapchain> m_swapchain;
 	std::vector<std::unique_ptr<ft::ImageView>> m_swapchainImageViews;
 	std::unique_ptr<ft::GraphicPipeline> m_graphicPipeline;
+	std::unique_ptr<ft::RenderPass> m_renderPass;
 	std::unique_ptr<ft::PipelineLayout> m_pipelineLayout;
 
 
@@ -76,6 +77,7 @@ private:
 	void createSwapChain();
 	void createImageViews();
 	void createGraphicsPipeline();
+	void createRenderPass();
 
 	std::vector<const char*> getRequiredExtensions();
 	void populateDebugMessengerCreateInfo(ft::DebugMessenger::CreateInfo& createInfo);

@@ -16,7 +16,7 @@ namespace LIB_NAMESPACE
 
 		if (!m_window)
 		{
-			throw std::runtime_error("failed to create window!");
+			throw std::runtime_error("failed to create window.");
 		}
 	}
 
@@ -30,7 +30,7 @@ namespace LIB_NAMESPACE
 	{
 		if (glfwCreateWindowSurface(m_instance, window, nullptr, &m_surface) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create window surface!");
+			throw std::runtime_error("failed to create window surface.");
 		}
 	}
 

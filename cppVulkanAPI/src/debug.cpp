@@ -18,7 +18,7 @@ namespace LIB_NAMESPACE
 
 		if (createDebugUtilsMessengerEXT(m_pInstance->getVk(), pCreateInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)
 		{
-			throw std::runtime_error("Failed to set up debug messenger");
+			throw std::runtime_error("Failed to set up debug messenger.");
 		}
 	}
 

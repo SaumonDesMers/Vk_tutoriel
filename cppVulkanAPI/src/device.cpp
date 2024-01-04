@@ -9,7 +9,7 @@ namespace LIB_NAMESPACE
 	{
 		if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &m_device) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create logical device!");
+			throw std::runtime_error("failed to create logical device.");
 		}
 	}
 

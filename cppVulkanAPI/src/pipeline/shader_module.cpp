@@ -10,7 +10,7 @@ namespace LIB_NAMESPACE
 	{
 		if (vkCreateShaderModule(m_device, &createInfo, nullptr, &m_shaderModule) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create shader module!");
+			throw std::runtime_error("failed to create shader module.");
 		}
 	}
 
@@ -25,7 +25,7 @@ namespace LIB_NAMESPACE
 
 		if (vkCreateShaderModule(m_device, &createInfo, nullptr, &m_shaderModule) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create shader module!");
+			throw std::runtime_error("failed to create shader module.");
 		}
 	}
 

@@ -13,3 +13,4 @@
 #include "../src/pipeline/graphic_pipeline.hpp"
 #include "../src/pipeline/shader_module.hpp"
 #include "../src/pipeline/pipeline_layout.hpp"
+#include "../src/pipeline/render_pass.hpp"

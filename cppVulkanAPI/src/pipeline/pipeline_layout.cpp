@@ -9,7 +9,7 @@ namespace LIB_NAMESPACE
 	{
 		if (vkCreatePipelineLayout(m_device, &createInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create pipeline layout!");
+			throw std::runtime_error("failed to create pipeline layout.");
 		}
 	}
 

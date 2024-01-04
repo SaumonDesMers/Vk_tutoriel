@@ -13,7 +13,7 @@ namespace LIB_NAMESPACE
 		VkResult result = vkCreateInstance(&createInfo, nullptr, &m_instance);
 		if (result != VK_SUCCESS)
 		{
-			throw std::runtime_error("Failed to create instance");
+			throw std::runtime_error("Failed to create instance.");
 		}
 	}
 
