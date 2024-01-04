@@ -35,6 +35,7 @@ target_sources(${PROJECT_NAME}
 		src/pipeline/shader_module.cpp
 		src/pipeline/pipeline_layout.cpp
 		src/pipeline/render_pass.cpp
+		src/frame_buffer.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)

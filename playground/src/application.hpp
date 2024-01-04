@@ -63,6 +63,7 @@ private:
 	std::unique_ptr<ft::RenderPass> m_renderPass;
 	std::unique_ptr<ft::PipelineLayout> m_pipelineLayout;
 	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
+	std::vector<std::unique_ptr<ft::Framebuffer>> m_swapchainFramebuffers;
 
 
 	void init();
@@ -78,6 +79,7 @@ private:
 	void createImageViews();
 	void createRenderPass();
 	void createGraphicsPipeline();
+	void createFramebuffers();
 
 	std::vector<const char*> getRequiredExtensions();
 	void populateDebugMessengerCreateInfo(ft::DebugMessenger::CreateInfo& createInfo);

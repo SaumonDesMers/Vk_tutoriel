@@ -393,6 +393,26 @@ void Application::createGraphicsPipeline()
 	m_graphicPipeline = std::make_unique<ft::Pipeline>(m_device->getVk(), pipelineInfo);
 }	
 
+void Application::createFramebuffers()
+{
+	m_swapchainFramebuffers.resize(m_swapchainImageViews.size());
+
+	for (size_t i = 0; i < m_swapchainImageViews.size(); i++) {
+		VkImageView attachments[] = {
+			m_swapchainImageViews[i]->getVk()
+		};
+
+		ft::Framebuffer::CreateInfo framebufferInfo{};
+		framebufferInfo.renderPass = m_renderPass->getVk();
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = m_swapchain->getExtent().width;
+		framebufferInfo.height = m_swapchain->getExtent().height;
+		framebufferInfo.layers = 1;
+
+		m_swapchainFramebuffers[i] = std::make_unique<ft::Framebuffer>(m_device->getVk(), framebufferInfo);
+	}
+}
 
 std::vector<const char*> Application::getRequiredExtensions() {
     std::vector<const char*> extensions = m_windowManager->getRequiredInstanceExtensions();
