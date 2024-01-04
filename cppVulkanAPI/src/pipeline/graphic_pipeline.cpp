@@ -4,7 +4,7 @@
 
 namespace LIB_NAMESPACE
 {
-	GraphicPipeline::GraphicPipeline(VkDevice device, const CreateInfo& createInfo)
+	Pipeline::Pipeline(VkDevice device, const CreateInfo& createInfo)
 		: m_device(device)
 	{
 		if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &createInfo, nullptr, &m_pipeline) != VK_SUCCESS)
@@ -13,7 +13,7 @@ namespace LIB_NAMESPACE
 		}
 	}
 
-	GraphicPipeline::~GraphicPipeline()
+	Pipeline::~Pipeline()
 	{
 		vkDestroyPipeline(m_device, m_pipeline, nullptr);
 	}

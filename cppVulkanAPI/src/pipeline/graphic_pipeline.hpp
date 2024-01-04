@@ -6,7 +6,7 @@
 
 namespace LIB_NAMESPACE
 {
-	class GraphicPipeline
+	class Pipeline
 	{
 	
 	public:
@@ -19,8 +19,8 @@ namespace LIB_NAMESPACE
 			}
 		};
 
-		GraphicPipeline(VkDevice device, const CreateInfo& createInfo);
-		~GraphicPipeline();
+		Pipeline(VkDevice device, const CreateInfo& createInfo);
+		~Pipeline();
 
 		VkPipeline getVk() const { return m_pipeline; }
 
