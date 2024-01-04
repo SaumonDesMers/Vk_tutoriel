@@ -14,7 +14,7 @@ namespace LIB_NAMESPACE
 		{
 			CreateInfo(): VkFramebufferCreateInfo()
 			{
-				this->sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+				this->sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			}
 		};
 

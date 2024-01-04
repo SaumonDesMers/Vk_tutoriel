@@ -8,7 +8,7 @@ namespace LIB_NAMESPACE
 		: m_device(device)
 	{
 		if (vkCreateFramebuffer(device, &createInfo, nullptr, &m_framebuffer) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create framebuffer!");
+			throw std::runtime_error("failed to create framebuffer.");
 		}
 	}
 

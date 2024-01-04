@@ -38,6 +38,8 @@ void Application::init()
 	createImageViews();
 	createRenderPass();
 	createGraphicsPipeline();
+	createFramebuffers();
+	createCommandPool();
 
 	FT_INFO("Application initialized");
 }
@@ -413,6 +415,18 @@ void Application::createFramebuffers()
 		m_swapchainFramebuffers[i] = std::make_unique<ft::Framebuffer>(m_device->getVk(), framebufferInfo);
 	}
 }
+
+void Application::createCommandPool()
+{
+	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(m_physicalDevice->getVk());
+
+	ft::CommandPool::CreateInfo poolInfo{};
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+
+	m_commandPool = std::make_unique<ft::CommandPool>(m_device->getVk(), poolInfo);
+}
+
 
 std::vector<const char*> Application::getRequiredExtensions() {
     std::vector<const char*> extensions = m_windowManager->getRequiredInstanceExtensions();
