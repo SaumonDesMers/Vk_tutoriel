@@ -66,6 +66,9 @@ private:
 	std::vector<std::unique_ptr<ft::Framebuffer>> m_swapchainFramebuffers;
 	std::unique_ptr<ft::CommandPool> m_commandPool;
 	std::unique_ptr<ft::CommandBuffer> m_commandBuffer;
+	std::unique_ptr<ft::Semaphore> m_imageAvailableSemaphore;
+	std::unique_ptr<ft::Semaphore> m_renderFinishedSemaphore;
+	std::unique_ptr<ft::Fence> m_inFlightFence;
 
 
 	void init();
@@ -84,6 +87,7 @@ private:
 	void createFramebuffers();
 	void createCommandPool();
 	void createCommandBuffer();
+	void createSyncObjects();
 
 	std::vector<const char*> getRequiredExtensions();
 	void populateDebugMessengerCreateInfo(ft::DebugMessenger::CreateInfo& createInfo);

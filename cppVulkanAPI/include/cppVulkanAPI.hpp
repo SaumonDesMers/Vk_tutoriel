@@ -17,3 +17,4 @@
 #include "../src/frame_buffer.hpp"
 #include "../src/command_pool.hpp"
 #include "../src/command_buffer.hpp"
+#include "../src/sync_object.hpp"

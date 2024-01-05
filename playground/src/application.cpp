@@ -41,6 +41,7 @@ void Application::init()
 	createFramebuffers();
 	createCommandPool();
 	createCommandBuffer();
+	createSyncObjects();
 
 	FT_INFO("Application initialized");
 }
@@ -436,6 +437,17 @@ void Application::createCommandBuffer()
 	allocInfo.commandBufferCount = 1;
 
 	m_commandBuffer = std::make_unique<ft::CommandBuffer>(m_device->getVk(), allocInfo);
+}
+
+void Application::createSyncObjects()
+{
+	ft::Semaphore::CreateInfo semaphoreInfo{};
+	m_imageAvailableSemaphore = std::make_unique<ft::Semaphore>(m_device->getVk(), semaphoreInfo);
+	m_renderFinishedSemaphore = std::make_unique<ft::Semaphore>(m_device->getVk(), semaphoreInfo);
+
+	ft::Fence::CreateInfo fenceInfo{};
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+	m_inFlightFence = std::make_unique<ft::Fence>(m_device->getVk(), fenceInfo);
 }
 
 

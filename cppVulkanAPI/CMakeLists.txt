@@ -38,6 +38,7 @@ target_sources(${PROJECT_NAME}
 		src/frame_buffer.cpp
 		src/command_pool.cpp
 		src/command_buffer.cpp
+		src/sync_object.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)
