@@ -16,3 +16,4 @@
 #include "../src/pipeline/render_pass.hpp"
 #include "../src/frame_buffer.hpp"
 #include "../src/command_pool.hpp"
+#include "../src/command_buffer.hpp"

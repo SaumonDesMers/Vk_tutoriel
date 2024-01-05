@@ -37,6 +37,7 @@ target_sources(${PROJECT_NAME}
 		src/pipeline/render_pass.cpp
 		src/frame_buffer.cpp
 		src/command_pool.cpp
+		src/command_buffer.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)

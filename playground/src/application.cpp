@@ -40,6 +40,7 @@ void Application::init()
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
+	createCommandBuffer();
 
 	FT_INFO("Application initialized");
 }
@@ -427,6 +428,16 @@ void Application::createCommandPool()
 	m_commandPool = std::make_unique<ft::CommandPool>(m_device->getVk(), poolInfo);
 }
 
+void Application::createCommandBuffer()
+{
+	ft::CommandBuffer::AllocateInfo allocInfo{};
+	allocInfo.commandPool = m_commandPool->getVk();
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = 1;
+
+	m_commandBuffer = std::make_unique<ft::CommandBuffer>(m_device->getVk(), allocInfo);
+}
+
 
 std::vector<const char*> Application::getRequiredExtensions() {
     std::vector<const char*> extensions = m_windowManager->getRequiredInstanceExtensions();
@@ -581,4 +592,33 @@ VkExtent2D Application::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabil
 
 		return actualExtent;
 	}
+}
+
+
+void Application::recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& commandBuffer, uint32_t imageIndex)
+{
+	ft::CommandBuffer::BeginInfo beginInfo = {};
+
+	commandBuffer->begin(beginInfo);
+
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = m_renderPass->getVk();
+	renderPassInfo.framebuffer = m_swapchainFramebuffers[0]->getVk();
+	renderPassInfo.renderArea.offset = {0, 0};
+	renderPassInfo.renderArea.extent = m_swapchain->getExtent();
+
+	VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	vkCmdBeginRenderPass(m_commandBuffer->getVk(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	vkCmdBindPipeline(m_commandBuffer->getVk(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicPipeline->getVk());
+
+	vkCmdDraw(m_commandBuffer->getVk(), 3, 1, 0, 0);
+
+	vkCmdEndRenderPass(m_commandBuffer->getVk());
+
+	commandBuffer->end();
 }
