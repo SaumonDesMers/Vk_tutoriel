@@ -32,6 +32,8 @@ namespace LIB_NAMESPACE
 		VkFormat getImageFormat() const { return m_imageFormat; }
 		VkExtent2D getExtent() const { return m_extent; }
 
+		VkResult acquireNextImage(uint64_t timeout, VkSemaphore semaphore, VkFence fence, uint32_t* imageIndex);
+
 	private:
 
 		VkSwapchainKHR m_swapchain;

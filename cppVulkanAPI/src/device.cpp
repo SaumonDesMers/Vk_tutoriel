@@ -17,4 +17,9 @@ namespace LIB_NAMESPACE
 	{
 		vkDestroyDevice(m_device, nullptr);
 	}
+
+	VkResult Device::waitIdle()
+	{
+		return vkDeviceWaitIdle(m_device);
+	}
 }

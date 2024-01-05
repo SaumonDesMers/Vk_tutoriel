@@ -24,6 +24,12 @@ namespace LIB_NAMESPACE
 
 		VkQueue getVk() const { return m_queue; }
 
+		VkResult submit(
+			uint32_t submitCount,
+			const VkSubmitInfo* submits,
+			VkFence fence = VK_NULL_HANDLE
+		);
+
 	private:
 
 		VkQueue m_queue;

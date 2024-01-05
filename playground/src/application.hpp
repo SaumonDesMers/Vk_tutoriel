@@ -101,4 +101,5 @@ private:
 
 
 	void recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& commandBuffer, uint32_t imageIndex);
+	void drawFrame();
 };

@@ -24,6 +24,8 @@ namespace LIB_NAMESPACE
 
 		VkDevice getVk() const { return m_device; }
 
+		VkResult waitIdle();
+
 	private:
 
 		VkDevice m_device;

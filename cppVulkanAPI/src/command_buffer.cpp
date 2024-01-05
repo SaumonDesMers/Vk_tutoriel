@@ -30,4 +30,9 @@ namespace LIB_NAMESPACE
 			throw std::runtime_error("failed to record command buffer.");
 		}
 	}
+
+	VkResult CommandBuffer::reset(VkCommandBufferResetFlags flags)
+	{
+		return vkResetCommandBuffer(m_commandBuffer, flags);
+	}
 }

@@ -31,4 +31,14 @@ namespace LIB_NAMESPACE
 	{
 		vkDestroyFence(m_device, m_fence, nullptr);
 	}
+
+	void Fence::wait(uint64_t timeout)
+	{
+		vkWaitForFences(m_device, 1, &m_fence, VK_TRUE, timeout);
+	}
+
+	void Fence::reset()
+	{
+		vkResetFences(m_device, 1, &m_fence);
+	}
 }

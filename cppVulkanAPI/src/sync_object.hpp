@@ -52,6 +52,9 @@ namespace LIB_NAMESPACE
 
 		VkFence getVk() const { return m_fence; }
 
+		void wait(uint64_t timeout = UINT64_MAX);
+		void reset();
+
 	private:
 
 		VkFence m_fence;

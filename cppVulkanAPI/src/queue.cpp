@@ -10,4 +10,9 @@ namespace LIB_NAMESPACE
 	Queue::~Queue()
 	{
 	}
+
+	VkResult Queue::submit(uint32_t submitCount, const VkSubmitInfo* submits, VkFence fence)
+	{
+		return vkQueueSubmit(m_queue, submitCount, submits, fence);
+	}
 }

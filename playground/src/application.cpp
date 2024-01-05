@@ -22,7 +22,10 @@ void Application::run()
 	while (m_window->shouldClose() == false)
 	{
 		m_windowManager->pollEvents();
+		drawFrame();
 	}
+
+	m_device->waitIdle();
 }
 
 void Application::init()
@@ -287,11 +290,21 @@ void Application::createRenderPass()
 	subpass.colorAttachmentCount = 1;
 	subpass.pColorAttachments = &colorAttachmentRef;
 
+	VkSubpassDependency dependency{};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = 0;
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
 	ft::RenderPass::CreateInfo renderPassInfo = {};
 	renderPassInfo.attachmentCount = 1;
 	renderPassInfo.pAttachments = &colorAttachment;
 	renderPassInfo.subpassCount = 1;
 	renderPassInfo.pSubpasses = &subpass;
+	renderPassInfo.dependencyCount = 1;
+	renderPassInfo.pDependencies = &dependency;
 
 	m_renderPass = std::make_unique<ft::RenderPass>(m_device->getVk(), renderPassInfo);
 }
@@ -628,9 +641,68 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& 
 
 	vkCmdBindPipeline(m_commandBuffer->getVk(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicPipeline->getVk());
 
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = static_cast<float>(m_swapchain->getExtent().width);
+	viewport.height = static_cast<float>(m_swapchain->getExtent().height);
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(m_commandBuffer->getVk(), 0, 1, &viewport);
+
+	VkRect2D scissor{};
+	scissor.offset = {0, 0};
+	scissor.extent = m_swapchain->getExtent();
+	vkCmdSetScissor(m_commandBuffer->getVk(), 0, 1, &scissor);
+
 	vkCmdDraw(m_commandBuffer->getVk(), 3, 1, 0, 0);
 
 	vkCmdEndRenderPass(m_commandBuffer->getVk());
 
 	commandBuffer->end();
 }
+
+void Application::drawFrame()
+{
+	m_inFlightFence->wait();
+	m_inFlightFence->reset();
+
+	uint32_t imageIndex;
+	VkResult result = m_swapchain->acquireNextImage(UINT64_MAX, m_imageAvailableSemaphore->getVk(), VK_NULL_HANDLE, &imageIndex);
+
+	m_commandBuffer->reset();
+	recordCommandBuffer(m_commandBuffer, imageIndex);
+
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	VkSemaphore waitSemaphores[] = {m_imageAvailableSemaphore->getVk()};
+	VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = waitSemaphores;
+	submitInfo.pWaitDstStageMask = waitStages;
+
+	VkCommandBuffer commandBuffers[] = {m_commandBuffer->getVk()};
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = commandBuffers;
+
+	VkSemaphore signalSemaphores[] = {m_renderFinishedSemaphore->getVk()};
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	m_graphicsQueue->submit(1, &submitInfo, m_inFlightFence->getVk());
+
+	VkPresentInfoKHR presentInfo{};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = signalSemaphores;
+
+	VkSwapchainKHR swapChains[] = {m_swapchain->getVk()};
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+	presentInfo.pImageIndices = &imageIndex;
+
+	vkQueuePresentKHR(m_presentQueue->getVk(), &presentInfo);
+}
+	

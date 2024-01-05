@@ -33,6 +33,7 @@ namespace LIB_NAMESPACE
 
 		void begin(const BeginInfo& beginInfo);
 		void end();
+		VkResult reset(VkCommandBufferResetFlags flags = 0);
 	
 	private:
 	

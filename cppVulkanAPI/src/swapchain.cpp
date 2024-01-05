@@ -26,4 +26,9 @@ namespace LIB_NAMESPACE
 		vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
 	}
 
+	VkResult Swapchain::acquireNextImage(uint64_t timeout, VkSemaphore semaphore, VkFence fence, uint32_t* imageIndex)
+	{
+		return vkAcquireNextImageKHR(m_device, m_swapchain, timeout, semaphore, fence, imageIndex);
+	}
+
 }
