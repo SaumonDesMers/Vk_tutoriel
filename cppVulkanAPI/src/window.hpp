@@ -43,6 +43,9 @@ namespace LIB_NAMESPACE
 
 		GLFWwindow* getGLFWwindow() const { return m_window; }
 
+		bool isResized() const { return m_framebufferResized; }
+		void resetResize() { m_framebufferResized = false; }
+
 		bool shouldClose() const
 		{
 			return glfwWindowShouldClose(m_window);
@@ -53,6 +56,8 @@ namespace LIB_NAMESPACE
 			glfwGetFramebufferSize(m_window, width, height);
 		}
 
+		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+
 	private:
 
 		GLFWwindow* m_window;
@@ -60,6 +65,8 @@ namespace LIB_NAMESPACE
 		std::string m_title;
 		int m_width;
 		int m_height;
+
+		bool m_framebufferResized;
 	};
 
 }

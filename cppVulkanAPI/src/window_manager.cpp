@@ -23,6 +23,11 @@ namespace LIB_NAMESPACE
 		glfwPollEvents();
 	}
 
+	void WindowManager::waitEvents()
+	{
+		glfwWaitEvents();
+	}
+
 	std::vector<const char *> WindowManager::getRequiredInstanceExtensions()
 	{
 		uint32_t glfwExtensionCount = 0;

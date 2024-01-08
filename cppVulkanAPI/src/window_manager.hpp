@@ -22,6 +22,7 @@ namespace LIB_NAMESPACE
 		std::unique_ptr<Window> createWindow(const WindowCreateInfo& createInfo);
 
 		void pollEvents();
+		void waitEvents();
 
 		std::vector<const char *> getRequiredInstanceExtensions();
 		

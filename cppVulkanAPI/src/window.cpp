@@ -10,7 +10,7 @@ namespace LIB_NAMESPACE
 		m_height(createInfo.height)
 	{
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		// glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
 
@@ -18,12 +18,22 @@ namespace LIB_NAMESPACE
 		{
 			throw std::runtime_error("failed to create window.");
 		}
+
+		glfwSetWindowUserPointer(m_window, this);
+		glfwSetFramebufferSizeCallback(m_window, framebufferResizeCallback);
 	}
 
 	Window::~Window()
 	{
 		glfwDestroyWindow(m_window);
 	}
+
+	void Window::framebufferResizeCallback(GLFWwindow* window, int, int)
+	{
+		auto userPtr = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+    	userPtr->m_framebufferResized = true;
+	}
+
 
 	Window::Surface::Surface(VkInstance instance, GLFWwindow* window)
 		: m_instance(instance)

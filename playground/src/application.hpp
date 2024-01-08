@@ -12,6 +12,8 @@
     const bool enableValidationLayers = true;
 #endif
 
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
 	std::optional<uint32_t> presentFamily;
@@ -65,10 +67,13 @@ private:
 	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
 	std::vector<std::unique_ptr<ft::Framebuffer>> m_swapchainFramebuffers;
 	std::unique_ptr<ft::CommandPool> m_commandPool;
-	std::unique_ptr<ft::CommandBuffer> m_commandBuffer;
-	std::unique_ptr<ft::Semaphore> m_imageAvailableSemaphore;
-	std::unique_ptr<ft::Semaphore> m_renderFinishedSemaphore;
-	std::unique_ptr<ft::Fence> m_inFlightFence;
+	std::vector<std::unique_ptr<ft::CommandBuffer>> m_commandBuffers;
+	std::vector<std::unique_ptr<ft::Semaphore>> m_imageAvailableSemaphores;
+	std::vector<std::unique_ptr<ft::Semaphore>> m_renderFinishedSemaphores;
+	std::vector<std::unique_ptr<ft::Fence>> m_inFlightFences;
+	bool m_framebufferResized = false;
+	
+	uint32_t m_currentFrame = 0;
 
 
 	void init();
@@ -81,6 +86,7 @@ private:
 	void pickPhysicalDevice();
 	void createLogicalDevice();
 	void createSwapChain();
+	void recreateSwapChain();
 	void createImageViews();
 	void createRenderPass();
 	void createGraphicsPipeline();
