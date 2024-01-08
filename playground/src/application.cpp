@@ -629,7 +629,7 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& 
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.renderPass = m_renderPass->getVk();
-	renderPassInfo.framebuffer = m_swapchainFramebuffers[0]->getVk();
+	renderPassInfo.framebuffer = m_swapchainFramebuffers[imageIndex]->getVk();
 	renderPassInfo.renderArea.offset = {0, 0};
 	renderPassInfo.renderArea.extent = m_swapchain->getExtent();
 
