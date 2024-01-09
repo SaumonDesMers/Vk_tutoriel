@@ -18,3 +18,4 @@
 #include "../src/command_pool.hpp"
 #include "../src/command_buffer.hpp"
 #include "../src/sync_object.hpp"
+#include "../src/buffer.hpp"

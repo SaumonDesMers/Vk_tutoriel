@@ -44,6 +44,7 @@ void Application::init()
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
+	createVertexBuffer();
 	createCommandBuffer();
 	createSyncObjects();
 
@@ -467,6 +468,23 @@ void Application::createCommandPool()
 	m_commandPool = std::make_unique<ft::CommandPool>(m_device->getVk(), poolInfo);
 }
 
+void Application::createVertexBuffer()
+{
+	ft::Buffer::CreateInfo bufferInfo = {};
+	bufferInfo.size = sizeof(vertices[0]) * vertices.size();
+	bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	m_vertexBuffer = std::make_unique<ft::Buffer>(
+		m_device->getVk(),
+		m_physicalDevice->getVk(),
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		bufferInfo
+	);
+
+	m_vertexBuffer->write((void*)vertices.data(), bufferInfo.size);
+}
+
 void Application::createCommandBuffer()
 {
 	m_commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
@@ -694,7 +712,11 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& 
 	scissor.extent = m_swapchain->getExtent();
 	vkCmdSetScissor(commandBuffer->getVk(), 0, 1, &scissor);
 
-	vkCmdDraw(commandBuffer->getVk(), 3, 1, 0, 0);
+	VkBuffer vertexBuffers[] = {m_vertexBuffer->getVk()};
+	VkDeviceSize offsets[] = {0};
+	vkCmdBindVertexBuffers(commandBuffer->getVk(), 0, 1, vertexBuffers, offsets);
+
+	vkCmdDraw(commandBuffer->getVk(), static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer->getVk());
 
