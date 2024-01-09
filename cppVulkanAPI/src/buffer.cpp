@@ -16,12 +16,46 @@ namespace LIB_NAMESPACE
 	{
 		createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
-		if (vkCreateBuffer(device, &createInfo, nullptr, &m_buffer) != VK_SUCCESS) {
+		init(createInfo, physicalDevice, properties);
+	}
+
+	Buffer::Buffer(
+		VkDevice device,
+		VkPhysicalDevice physicalDevice,
+		VkDeviceSize size,
+		VkBufferUsageFlags usage,
+		VkMemoryPropertyFlags properties
+	)
+		:m_device(device),
+		m_mappedData(nullptr)
+	{
+		VkBufferCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		createInfo.size = size;
+		createInfo.usage = usage;
+		createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		init(createInfo, physicalDevice, properties);
+	}
+
+	Buffer::~Buffer()
+	{
+		vkDestroyBuffer(m_device, m_buffer, nullptr);
+		vkFreeMemory(m_device, m_bufferMemory, nullptr);
+	}
+
+	void Buffer::init(
+		const VkBufferCreateInfo& createInfo,
+		VkPhysicalDevice physicalDevice,
+		const VkMemoryPropertyFlags& properties
+	)
+	{
+		if (vkCreateBuffer(m_device, &createInfo, nullptr, &m_buffer) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create vertex buffer!");
 		}
 
 		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(device, m_buffer, &memRequirements);
+		vkGetBufferMemoryRequirements(m_device, m_buffer, &memRequirements);
 
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -32,17 +66,11 @@ namespace LIB_NAMESPACE
 			properties
 		);
 
-		if (vkAllocateMemory(device, &allocInfo, nullptr, &m_bufferMemory) != VK_SUCCESS) {
+		if (vkAllocateMemory(m_device, &allocInfo, nullptr, &m_bufferMemory) != VK_SUCCESS) {
 			throw std::runtime_error("failed to allocate vertex buffer memory!");
 		}
 
-		vkBindBufferMemory(device, m_buffer, m_bufferMemory, 0);
-	}
-
-	Buffer::~Buffer()
-	{
-		vkDestroyBuffer(m_device, m_buffer, nullptr);
-		vkFreeMemory(m_device, m_bufferMemory, nullptr);
+		vkBindBufferMemory(m_device, m_buffer, m_bufferMemory, 0);
 	}
 
 	uint32_t Buffer::findMemoryType(

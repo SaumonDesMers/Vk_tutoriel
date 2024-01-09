@@ -25,6 +25,13 @@ namespace LIB_NAMESPACE
 			VkMemoryPropertyFlags properties,
 			VkBufferCreateInfo& createInfo
 		);
+		Buffer(
+			VkDevice device,
+			VkPhysicalDevice physicalDevice,
+			VkDeviceSize size,
+			VkBufferUsageFlags usage,
+			VkMemoryPropertyFlags properties
+		);
 		~Buffer();
 
 		VkBuffer getVk() { return m_buffer; }
@@ -39,6 +46,12 @@ namespace LIB_NAMESPACE
 		VkDevice m_device;
 
 		void *m_mappedData;
+
+		void init(
+			const VkBufferCreateInfo& createInfo,
+			VkPhysicalDevice physicalDevice,
+			const VkMemoryPropertyFlags& properties
+		);
 
 		uint32_t findMemoryType(
 			VkPhysicalDevice physicalDevice,
