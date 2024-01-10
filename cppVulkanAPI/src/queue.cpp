@@ -15,4 +15,10 @@ namespace LIB_NAMESPACE
 	{
 		return vkQueueSubmit(m_queue, submitCount, submits, fence);
 	}
+
+	VkResult Queue::waitIdle()
+	{
+		return vkQueueWaitIdle(m_queue);
+	}
+
 }

@@ -4,7 +4,7 @@
 
 namespace LIB_NAMESPACE
 {
-	CommandBuffer::CommandBuffer(VkDevice device, const AllocateInfo& allocateInfo)
+	CommandBuffer::CommandBuffer(VkDevice device, const VkCommandBufferAllocateInfo& allocateInfo)
 		: m_device(device), m_commandPool(allocateInfo.commandPool)
 	{
 		if (vkAllocateCommandBuffers(device, &allocateInfo, &m_commandBuffer) != VK_SUCCESS) {
@@ -17,7 +17,7 @@ namespace LIB_NAMESPACE
 		vkFreeCommandBuffers(m_device, m_commandPool, 1, &m_commandBuffer);
 	}
 
-	void CommandBuffer::begin(const BeginInfo& beginInfo)
+	void CommandBuffer::begin(const VkCommandBufferBeginInfo& beginInfo)
 	{
 		if (vkBeginCommandBuffer(m_commandBuffer, &beginInfo) != VK_SUCCESS) {
 			throw std::runtime_error("failed to begin recording command buffer.");

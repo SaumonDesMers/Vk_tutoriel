@@ -12,7 +12,8 @@ namespace LIB_NAMESPACE
 		VkBufferCreateInfo& createInfo
 	)
 		:m_device(device),
-		m_mappedData(nullptr)
+		m_mappedData(nullptr),
+		m_writedDataSize(0)
 	{
 		createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
@@ -27,7 +28,8 @@ namespace LIB_NAMESPACE
 		VkMemoryPropertyFlags properties
 	)
 		:m_device(device),
-		m_mappedData(nullptr)
+		m_mappedData(nullptr),
+		m_writedDataSize(0)
 	{
 		VkBufferCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -112,4 +114,5 @@ namespace LIB_NAMESPACE
 		memcpy(m_mappedData, data, size);
 		unmap();
 	}
+	
 }

@@ -47,6 +47,8 @@ namespace LIB_NAMESPACE
 
 		void *m_mappedData;
 
+		VkDeviceSize m_writedDataSize;
+
 		void init(
 			const VkBufferCreateInfo& createInfo,
 			VkPhysicalDevice physicalDevice,

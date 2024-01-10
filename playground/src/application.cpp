@@ -233,8 +233,6 @@ void Application::createSwapChain()
 	else
 	{
 		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		createInfo.queueFamilyIndexCount = 0; // Optional
-		createInfo.pQueueFamilyIndices = nullptr; // Optional
 	}
 
 	createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
@@ -470,19 +468,27 @@ void Application::createCommandPool()
 
 void Application::createVertexBuffer()
 {
-	ft::Buffer::CreateInfo bufferInfo = {};
-	bufferInfo.size = sizeof(vertices[0]) * vertices.size();
-	bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	VkDeviceSize dataSize = sizeof(vertices[0]) * vertices.size();
+
+	ft::Buffer stagingBuffer(
+		m_device->getVk(),
+		m_physicalDevice->getVk(),
+		dataSize,
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
+
+	stagingBuffer.write((void*)vertices.data(), dataSize);
 
 	m_vertexBuffer = std::make_unique<ft::Buffer>(
 		m_device->getVk(),
 		m_physicalDevice->getVk(),
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		bufferInfo
+		dataSize,
+		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
 
-	m_vertexBuffer->write((void*)vertices.data(), bufferInfo.size);
+	copyBuffer(stagingBuffer.getVk(), m_vertexBuffer->getVk(), dataSize);
 }
 
 void Application::createCommandBuffer()
@@ -674,6 +680,38 @@ VkExtent2D Application::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabil
 
 		return actualExtent;
 	}
+}
+
+void Application::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+{
+	VkCommandBufferAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandPool = m_commandPool->getVk();
+	allocInfo.commandBufferCount = 1;
+
+	ft::CommandBuffer commandBuffer(m_device->getVk(), allocInfo);
+
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+	commandBuffer.begin(beginInfo);
+
+	VkBufferCopy copyRegion{};
+	copyRegion.size = size;
+	vkCmdCopyBuffer(commandBuffer.getVk(), srcBuffer, dstBuffer, 1, &copyRegion);
+
+	commandBuffer.end();
+
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.commandBufferCount = 1;
+	VkCommandBuffer cmdBuf = commandBuffer.getVk();
+	submitInfo.pCommandBuffers = &cmdBuf;
+
+	m_graphicsQueue->submit(1, &submitInfo);
+	m_graphicsQueue->waitIdle();
 }
 
 

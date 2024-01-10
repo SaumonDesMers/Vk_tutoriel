@@ -30,6 +30,8 @@ namespace LIB_NAMESPACE
 			VkFence fence = VK_NULL_HANDLE
 		);
 
+		VkResult waitIdle();
+
 	private:
 
 		VkQueue m_queue;

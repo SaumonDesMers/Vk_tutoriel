@@ -26,12 +26,12 @@ namespace LIB_NAMESPACE
 			}
 		};
 
-		CommandBuffer(VkDevice device, const AllocateInfo& allocateInfo);
+		CommandBuffer(VkDevice device, const VkCommandBufferAllocateInfo& allocateInfo);
 		~CommandBuffer();
 
 		VkCommandBuffer getVk() const { return m_commandBuffer; }
 
-		void begin(const BeginInfo& beginInfo);
+		void begin(const VkCommandBufferBeginInfo& beginInfo);
 		void end();
 		VkResult reset(VkCommandBufferResetFlags flags = 0);
 	
