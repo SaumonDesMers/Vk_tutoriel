@@ -72,6 +72,7 @@ private:
 	std::vector<std::unique_ptr<ft::Semaphore>> m_renderFinishedSemaphores;
 	std::vector<std::unique_ptr<ft::Fence>> m_inFlightFences;
 	std::unique_ptr<ft::Buffer> m_vertexBuffer;
+	std::unique_ptr<ft::Buffer> m_indexBuffer;
 	bool m_framebufferResized = false;
 	
 	uint32_t m_currentFrame = 0;
@@ -94,6 +95,7 @@ private:
 	void createFramebuffers();
 	void createCommandPool();
 	void createVertexBuffer();
+	void createIndexBuffer();
 	void createCommandBuffer();
 	void createSyncObjects();
 

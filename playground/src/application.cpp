@@ -45,6 +45,7 @@ void Application::init()
 	createFramebuffers();
 	createCommandPool();
 	createVertexBuffer();
+	createIndexBuffer();
 	createCommandBuffer();
 	createSyncObjects();
 
@@ -468,27 +469,52 @@ void Application::createCommandPool()
 
 void Application::createVertexBuffer()
 {
-	VkDeviceSize dataSize = sizeof(vertices[0]) * vertices.size();
+	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
 	ft::Buffer stagingBuffer(
 		m_device->getVk(),
 		m_physicalDevice->getVk(),
-		dataSize,
+		bufferSize,
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
 
-	stagingBuffer.write((void*)vertices.data(), dataSize);
+	stagingBuffer.write((void*)vertices.data(), bufferSize);
 
 	m_vertexBuffer = std::make_unique<ft::Buffer>(
 		m_device->getVk(),
 		m_physicalDevice->getVk(),
-		dataSize,
+		bufferSize,
 		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
 
-	copyBuffer(stagingBuffer.getVk(), m_vertexBuffer->getVk(), dataSize);
+	copyBuffer(stagingBuffer.getVk(), m_vertexBuffer->getVk(), bufferSize);
+}
+
+void Application::createIndexBuffer()
+{
+	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+	ft::Buffer stagingBuffer(
+		m_device->getVk(),
+		m_physicalDevice->getVk(),
+		bufferSize,
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
+
+	stagingBuffer.write((void*)indices.data(), bufferSize);
+
+	m_indexBuffer = std::make_unique<ft::Buffer>(
+		m_device->getVk(),
+		m_physicalDevice->getVk(),
+		bufferSize,
+		VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+	);
+
+	copyBuffer(stagingBuffer.getVk(), m_indexBuffer->getVk(), bufferSize);
 }
 
 void Application::createCommandBuffer()
@@ -754,7 +780,9 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& 
 	VkDeviceSize offsets[] = {0};
 	vkCmdBindVertexBuffers(commandBuffer->getVk(), 0, 1, vertexBuffers, offsets);
 
-	vkCmdDraw(commandBuffer->getVk(), static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+	vkCmdBindIndexBuffer(commandBuffer->getVk(), m_indexBuffer->getVk(), 0, VK_INDEX_TYPE_UINT16);
+
+	vkCmdDrawIndexed(commandBuffer->getVk(), static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer->getVk());
 
