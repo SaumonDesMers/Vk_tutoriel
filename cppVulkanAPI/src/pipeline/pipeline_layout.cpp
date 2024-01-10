@@ -4,7 +4,7 @@
 
 namespace LIB_NAMESPACE
 {
-	PipelineLayout::PipelineLayout(VkDevice device, const CreateInfo& createInfo)
+	PipelineLayout::PipelineLayout(VkDevice device, const VkPipelineLayoutCreateInfo& createInfo)
 		: m_device(device)
 	{
 		if (vkCreatePipelineLayout(m_device, &createInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)

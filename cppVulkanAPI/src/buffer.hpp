@@ -35,7 +35,13 @@ namespace LIB_NAMESPACE
 		~Buffer();
 
 		VkBuffer getVk() { return m_buffer; }
-		
+
+		VkResult map(
+			VkDeviceSize offset = 0,
+			VkDeviceSize size = VK_WHOLE_SIZE
+		);
+		void unmap();
+
 		void write(void *data, uint32_t size);
 	
 	private:
@@ -45,7 +51,8 @@ namespace LIB_NAMESPACE
 
 		VkDevice m_device;
 
-		void *m_mappedData;
+		bool m_isMapped;
+		void *m_mappedMemory;
 
 		VkDeviceSize m_writedDataSize;
 
@@ -61,10 +68,5 @@ namespace LIB_NAMESPACE
 			VkMemoryPropertyFlags properties
 		);
 
-		VkResult map(
-			VkDeviceSize offset = 0,
-			VkDeviceSize size = VK_WHOLE_SIZE
-		);
-		void unmap();		
 	};
 }

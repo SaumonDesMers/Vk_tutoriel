@@ -2,32 +2,40 @@
 
 #include <cppVulkanAPI.hpp>
 
+#include <glm/glm.hpp>
+
 #include <stdexcept>
 #include <memory>
 #include <optional>
 
 #ifdef NDEBUG
-    const bool enableValidationLayers = false;
+	const bool enableValidationLayers = false;
 #else
-    const bool enableValidationLayers = true;
+	const bool enableValidationLayers = true;
 #endif
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
 struct QueueFamilyIndices {
-    std::optional<uint32_t> graphicsFamily;
+	std::optional<uint32_t> graphicsFamily;
 	std::optional<uint32_t> presentFamily;
 
-    bool isComplete() {
-        return graphicsFamily.has_value() && presentFamily.has_value();
-    }
+	bool isComplete() {
+		return graphicsFamily.has_value() && presentFamily.has_value();
+	}
 };
 
 struct SwapChainSupportDetails
 {
-    VkSurfaceCapabilitiesKHR capabilities;
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> presentModes;
+	VkSurfaceCapabilitiesKHR capabilities;
+	std::vector<VkSurfaceFormatKHR> formats;
+	std::vector<VkPresentModeKHR> presentModes;
+};
+
+struct UniformBufferObject {
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::mat4 proj;
 };
 
 class Application
@@ -63,6 +71,7 @@ private:
 	std::unique_ptr<ft::Swapchain> m_swapchain;
 	std::vector<std::unique_ptr<ft::ImageView>> m_swapchainImageViews;
 	std::unique_ptr<ft::RenderPass> m_renderPass;
+	std::unique_ptr<ft::DescriptorSetLayout> m_descriptorSetLayout;
 	std::unique_ptr<ft::PipelineLayout> m_pipelineLayout;
 	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
 	std::vector<std::unique_ptr<ft::Framebuffer>> m_swapchainFramebuffers;
@@ -73,6 +82,7 @@ private:
 	std::vector<std::unique_ptr<ft::Fence>> m_inFlightFences;
 	std::unique_ptr<ft::Buffer> m_vertexBuffer;
 	std::unique_ptr<ft::Buffer> m_indexBuffer;
+	std::vector<std::unique_ptr<ft::Buffer>> m_uniformBuffers;
 	bool m_framebufferResized = false;
 	
 	uint32_t m_currentFrame = 0;
@@ -91,11 +101,13 @@ private:
 	void recreateSwapChain();
 	void createImageViews();
 	void createRenderPass();
+	void createDescriptorSetLayout();
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
 	void createVertexBuffer();
 	void createIndexBuffer();
+	void createUniformBuffers();
 	void createCommandBuffer();
 	void createSyncObjects();
 
@@ -114,4 +126,5 @@ private:
 
 	void recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& commandBuffer, uint32_t imageIndex);
 	void drawFrame();
+	void updateUniformBuffer(uint32_t currentImage);
 };

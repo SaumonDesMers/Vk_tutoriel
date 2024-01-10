@@ -12,7 +12,8 @@ namespace LIB_NAMESPACE
 		VkBufferCreateInfo& createInfo
 	)
 		:m_device(device),
-		m_mappedData(nullptr),
+		m_isMapped(false),
+		m_mappedMemory(nullptr),
 		m_writedDataSize(0)
 	{
 		createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -28,7 +29,8 @@ namespace LIB_NAMESPACE
 		VkMemoryPropertyFlags properties
 	)
 		:m_device(device),
-		m_mappedData(nullptr),
+		m_isMapped(false),
+		m_mappedMemory(nullptr),
 		m_writedDataSize(0)
 	{
 		VkBufferCreateInfo createInfo{};
@@ -95,24 +97,44 @@ namespace LIB_NAMESPACE
 			}
 		}
 
-		throw std::runtime_error("buffer: failed to find suitable memory type.");
+		throw std::runtime_error("failed to find suitable memory type for buffer.");
 	}
 
 	VkResult Buffer::map(VkDeviceSize offset, VkDeviceSize size)
 	{
-		return vkMapMemory(m_device, m_bufferMemory, offset, size, 0, &m_mappedData);
+		VkResult result = vkMapMemory(m_device, m_bufferMemory, offset, size, 0, &m_mappedMemory);
+		if (result == VK_SUCCESS)
+		{
+			m_isMapped = true;
+		}
+		return result;
 	}
 
 	void Buffer::unmap()
 	{
 		vkUnmapMemory(m_device, m_bufferMemory);
+		m_isMapped = false;
 	}
 
 	void Buffer::write(void *data, uint32_t size)
 	{
-		map();
-		memcpy(m_mappedData, data, size);
-		unmap();
+		if (m_isMapped == true)
+		{
+			memcpy(m_mappedMemory, data, size);
+		}
+		else
+		{
+			map();
+			if (m_isMapped == true)
+			{
+				memcpy(m_mappedMemory, data, size);
+			}
+			else
+			{
+				throw std::runtime_error("cannot map to unmaped buffer.");
+			}
+			unmap();
+		}
 	}
 	
 }

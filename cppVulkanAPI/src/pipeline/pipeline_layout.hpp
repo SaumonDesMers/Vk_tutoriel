@@ -19,7 +19,7 @@ namespace LIB_NAMESPACE
 			}
 		};
 
-		PipelineLayout(VkDevice device, const CreateInfo& createInfo);
+		PipelineLayout(VkDevice device, const VkPipelineLayoutCreateInfo& createInfo);
 		~PipelineLayout();
 
 		VkPipelineLayout getVk() const { return m_pipelineLayout; }
