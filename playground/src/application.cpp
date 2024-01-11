@@ -54,6 +54,7 @@ void Application::init()
 	createIndexBuffer();
 	createUniformBuffers();
 	createDescriptorPool();
+	createDescriptorSets();
 	createCommandBuffer();
 	createSyncObjects();
 
@@ -416,7 +417,7 @@ void Application::createGraphicsPipeline()
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizer.lineWidth = 1.0f;
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizer.depthBiasEnable = VK_FALSE;
 
 
@@ -568,15 +569,53 @@ void Application::createDescriptorPool()
 {
 	VkDescriptorPoolSize poolSize{};
 	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	poolSize.descriptorCount = static_cast<uint32_t>(m_swapchainImageViews.size());
+	poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
 	VkDescriptorPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	poolInfo.poolSizeCount = 1;
 	poolInfo.pPoolSizes = &poolSize;
-	poolInfo.maxSets = static_cast<uint32_t>(m_swapchainImageViews.size());
+	poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
 	m_descriptorPool = std::make_unique<ft::DescriptorPool>(m_device->getVk(), poolInfo);
+}
+
+void Application::createDescriptorSets()
+{
+	// TODO: rework all descriptor set stuff so that I can allocate all descriptor sets at once
+	// also don't allow to create descriptor sets without a descriptor pool
+
+	std::vector<VkDescriptorSetLayout> layouts(1, m_descriptorSetLayout->getVk());
+
+	VkDescriptorSetAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool = m_descriptorPool->getVk();
+	allocInfo.descriptorSetCount = 1;
+	allocInfo.pSetLayouts = layouts.data();
+
+	m_descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		m_descriptorSets[i] = std::make_unique<ft::DescriptorSet>(m_device->getVk(), allocInfo);
+
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = m_uniformBuffers[i]->getVk();
+		bufferInfo.offset = 0;
+		bufferInfo.range = sizeof(UniformBufferObject);
+
+		VkWriteDescriptorSet descriptorWrite{};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = m_descriptorSets[i]->getVk();
+		descriptorWrite.dstBinding = 0;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.pBufferInfo = &bufferInfo;
+
+		m_descriptorSets[i]->update(1, &descriptorWrite);
+	}
+
 }
 
 void Application::createCommandBuffer()
@@ -823,6 +862,17 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& 
 	vkCmdBeginRenderPass(commandBuffer->getVk(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	vkCmdBindPipeline(commandBuffer->getVk(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicPipeline->getVk());
+
+	// FT_DEBUG("Image index = " << imageIndex);
+	// FT_DEBUG("Binding descriptor set with address = " << m_descriptorSets[imageIndex]->getVkPtr());
+	vkCmdBindDescriptorSets(
+		commandBuffer->getVk(),
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		m_pipelineLayout->getVk(),
+		0, 1,
+		m_descriptorSets[m_currentFrame]->getVkPtr(),
+		0, nullptr
+	);
 
 	VkViewport viewport{};
 	viewport.x = 0.0f;

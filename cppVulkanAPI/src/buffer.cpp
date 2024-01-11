@@ -54,7 +54,8 @@ namespace LIB_NAMESPACE
 		const VkMemoryPropertyFlags& properties
 	)
 	{
-		if (vkCreateBuffer(m_device, &createInfo, nullptr, &m_buffer) != VK_SUCCESS) {
+		if (vkCreateBuffer(m_device, &createInfo, nullptr, &m_buffer) != VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to create vertex buffer!");
 		}
 
@@ -70,7 +71,8 @@ namespace LIB_NAMESPACE
 			properties
 		);
 
-		if (vkAllocateMemory(m_device, &allocInfo, nullptr, &m_bufferMemory) != VK_SUCCESS) {
+		if (vkAllocateMemory(m_device, &allocInfo, nullptr, &m_bufferMemory) != VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to allocate vertex buffer memory!");
 		}
 

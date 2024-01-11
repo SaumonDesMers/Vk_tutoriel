@@ -16,6 +16,7 @@
 #include "../src/pipeline/render_pass.hpp"
 #include "../src/pipeline/descriptor_layout.hpp"
 #include "../src/pipeline/descriptor_pool.hpp"
+#include "../src/pipeline/descriptor_set.hpp"
 #include "../src/frame_buffer.hpp"
 #include "../src/command_pool.hpp"
 #include "../src/command_buffer.hpp"
