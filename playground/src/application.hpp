@@ -83,6 +83,7 @@ private:
 	std::unique_ptr<ft::Buffer> m_vertexBuffer;
 	std::unique_ptr<ft::Buffer> m_indexBuffer;
 	std::vector<std::unique_ptr<ft::Buffer>> m_uniformBuffers;
+	std::unique_ptr<ft::DescriptorPool> m_descriptorPool;
 	bool m_framebufferResized = false;
 	
 	uint32_t m_currentFrame = 0;
@@ -108,6 +109,7 @@ private:
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();
+	void createDescriptorPool();
 	void createCommandBuffer();
 	void createSyncObjects();
 

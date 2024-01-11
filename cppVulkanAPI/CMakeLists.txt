@@ -36,6 +36,7 @@ target_sources(${PROJECT_NAME}
 		src/pipeline/pipeline_layout.cpp
 		src/pipeline/render_pass.cpp
 		src/pipeline/descriptor_layout.cpp
+		src/pipeline/descriptor_pool.cpp
 		src/frame_buffer.cpp
 		src/command_pool.cpp
 		src/command_buffer.cpp

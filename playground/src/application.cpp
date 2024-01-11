@@ -53,6 +53,7 @@ void Application::init()
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
+	createDescriptorPool();
 	createCommandBuffer();
 	createSyncObjects();
 
@@ -561,6 +562,21 @@ void Application::createUniformBuffers()
 
 		m_uniformBuffers[i]->map();
     }
+}
+
+void Application::createDescriptorPool()
+{
+	VkDescriptorPoolSize poolSize{};
+	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	poolSize.descriptorCount = static_cast<uint32_t>(m_swapchainImageViews.size());
+
+	VkDescriptorPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	poolInfo.poolSizeCount = 1;
+	poolInfo.pPoolSizes = &poolSize;
+	poolInfo.maxSets = static_cast<uint32_t>(m_swapchainImageViews.size());
+
+	m_descriptorPool = std::make_unique<ft::DescriptorPool>(m_device->getVk(), poolInfo);
 }
 
 void Application::createCommandBuffer()
