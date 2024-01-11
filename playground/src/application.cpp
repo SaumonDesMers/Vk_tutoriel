@@ -8,6 +8,9 @@
 
 #include <vulkan/vulkan.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include <set>
 #include <chrono>
 
@@ -50,6 +53,7 @@ void Application::init()
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
+	createTextureImage();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
@@ -495,27 +499,107 @@ void Application::createCommandPool()
 	m_commandPool = std::make_unique<ft::CommandPool>(m_device->getVk(), poolInfo);
 }
 
+void Application::createTextureImage()
+{
+	// int texWidth, texHeight, texChannels;
+	// stbi_uc* pixels = stbi_load("playground/textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	// VkDeviceSize imageSize = texWidth * texHeight * 4;
+
+	// if (pixels == nullptr)
+	// {
+	// 	throw std::runtime_error("failed to load texture: playground/textures/texture.jpg");
+	// }
+
+	// ft::Buffer stagingBuffer(
+	// 	m_device->getVk(),
+	// 	m_physicalDevice->getVk(),
+	// 	imageSize,
+	// 	VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+	// 	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	// );
+
+	// stagingBuffer.write((void*)pixels, imageSize);
+
+	// stbi_image_free(pixels);
+
+
+	// VkImageCreateInfo imageInfo{};
+	// imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	// imageInfo.imageType = VK_IMAGE_TYPE_2D;
+	// imageInfo.extent.width = static_cast<uint32_t>(texWidth);
+	// imageInfo.extent.height = static_cast<uint32_t>(texHeight);
+	// imageInfo.extent.depth = 1;
+	// imageInfo.mipLevels = 1;
+	// imageInfo.arrayLayers = 1;
+	// imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+	// imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+	// imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	// imageInfo.usage = 
+	// 	VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+	// 	VK_IMAGE_USAGE_SAMPLED_BIT;
+	// imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	// imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+
+	// m_textureImage = std::make_unique<ft::Image>(m_device->getVk(), m_physicalDevice->getVk(), imageInfo);
+}
+
 void Application::createVertexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
-	ft::Buffer stagingBuffer(
-		m_device->getVk(),
+
+	VkBufferCreateInfo stagingBufferInfo{};
+	stagingBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	stagingBufferInfo.size = bufferSize;
+	stagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	stagingBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	ft::Buffer stagingBuffer(m_device->getVk(), stagingBufferInfo);
+
+	VkMemoryRequirements memRequirements = stagingBuffer.getMemoryRequirements();
+	
+	VkMemoryAllocateInfo stagingMemoryInfo{};
+	stagingMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	stagingMemoryInfo.allocationSize = memRequirements.size;
+	stagingMemoryInfo.memoryTypeIndex = ft::DeviceMemory::findMemoryType(
 		m_physicalDevice->getVk(),
-		bufferSize,
-		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		memRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
 
-	stagingBuffer.write((void*)vertices.data(), bufferSize);
+	ft::DeviceMemory stagingBufferMemory(m_device->getVk(), stagingMemoryInfo);
 
-	m_vertexBuffer = std::make_unique<ft::Buffer>(
-		m_device->getVk(),
+	vkBindBufferMemory(m_device->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
+
+
+	stagingBufferMemory.map();
+	stagingBufferMemory.write((void*)vertices.data(), bufferSize);
+	stagingBufferMemory.unmap();
+
+
+	VkBufferCreateInfo vertexBufferInfo{};
+	vertexBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	vertexBufferInfo.size = bufferSize;
+	vertexBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	vertexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	m_vertexBuffer = std::make_unique<ft::Buffer>(m_device->getVk(), vertexBufferInfo);
+
+	VkMemoryRequirements vertexMemRequirements = m_vertexBuffer->getMemoryRequirements();
+
+	VkMemoryAllocateInfo vertexMemoryInfo{};
+	vertexMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	vertexMemoryInfo.allocationSize = vertexMemRequirements.size;
+	vertexMemoryInfo.memoryTypeIndex = ft::DeviceMemory::findMemoryType(
 		m_physicalDevice->getVk(),
-		bufferSize,
-		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		vertexMemRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
+
+	m_vertexBufferMemory = std::make_unique<ft::DeviceMemory>(m_device->getVk(), vertexMemoryInfo);
+
+	vkBindBufferMemory(m_device->getVk(), m_vertexBuffer->getVk(), m_vertexBufferMemory->getVk(), 0);
+
 
 	copyBuffer(stagingBuffer.getVk(), m_vertexBuffer->getVk(), bufferSize);
 }
@@ -524,23 +608,58 @@ void Application::createIndexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
-	ft::Buffer stagingBuffer(
-		m_device->getVk(),
+	VkBufferCreateInfo stagingBufferInfo{};
+	stagingBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	stagingBufferInfo.size = bufferSize;
+	stagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	stagingBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	ft::Buffer stagingBuffer(m_device->getVk(), stagingBufferInfo);
+
+	VkMemoryRequirements stagingMemRequirements = stagingBuffer.getMemoryRequirements();
+
+	VkMemoryAllocateInfo stagingMemoryInfo{};
+	stagingMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	stagingMemoryInfo.allocationSize = stagingMemRequirements.size;
+	stagingMemoryInfo.memoryTypeIndex = ft::DeviceMemory::findMemoryType(
 		m_physicalDevice->getVk(),
-		bufferSize,
-		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		stagingMemRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
 
-	stagingBuffer.write((void*)indices.data(), bufferSize);
+	ft::DeviceMemory stagingBufferMemory(m_device->getVk(), stagingMemoryInfo);
 
-	m_indexBuffer = std::make_unique<ft::Buffer>(
-		m_device->getVk(),
+	vkBindBufferMemory(m_device->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
+
+
+	stagingBufferMemory.map();
+	stagingBufferMemory.write((void*)indices.data(), bufferSize);
+	stagingBufferMemory.unmap();
+
+
+	VkBufferCreateInfo indexBufferInfo{};
+	indexBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	indexBufferInfo.size = bufferSize;
+	indexBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+	indexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	m_indexBuffer = std::make_unique<ft::Buffer>(m_device->getVk(), indexBufferInfo);
+
+	VkMemoryRequirements indexMemRequirements = m_indexBuffer->getMemoryRequirements();
+
+	VkMemoryAllocateInfo indexMemoryInfo{};
+	indexMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	indexMemoryInfo.allocationSize = indexMemRequirements.size;
+	indexMemoryInfo.memoryTypeIndex = ft::DeviceMemory::findMemoryType(
 		m_physicalDevice->getVk(),
-		bufferSize,
-		VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		indexMemRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
+
+	m_indexBufferMemory = std::make_unique<ft::DeviceMemory>(m_device->getVk(), indexMemoryInfo);
+
+	vkBindBufferMemory(m_device->getVk(), m_indexBuffer->getVk(), m_indexBufferMemory->getVk(), 0);
+
 
 	copyBuffer(stagingBuffer.getVk(), m_indexBuffer->getVk(), bufferSize);
 }
@@ -550,18 +669,35 @@ void Application::createUniformBuffers()
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
     m_uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+	m_uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
-		m_uniformBuffers[i] = std::make_unique<ft::Buffer>(
-			m_device->getVk(),
+		VkBufferCreateInfo bufferInfo{};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = bufferSize;
+		bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		m_uniformBuffers[i] = std::make_unique<ft::Buffer>(m_device->getVk(), bufferInfo);
+
+		VkMemoryRequirements memRequirements = m_uniformBuffers[i]->getMemoryRequirements();
+
+		VkMemoryAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = ft::DeviceMemory::findMemoryType(
 			m_physicalDevice->getVk(),
-			bufferSize,
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+			memRequirements.memoryTypeBits,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		);
 
-		m_uniformBuffers[i]->map();
+		m_uniformBuffersMemory[i] = std::make_unique<ft::DeviceMemory>(m_device->getVk(), allocInfo);
+
+		vkBindBufferMemory(m_device->getVk(), m_uniformBuffers[i]->getVk(), m_uniformBuffersMemory[i]->getVk(), 0);
+
+
+		m_uniformBuffersMemory[i]->map();
     }
 }
 
@@ -863,8 +999,6 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& 
 
 	vkCmdBindPipeline(commandBuffer->getVk(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicPipeline->getVk());
 
-	// FT_DEBUG("Image index = " << imageIndex);
-	// FT_DEBUG("Binding descriptor set with address = " << m_descriptorSets[imageIndex]->getVkPtr());
 	vkCmdBindDescriptorSets(
 		commandBuffer->getVk(),
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -984,5 +1118,5 @@ void Application::updateUniformBuffer(uint32_t currentImage)
 
 	ubo.proj[1][1] *= -1;
 
-	m_uniformBuffers[currentImage]->write(&ubo, sizeof(ubo));
+	m_uniformBuffersMemory[currentImage]->write(&ubo, sizeof(ubo));
 }

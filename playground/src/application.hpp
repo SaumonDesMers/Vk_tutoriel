@@ -81,8 +81,11 @@ private:
 	std::vector<std::unique_ptr<ft::Semaphore>> m_renderFinishedSemaphores;
 	std::vector<std::unique_ptr<ft::Fence>> m_inFlightFences;
 	std::unique_ptr<ft::Buffer> m_vertexBuffer;
+	std::unique_ptr<ft::DeviceMemory> m_vertexBufferMemory;
 	std::unique_ptr<ft::Buffer> m_indexBuffer;
+	std::unique_ptr<ft::DeviceMemory> m_indexBufferMemory;
 	std::vector<std::unique_ptr<ft::Buffer>> m_uniformBuffers;
+	std::vector<std::unique_ptr<ft::DeviceMemory>> m_uniformBuffersMemory;
 	std::unique_ptr<ft::DescriptorPool> m_descriptorPool;
 	std::vector<std::unique_ptr<ft::DescriptorSet>> m_descriptorSets;
 	bool m_framebufferResized = false;
@@ -107,6 +110,7 @@ private:
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
+	void createTextureImage();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();

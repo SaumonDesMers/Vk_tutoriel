@@ -1,6 +1,7 @@
 #pragma once
 
 #include "defines.hpp"
+#include "device_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -21,52 +22,30 @@ namespace LIB_NAMESPACE
 
 		Buffer(
 			VkDevice device,
-			VkPhysicalDevice physicalDevice,
-			VkMemoryPropertyFlags properties,
 			VkBufferCreateInfo& createInfo
 		);
 		Buffer(
 			VkDevice device,
-			VkPhysicalDevice physicalDevice,
 			VkDeviceSize size,
-			VkBufferUsageFlags usage,
-			VkMemoryPropertyFlags properties
+			VkBufferUsageFlags usage
 		);
 		~Buffer();
 
 		VkBuffer getVk() { return m_buffer; }
 
-		VkResult map(
-			VkDeviceSize offset = 0,
-			VkDeviceSize size = VK_WHOLE_SIZE
-		);
-		void unmap();
-
-		void write(void *data, uint32_t size);
+		VkMemoryRequirements getMemoryRequirements();
 	
 	private:
 
 		VkBuffer m_buffer;
-		VkDeviceMemory m_bufferMemory;
 
 		VkDevice m_device;
 
-		bool m_isMapped;
-		void *m_mappedMemory;
-
-		VkDeviceSize m_writedDataSize;
-
 		void init(
 			const VkBufferCreateInfo& createInfo,
-			VkPhysicalDevice physicalDevice,
 			const VkMemoryPropertyFlags& properties
 		);
 
-		uint32_t findMemoryType(
-			VkPhysicalDevice physicalDevice,
-			uint32_t typeFilter,
-			VkMemoryPropertyFlags properties
-		);
 
 	};
 }

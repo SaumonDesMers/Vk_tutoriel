@@ -43,6 +43,7 @@ target_sources(${PROJECT_NAME}
 		src/command_buffer.cpp
 		src/sync_object.cpp
 		src/buffer.cpp
+		src/device_memory.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)
@@ -51,6 +52,6 @@ target_include_directories(${PROJECT_NAME}
 	INTERFACE
 		${CMAKE_CURRENT_SOURCE_DIR}/include
 	PRIVATE
-		${CMAKE_CURRENT_SOURCE_DIR}/external/glm
+		# ${CMAKE_CURRENT_SOURCE_DIR}/external/glm
 		${CMAKE_CURRENT_SOURCE_DIR}/src
 )

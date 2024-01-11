@@ -22,3 +22,4 @@
 #include "../src/command_buffer.hpp"
 #include "../src/sync_object.hpp"
 #include "../src/buffer.hpp"
+#include "../src/device_memory.hpp"
