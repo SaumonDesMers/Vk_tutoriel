@@ -61,35 +61,49 @@ private:
 
 	std::unique_ptr<ft::WindowManager> m_windowManager;
 	std::unique_ptr<ft::Window> m_window;
+
 	std::unique_ptr<ft::Instance> m_instance;
 	std::unique_ptr<ft::DebugMessenger> m_debugMessenger;
+
 	std::unique_ptr<ft::Window::Surface> m_surface;
+
 	std::unique_ptr<ft::PhysicalDevice> m_physicalDevice;
 	std::unique_ptr<ft::Device> m_device;
+
 	std::unique_ptr<ft::Queue> m_graphicsQueue;
 	std::unique_ptr<ft::Queue> m_presentQueue;
+
 	std::unique_ptr<ft::Swapchain> m_swapchain;
 	std::vector<std::unique_ptr<ft::ImageView>> m_swapchainImageViews;
+
 	std::unique_ptr<ft::RenderPass> m_renderPass;
 	std::unique_ptr<ft::DescriptorSetLayout> m_descriptorSetLayout;
 	std::unique_ptr<ft::PipelineLayout> m_pipelineLayout;
 	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
 	std::vector<std::unique_ptr<ft::Framebuffer>> m_swapchainFramebuffers;
+
 	std::unique_ptr<ft::CommandPool> m_commandPool;
 	std::vector<std::unique_ptr<ft::CommandBuffer>> m_commandBuffers;
+
 	std::vector<std::unique_ptr<ft::Semaphore>> m_imageAvailableSemaphores;
 	std::vector<std::unique_ptr<ft::Semaphore>> m_renderFinishedSemaphores;
 	std::vector<std::unique_ptr<ft::Fence>> m_inFlightFences;
+
 	std::unique_ptr<ft::Buffer> m_vertexBuffer;
 	std::unique_ptr<ft::DeviceMemory> m_vertexBufferMemory;
 	std::unique_ptr<ft::Buffer> m_indexBuffer;
 	std::unique_ptr<ft::DeviceMemory> m_indexBufferMemory;
+
 	std::unique_ptr<ft::Image> m_textureImage;
 	std::unique_ptr<ft::DeviceMemory> m_textureImageMemory;
+	std::unique_ptr<ft::ImageView> m_textureImageView;
+
 	std::vector<std::unique_ptr<ft::Buffer>> m_uniformBuffers;
 	std::vector<std::unique_ptr<ft::DeviceMemory>> m_uniformBuffersMemory;
+
 	std::unique_ptr<ft::DescriptorPool> m_descriptorPool;
 	std::vector<std::unique_ptr<ft::DescriptorSet>> m_descriptorSets;
+
 	bool m_framebufferResized = false;
 	
 	uint32_t m_currentFrame = 0;
@@ -106,13 +120,14 @@ private:
 	void createLogicalDevice();
 	void createSwapChain();
 	void recreateSwapChain();
-	void createImageViews();
+	void createSwapchainImageViews();
 	void createRenderPass();
 	void createDescriptorSetLayout();
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
 	void createTextureImage();
+	void createTextureImageView();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();

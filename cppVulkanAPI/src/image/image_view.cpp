@@ -4,7 +4,7 @@
 
 namespace LIB_NAMESPACE
 {
-	ImageView::ImageView(VkDevice device, const CreateInfo& createInfo)
+	ImageView::ImageView(VkDevice device, const VkImageViewCreateInfo& createInfo)
 		: m_device(device)
 	{
 		if (vkCreateImageView(m_device, &createInfo, nullptr, &m_imageView) != VK_SUCCESS)

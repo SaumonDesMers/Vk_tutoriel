@@ -47,7 +47,7 @@ void Application::init()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapChain();
-	createImageViews();
+	createSwapchainImageViews();
 	createRenderPass();
 	createDescriptorSetLayout();
 	createGraphicsPipeline();
@@ -276,11 +276,11 @@ void Application::recreateSwapChain()
 	m_swapchain.reset();
 
 	createSwapChain();
-	createImageViews();
+	createSwapchainImageViews();
 	createFramebuffers();
 }
 
-void Application::createImageViews()
+void Application::createSwapchainImageViews()
 {
 	m_swapchainImageViews.resize(m_swapchain->getImageCount());
 
@@ -595,6 +595,23 @@ void Application::createTextureImage()
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 	);
+}
+
+void Application::createTextureImageView()
+{
+	VkImageViewCreateInfo viewInfo{};
+	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewInfo.image = m_textureImage->getVk();
+	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+
+	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	viewInfo.subresourceRange.baseMipLevel = 0;
+	viewInfo.subresourceRange.levelCount = 1;
+	viewInfo.subresourceRange.baseArrayLayer = 0;
+	viewInfo.subresourceRange.layerCount = 1;
+
+	m_textureImageView = std::make_unique<ft::ImageView>(m_device->getVk(), viewInfo);
 }
 
 void Application::createVertexBuffer()

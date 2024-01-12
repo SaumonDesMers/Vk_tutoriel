@@ -1,6 +1,6 @@
 #pragma once
 
-#include "defines.hpp"
+#include "../defines.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -19,7 +19,7 @@ namespace LIB_NAMESPACE
 			}
 		};
 
-		ImageView(VkDevice device, const CreateInfo& createInfo);
+		ImageView(VkDevice device, const VkImageViewCreateInfo& createInfo);
 		~ImageView();
 
 		VkImageView getVk() const { return m_imageView; }

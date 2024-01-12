@@ -30,7 +30,8 @@ target_sources(${PROJECT_NAME}
 		src/device.cpp
 		src/queue.cpp
 		src/swapchain.cpp
-		src/image_view.cpp
+		src/image/image.cpp
+		src/image/image_view.cpp
 		src/pipeline/graphic_pipeline.cpp
 		src/pipeline/shader_module.cpp
 		src/pipeline/pipeline_layout.cpp
@@ -44,7 +45,6 @@ target_sources(${PROJECT_NAME}
 		src/sync_object.cpp
 		src/buffer.cpp
 		src/device_memory.cpp
-		src/image.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)
