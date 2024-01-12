@@ -23,3 +23,4 @@
 #include "../src/sync_object.hpp"
 #include "../src/buffer.hpp"
 #include "../src/device_memory.hpp"
+#include "../src/image.hpp"

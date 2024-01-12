@@ -84,6 +84,8 @@ private:
 	std::unique_ptr<ft::DeviceMemory> m_vertexBufferMemory;
 	std::unique_ptr<ft::Buffer> m_indexBuffer;
 	std::unique_ptr<ft::DeviceMemory> m_indexBufferMemory;
+	std::unique_ptr<ft::Image> m_textureImage;
+	std::unique_ptr<ft::DeviceMemory> m_textureImageMemory;
 	std::vector<std::unique_ptr<ft::Buffer>> m_uniformBuffers;
 	std::vector<std::unique_ptr<ft::DeviceMemory>> m_uniformBuffersMemory;
 	std::unique_ptr<ft::DescriptorPool> m_descriptorPool;
@@ -129,7 +131,11 @@ private:
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
-	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	void copyBufferToBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+	ft::CommandBuffer* beginSingleTimeCommands();
+	void endSingleTimeCommands(ft::CommandBuffer* commandBuffer);
+	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 
 	void recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& commandBuffer, uint32_t imageIndex);

@@ -13,13 +13,18 @@ namespace LIB_NAMESPACE
 
 		Image(
 			VkDevice device,
-			VkPhysicalDevice physicalDevice,
 			VkImageCreateInfo& createInfo
 		);
 		~Image();
 
-		VkImage getVk() { return m_image; }
-	
+		VkImage getVk() const { return m_image; }
+
+		VkMemoryRequirements getMemoryRequirements() const;
+
+		VkResult bindMemory(
+			VkDeviceMemory memory,
+			VkDeviceSize memoryOffset = 0
+		) const;
 
 	private:
 

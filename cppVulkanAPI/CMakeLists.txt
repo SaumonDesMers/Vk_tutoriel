@@ -44,6 +44,7 @@ target_sources(${PROJECT_NAME}
 		src/sync_object.cpp
 		src/buffer.cpp
 		src/device_memory.cpp
+		src/image.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)

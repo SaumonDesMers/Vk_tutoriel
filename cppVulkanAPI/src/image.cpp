@@ -6,7 +6,6 @@ namespace LIB_NAMESPACE
 {
 	Image::Image(
 		VkDevice device,
-		VkPhysicalDevice physicalDevice,
 		VkImageCreateInfo& createInfo
 	):
 		m_device(device)
@@ -20,5 +19,20 @@ namespace LIB_NAMESPACE
 	Image::~Image()
 	{
 		vkDestroyImage(m_device, m_image, nullptr);
+	}
+
+	VkMemoryRequirements Image::getMemoryRequirements() const
+	{
+		VkMemoryRequirements memoryRequirements;
+		vkGetImageMemoryRequirements(m_device, m_image, &memoryRequirements);
+		return memoryRequirements;
+	}
+
+	VkResult Image::bindMemory(
+		VkDeviceMemory memory,
+		VkDeviceSize memoryOffset
+	) const
+	{
+		return vkBindImageMemory(m_device, m_image, memory, memoryOffset);
 	}
 }
