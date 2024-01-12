@@ -70,6 +70,8 @@ namespace LIB_NAMESPACE
 			const std::vector<const char*>& extensions
 		);
 
+		void getProperties(VkPhysicalDeviceProperties* properties) const;
+
 	private:
 
 		VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;

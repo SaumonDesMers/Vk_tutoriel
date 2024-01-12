@@ -11,6 +11,7 @@
 #include "../src/swapchain.hpp"
 #include "../src/image/image.hpp"
 #include "../src/image/image_view.hpp"
+#include "../src/image/sampler.hpp"
 #include "../src/pipeline/graphic_pipeline.hpp"
 #include "../src/pipeline/shader_module.hpp"
 #include "../src/pipeline/pipeline_layout.hpp"

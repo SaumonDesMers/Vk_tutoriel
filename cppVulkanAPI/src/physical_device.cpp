@@ -98,4 +98,9 @@ namespace LIB_NAMESPACE
 
 		return requiredExtensions.empty();
 	}
+
+	void PhysicalDevice::getProperties(VkPhysicalDeviceProperties* properties) const
+	{
+		vkGetPhysicalDeviceProperties(m_physicalDevice, properties);
+	}
 }

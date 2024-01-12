@@ -97,6 +97,7 @@ private:
 	std::unique_ptr<ft::Image> m_textureImage;
 	std::unique_ptr<ft::DeviceMemory> m_textureImageMemory;
 	std::unique_ptr<ft::ImageView> m_textureImageView;
+	std::unique_ptr<ft::Sampler> m_textureSampler;
 
 	std::vector<std::unique_ptr<ft::Buffer>> m_uniformBuffers;
 	std::vector<std::unique_ptr<ft::DeviceMemory>> m_uniformBuffersMemory;
@@ -128,6 +129,7 @@ private:
 	void createCommandPool();
 	void createTextureImage();
 	void createTextureImageView();
+	void createTextureSampler();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();

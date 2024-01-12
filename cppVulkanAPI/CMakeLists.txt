@@ -32,6 +32,7 @@ target_sources(${PROJECT_NAME}
 		src/swapchain.cpp
 		src/image/image.cpp
 		src/image/image_view.cpp
+		src/image/sampler.cpp
 		src/pipeline/graphic_pipeline.cpp
 		src/pipeline/shader_module.cpp
 		src/pipeline/pipeline_layout.cpp
