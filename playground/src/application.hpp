@@ -1,5 +1,7 @@
 #pragma once
 
+#include "vertex.hpp"
+
 #include <cppVulkanAPI.hpp>
 
 #include <glm/glm.hpp>
@@ -93,6 +95,8 @@ private:
 	std::vector<std::unique_ptr<ft::Semaphore>> m_renderFinishedSemaphores;
 	std::vector<std::unique_ptr<ft::Fence>> m_inFlightFences;
 
+	std::vector<Vertex> m_vertices;
+	std::vector<uint32_t> m_indices;
 	std::unique_ptr<ft::Buffer> m_vertexBuffer;
 	std::unique_ptr<ft::DeviceMemory> m_vertexBufferMemory;
 	std::unique_ptr<ft::Buffer> m_indexBuffer;
@@ -135,6 +139,7 @@ private:
 	void createTextureImage();
 	void createTextureImageView();
 	void createTextureSampler();
+	void loadModel();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();

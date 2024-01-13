@@ -12,6 +12,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
 #include <set>
 #include <chrono>
 
@@ -58,6 +61,7 @@ void Application::init()
 	createTextureImage();
 	createTextureImageView();
 	createTextureSampler();
+	loadModel();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
@@ -597,13 +601,15 @@ void Application::createDepthResources()
 
 void Application::createTextureImage()
 {
+	std::string modelPath = "playground/textures/viking_room.ppm";
+
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load("playground/textures/texture.ppm", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	stbi_uc* pixels = stbi_load(modelPath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 	if (pixels == nullptr)
 	{
-		throw std::runtime_error("failed to load texture: playground/textures/texture.ppm");
+		throw std::runtime_error("failed to load texture: " + modelPath);
 	}
 
 	VkBufferCreateInfo stagingBufferInfo{};
@@ -739,9 +745,56 @@ void Application::createTextureSampler()
 	m_textureSampler = std::make_unique<ft::Sampler>(m_device->getVk(), samplerInfo);
 }
 
+void Application::loadModel()
+{
+	std::string modelPath = "playground/models/viking_room.obj";
+
+	tinyobj::attrib_t attrib;
+	std::vector<tinyobj::shape_t> shapes;
+	std::vector<tinyobj::material_t> materials;
+	std::string warning, error;
+
+	if (tinyobj::LoadObj(&attrib, &shapes, &materials, &warning, &error, modelPath.c_str()) == false)
+	{
+		throw std::runtime_error(warning + error);
+	}
+
+	std::unordered_map<Vertex, uint32_t> uniqueVertices = {};
+
+	for (const auto& shape : shapes)
+	{
+		for (const auto& index : shape.mesh.indices)
+		{
+			Vertex vertex = {};
+
+			vertex.pos = {
+				attrib.vertices[3 * index.vertex_index + 0],
+				attrib.vertices[3 * index.vertex_index + 1],
+				attrib.vertices[3 * index.vertex_index + 2]
+			};
+
+			vertex.texCoord = {
+				attrib.texcoords[2 * index.texcoord_index + 0],
+				1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+			};
+
+			vertex.color = { 1.0f, 1.0f, 1.0f };
+
+			if (uniqueVertices.count(vertex) == 0)
+			{
+				uniqueVertices[vertex] = static_cast<uint32_t>(m_vertices.size());
+				m_vertices.push_back(vertex);
+			}
+
+			m_indices.push_back(uniqueVertices[vertex]);
+		}
+	}
+
+}
+
 void Application::createVertexBuffer()
 {
-	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+	VkDeviceSize bufferSize = sizeof(m_vertices[0]) * m_vertices.size();
 
 
 	VkBufferCreateInfo stagingBufferInfo{};
@@ -769,7 +822,7 @@ void Application::createVertexBuffer()
 
 
 	stagingBufferMemory.map();
-	stagingBufferMemory.write((void*)vertices.data(), bufferSize);
+	stagingBufferMemory.write((void*)m_vertices.data(), bufferSize);
 	stagingBufferMemory.unmap();
 
 
@@ -802,7 +855,7 @@ void Application::createVertexBuffer()
 
 void Application::createIndexBuffer()
 {
-	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+	VkDeviceSize bufferSize = sizeof(m_indices[0]) * m_indices.size();
 
 	VkBufferCreateInfo stagingBufferInfo{};
 	stagingBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -829,7 +882,7 @@ void Application::createIndexBuffer()
 
 
 	stagingBufferMemory.map();
-	stagingBufferMemory.write((void*)indices.data(), bufferSize);
+	stagingBufferMemory.write((void*)m_indices.data(), bufferSize);
 	stagingBufferMemory.unmap();
 
 
@@ -1391,9 +1444,9 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& 
 	VkDeviceSize offsets[] = {0};
 	vkCmdBindVertexBuffers(commandBuffer->getVk(), 0, 1, vertexBuffers, offsets);
 
-	vkCmdBindIndexBuffer(commandBuffer->getVk(), m_indexBuffer->getVk(), 0, VK_INDEX_TYPE_UINT16);
+	vkCmdBindIndexBuffer(commandBuffer->getVk(), m_indexBuffer->getVk(), 0, VK_INDEX_TYPE_UINT32);
 
-	vkCmdDrawIndexed(commandBuffer->getVk(), static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+	vkCmdDrawIndexed(commandBuffer->getVk(), static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer->getVk());
 

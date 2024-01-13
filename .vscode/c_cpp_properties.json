@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/cppVulkanAPI/include",
                 "${workspaceFolder}/cppVulkanAPI/external/glm",
-                "${workspaceFolder}/playground/src"
+                "${workspaceFolder}/playground/src",
+                "${workspaceFolder}/playground/external"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
