@@ -102,6 +102,7 @@ private:
 	std::unique_ptr<ft::Buffer> m_indexBuffer;
 	std::unique_ptr<ft::DeviceMemory> m_indexBufferMemory;
 
+	uint32_t m_mipLevels;
 	std::unique_ptr<ft::Image> m_textureImage;
 	std::unique_ptr<ft::DeviceMemory> m_textureImageMemory;
 	std::unique_ptr<ft::ImageView> m_textureImageView;
@@ -165,7 +166,8 @@ private:
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	ft::CommandBuffer* beginSingleTimeCommands();
 	void endSingleTimeCommands(ft::CommandBuffer* commandBuffer);
-	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+	void generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
 
 	void recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& commandBuffer, uint32_t imageIndex);
