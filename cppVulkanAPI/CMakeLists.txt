@@ -22,30 +22,30 @@ target_compile_options(${PROJECT_NAME}
 
 target_sources(${PROJECT_NAME}
 	PUBLIC
-		src/window_manager.cpp
-		src/window.cpp
-		src/instance.cpp
-		src/debug.cpp
-		src/physical_device.cpp
-		src/device.cpp
-		src/queue.cpp
-		src/swapchain.cpp
-		src/image/image.cpp
-		src/image/image_view.cpp
-		src/image/sampler.cpp
-		src/pipeline/graphic_pipeline.cpp
-		src/pipeline/shader_module.cpp
-		src/pipeline/pipeline_layout.cpp
-		src/pipeline/render_pass.cpp
-		src/pipeline/descriptor_layout.cpp
-		src/pipeline/descriptor_pool.cpp
-		src/pipeline/descriptor_set.cpp
-		src/frame_buffer.cpp
-		src/command_pool.cpp
-		src/command_buffer.cpp
-		src/sync_object.cpp
-		src/buffer.cpp
-		src/device_memory.cpp
+		src/core/window_manager.cpp
+		src/core/window.cpp
+		src/core/instance.cpp
+		src/core/debug.cpp
+		src/core/physical_device.cpp
+		src/core/device.cpp
+		src/core/queue.cpp
+		src/core/swapchain.cpp
+		src/core/image/image.cpp
+		src/core/image/image_view.cpp
+		src/core/image/sampler.cpp
+		src/core/pipeline/graphic_pipeline.cpp
+		src/core/pipeline/shader_module.cpp
+		src/core/pipeline/pipeline_layout.cpp
+		src/core/pipeline/render_pass.cpp
+		src/core/pipeline/descriptor_layout.cpp
+		src/core/pipeline/descriptor_pool.cpp
+		src/core/pipeline/descriptor_set.cpp
+		src/core/frame_buffer.cpp
+		src/core/command_pool.cpp
+		src/core/command_buffer.cpp
+		src/core/sync_object.cpp
+		src/core/buffer.cpp
+		src/core/device_memory.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)
@@ -54,6 +54,5 @@ target_include_directories(${PROJECT_NAME}
 	INTERFACE
 		${CMAKE_CURRENT_SOURCE_DIR}/include
 	PRIVATE
-		# ${CMAKE_CURRENT_SOURCE_DIR}/external/glm
-		${CMAKE_CURRENT_SOURCE_DIR}/src
+		${CMAKE_CURRENT_SOURCE_DIR}/src/core
 )
