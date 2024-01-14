@@ -78,11 +78,16 @@ private:
 	std::unique_ptr<ft::Swapchain> m_swapchain;
 	std::vector<std::unique_ptr<ft::ImageView>> m_swapchainImageViews;
 
+	VkSampleCountFlagBits m_msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 	std::unique_ptr<ft::RenderPass> m_renderPass;
 	std::unique_ptr<ft::DescriptorSetLayout> m_descriptorSetLayout;
 	std::unique_ptr<ft::PipelineLayout> m_pipelineLayout;
 	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
 	std::vector<std::unique_ptr<ft::Framebuffer>> m_swapchainFramebuffers;
+
+	std::unique_ptr<ft::Image> m_colorImage;
+	std::unique_ptr<ft::DeviceMemory> m_colorImageMemory;
+	std::unique_ptr<ft::ImageView> m_colorImageView;
 
 	std::unique_ptr<ft::Image> m_depthImage;
 	std::unique_ptr<ft::DeviceMemory> m_depthImageMemory;
@@ -136,6 +141,7 @@ private:
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
+	void createColorResources();
 	void createDepthResources();
 	void createTextureImage();
 	void createTextureImageView();
@@ -161,6 +167,7 @@ private:
 	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 	VkFormat findDepthFormat();
 	bool hasStencilComponent(VkFormat format);
+	VkSampleCountFlagBits getMaxUsableSampleCount(VkPhysicalDevice physicalDevice);
 
 	void copyBufferToBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
