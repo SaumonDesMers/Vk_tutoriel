@@ -4,18 +4,20 @@
 
 namespace LIB_NAMESPACE
 {
-	ImageView::ImageView(VkDevice device, const VkImageViewCreateInfo& createInfo)
-		: m_device(device)
+	namespace core
 	{
-		if (vkCreateImageView(m_device, &createInfo, nullptr, &m_imageView) != VK_SUCCESS)
+		ImageView::ImageView(VkDevice device, const VkImageViewCreateInfo& createInfo)
+			: m_device(device)
 		{
-			throw std::runtime_error("failed to create image view.");
+			if (vkCreateImageView(m_device, &createInfo, nullptr, &m_imageView) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to create image view.");
+			}
+		}
+
+		ImageView::~ImageView()
+		{
+			vkDestroyImageView(m_device, m_imageView, nullptr);
 		}
 	}
-
-	ImageView::~ImageView()
-	{
-		vkDestroyImageView(m_device, m_imageView, nullptr);
-	}
-
 }

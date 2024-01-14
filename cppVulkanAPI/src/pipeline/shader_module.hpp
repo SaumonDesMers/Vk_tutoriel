@@ -9,33 +9,35 @@
 
 namespace LIB_NAMESPACE
 {
-	class ShaderModule
+	namespace core
 	{
-	
-	public:
-
-		struct CreateInfo: public VkShaderModuleCreateInfo
+		class ShaderModule
 		{
-			CreateInfo(): VkShaderModuleCreateInfo()
+		
+		public:
+
+			struct CreateInfo: public VkShaderModuleCreateInfo
 			{
-				this->sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-			}
+				CreateInfo(): VkShaderModuleCreateInfo()
+				{
+					this->sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+				}
+			};
+
+			ShaderModule(VkDevice device, const CreateInfo& createInfo);
+			ShaderModule(VkDevice device, std::filesystem::path path);
+			~ShaderModule();
+
+			VkShaderModule getVk() const { return m_shaderModule; }
+
+			static std::vector<char> readFile(const std::filesystem::path& path);
+
+		private:
+
+			VkShaderModule m_shaderModule;
+
+			VkDevice m_device;
+
 		};
-
-		ShaderModule(VkDevice device, const CreateInfo& createInfo);
-		ShaderModule(VkDevice device, std::filesystem::path path);
-		~ShaderModule();
-
-		VkShaderModule getVk() const { return m_shaderModule; }
-
-		static std::vector<char> readFile(const std::filesystem::path& path);
-
-	private:
-
-		VkShaderModule m_shaderModule;
-
-		VkDevice m_device;
-
-	};
-
+	}
 }

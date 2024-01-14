@@ -9,64 +9,66 @@
 
 namespace LIB_NAMESPACE
 {
-
-	struct WindowCreateInfo
-	{
-		std::string title = "Default title";
-		int width = 800;
-		int height = 600;
-	};
-
-	class Window
+	namespace core
 	{
 
-	public:
+		struct WindowCreateInfo
+		{
+			std::string title = "Default title";
+			int width = 800;
+			int height = 600;
+		};
 
-		class Surface
+		class Window
 		{
 
 		public:
 
-			Surface(VkInstance instance, GLFWwindow* window);
-			~Surface();
+			class Surface
+			{
 
-			VkSurfaceKHR getVk() const { return m_surface; }
+			public:
+
+				Surface(VkInstance instance, GLFWwindow* window);
+				~Surface();
+
+				VkSurfaceKHR getVk() const { return m_surface; }
+
+			private:
+
+				VkSurfaceKHR m_surface;
+				VkInstance m_instance;
+			};
+
+			Window(const ft::core::WindowCreateInfo& createInfo);
+			~Window();
+
+			GLFWwindow* getGLFWwindow() const { return m_window; }
+
+			bool isResized() const { return m_framebufferResized; }
+			void resetResize() { m_framebufferResized = false; }
+
+			bool shouldClose() const
+			{
+				return glfwWindowShouldClose(m_window);
+			}
+
+			void getFramebufferSize(int* width, int* height) const
+			{
+				glfwGetFramebufferSize(m_window, width, height);
+			}
+
+			static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 
 		private:
 
-			VkSurfaceKHR m_surface;
-			VkInstance m_instance;
+			GLFWwindow* m_window;
+
+			std::string m_title;
+			int m_width;
+			int m_height;
+
+			bool m_framebufferResized;
 		};
-
-		Window(const ft::WindowCreateInfo& createInfo);
-		~Window();
-
-		GLFWwindow* getGLFWwindow() const { return m_window; }
-
-		bool isResized() const { return m_framebufferResized; }
-		void resetResize() { m_framebufferResized = false; }
-
-		bool shouldClose() const
-		{
-			return glfwWindowShouldClose(m_window);
-		}
-
-		void getFramebufferSize(int* width, int* height) const
-		{
-			glfwGetFramebufferSize(m_window, width, height);
-		}
-
-		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
-
-	private:
-
-		GLFWwindow* m_window;
-
-		std::string m_title;
-		int m_width;
-		int m_height;
-
-		bool m_framebufferResized;
-	};
-
+	}
 }

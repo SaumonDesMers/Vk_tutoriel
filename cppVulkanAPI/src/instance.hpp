@@ -9,41 +9,43 @@
 
 namespace LIB_NAMESPACE
 {
-	struct ApplicationInfo: public VkApplicationInfo
+	namespace core
 	{
-		ApplicationInfo(): VkApplicationInfo()
+		struct ApplicationInfo: public VkApplicationInfo
 		{
-			sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		}
-	};
-
-	class Instance
-	{
-
-	public:
-
-
-		struct CreateInfo: public VkInstanceCreateInfo
-		{
-			CreateInfo(): VkInstanceCreateInfo()
+			ApplicationInfo(): VkApplicationInfo()
 			{
-				sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+				sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 			}
 		};
 
-		Instance(const CreateInfo & createInfo);
-		~Instance();
+		class Instance
+		{
 
-		VkInstance getVk() const { return m_instance; }
+		public:
 
-		std::vector<VkPhysicalDevice> getPhysicalDevices() const;
 
-		static bool checkValidationLayerSupport(const std::vector<const char*>& validationLayers);
+			struct CreateInfo: public VkInstanceCreateInfo
+			{
+				CreateInfo(): VkInstanceCreateInfo()
+				{
+					sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+				}
+			};
 
-	private:
+			Instance(const CreateInfo & createInfo);
+			~Instance();
 
-		VkInstance m_instance;
+			VkInstance getVk() const { return m_instance; }
 
-	};
+			std::vector<VkPhysicalDevice> getPhysicalDevices() const;
 
+			static bool checkValidationLayerSupport(const std::vector<const char*>& validationLayers);
+
+		private:
+
+			VkInstance m_instance;
+
+		};
+	}
 }

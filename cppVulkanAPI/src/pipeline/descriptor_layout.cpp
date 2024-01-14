@@ -4,17 +4,20 @@
 
 namespace LIB_NAMESPACE
 {
-	DescriptorSetLayout::DescriptorSetLayout(VkDevice device, VkDescriptorSetLayoutCreateInfo& createInfo)
-		: m_device(device)
+	namespace core
 	{
-		if (vkCreateDescriptorSetLayout(m_device, &createInfo, nullptr, &m_layout) != VK_SUCCESS)
+		DescriptorSetLayout::DescriptorSetLayout(VkDevice device, VkDescriptorSetLayoutCreateInfo& createInfo)
+			: m_device(device)
 		{
-			throw std::runtime_error("failed to create descriptor set layout!");
+			if (vkCreateDescriptorSetLayout(m_device, &createInfo, nullptr, &m_layout) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to create descriptor set layout!");
+			}
 		}
-	}
 
-	DescriptorSetLayout::~DescriptorSetLayout()
-	{
-		vkDestroyDescriptorSetLayout(m_device, m_layout, nullptr);
+		DescriptorSetLayout::~DescriptorSetLayout()
+		{
+			vkDestroyDescriptorSetLayout(m_device, m_layout, nullptr);
+		}
 	}
 }

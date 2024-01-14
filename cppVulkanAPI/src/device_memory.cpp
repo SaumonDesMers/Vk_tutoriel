@@ -5,78 +5,81 @@
 
 namespace LIB_NAMESPACE
 {
-	DeviceMemory::DeviceMemory(
-		VkDevice device,
-		VkMemoryAllocateInfo& allocInfo
-	):
-		m_device(device)
+	namespace core
 	{
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-
-		if (vkAllocateMemory(device, &allocInfo, nullptr, &m_memory) != VK_SUCCESS)
+		DeviceMemory::DeviceMemory(
+			VkDevice device,
+			VkMemoryAllocateInfo& allocInfo
+		):
+			m_device(device)
 		{
-			throw std::runtime_error("failed to allocate vertex buffer memory.");
-		}
-	}
+			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 
-	DeviceMemory::~DeviceMemory()
-	{
-		vkFreeMemory(m_device, m_memory, nullptr);
-	}
-
-	uint32_t DeviceMemory::findMemoryType(
-		VkPhysicalDevice physicalDevice,
-		uint32_t typeFilter,
-		VkMemoryPropertyFlags properties
-	)
-	{
-		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
-
-		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-		{
-			if (
-				(typeFilter & (1 << i))
-				&& (memProperties.memoryTypes[i].propertyFlags & properties) == properties
-			)
+			if (vkAllocateMemory(device, &allocInfo, nullptr, &m_memory) != VK_SUCCESS)
 			{
-				return i;
+				throw std::runtime_error("failed to allocate vertex buffer memory.");
 			}
 		}
 
-		throw std::runtime_error("failed to find suitable memory type for buffer.");
-	}
-
-	VkResult DeviceMemory::map(
-		VkDeviceSize offset,
-		VkDeviceSize size,
-		VkMemoryMapFlags flags
-	)
-	{
-		VkResult result = vkMapMemory(m_device, m_memory, offset, size, flags, &m_mappedMemory);
-
-		if (result == VK_SUCCESS)
+		DeviceMemory::~DeviceMemory()
 		{
-			m_isMapped = true;
+			vkFreeMemory(m_device, m_memory, nullptr);
 		}
 
-		return result;
-	}
-
-	void DeviceMemory::unmap()
-	{
-		vkUnmapMemory(m_device, m_memory);
-		m_isMapped = false;
-	}
-
-	void DeviceMemory::write(void *data, uint32_t size)
-	{
-		if (m_isMapped == false)
+		uint32_t DeviceMemory::findMemoryType(
+			VkPhysicalDevice physicalDevice,
+			uint32_t typeFilter,
+			VkMemoryPropertyFlags properties
+		)
 		{
-			throw std::runtime_error("failed to write data to memory: memory is not mapped.");
+			VkPhysicalDeviceMemoryProperties memProperties;
+			vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+			for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+			{
+				if (
+					(typeFilter & (1 << i))
+					&& (memProperties.memoryTypes[i].propertyFlags & properties) == properties
+				)
+				{
+					return i;
+				}
+			}
+
+			throw std::runtime_error("failed to find suitable memory type for buffer.");
 		}
 
-		memcpy(m_mappedMemory, data, size);
+		VkResult DeviceMemory::map(
+			VkDeviceSize offset,
+			VkDeviceSize size,
+			VkMemoryMapFlags flags
+		)
+		{
+			VkResult result = vkMapMemory(m_device, m_memory, offset, size, flags, &m_mappedMemory);
 
+			if (result == VK_SUCCESS)
+			{
+				m_isMapped = true;
+			}
+
+			return result;
+		}
+
+		void DeviceMemory::unmap()
+		{
+			vkUnmapMemory(m_device, m_memory);
+			m_isMapped = false;
+		}
+
+		void DeviceMemory::write(void *data, uint32_t size)
+		{
+			if (m_isMapped == false)
+			{
+				throw std::runtime_error("failed to write data to memory: memory is not mapped.");
+			}
+
+			memcpy(m_mappedMemory, data, size);
+
+		}
 	}
 }

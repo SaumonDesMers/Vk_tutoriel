@@ -6,30 +6,33 @@
 
 namespace LIB_NAMESPACE
 {
-	class Image
+	namespace core
 	{
+		class Image
+		{
 
-	public:
+		public:
 
-		Image(
-			VkDevice device,
-			VkImageCreateInfo& createInfo
-		);
-		~Image();
+			Image(
+				VkDevice device,
+				VkImageCreateInfo& createInfo
+			);
+			~Image();
 
-		VkImage getVk() const { return m_image; }
+			VkImage getVk() const { return m_image; }
 
-		VkMemoryRequirements getMemoryRequirements() const;
+			VkMemoryRequirements getMemoryRequirements() const;
 
-		VkResult bindMemory(
-			VkDeviceMemory memory,
-			VkDeviceSize memoryOffset = 0
-		) const;
+			VkResult bindMemory(
+				VkDeviceMemory memory,
+				VkDeviceSize memoryOffset = 0
+			) const;
 
-	private:
+		private:
 
-		VkImage m_image;
+			VkImage m_image;
 
-		VkDevice m_device;
-	};
+			VkDevice m_device;
+		};
+	}
 }

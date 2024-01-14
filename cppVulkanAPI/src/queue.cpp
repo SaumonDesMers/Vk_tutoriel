@@ -2,23 +2,25 @@
 
 namespace LIB_NAMESPACE
 {
-	Queue::Queue(VkDevice device, uint32_t queueFamilyIndex, uint32_t queueIndex)
+	namespace core
 	{
-		vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, &m_queue);
-	}
+		Queue::Queue(VkDevice device, uint32_t queueFamilyIndex, uint32_t queueIndex)
+		{
+			vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, &m_queue);
+		}
 
-	Queue::~Queue()
-	{
-	}
+		Queue::~Queue()
+		{
+		}
 
-	VkResult Queue::submit(uint32_t submitCount, const VkSubmitInfo* submits, VkFence fence)
-	{
-		return vkQueueSubmit(m_queue, submitCount, submits, fence);
-	}
+		VkResult Queue::submit(uint32_t submitCount, const VkSubmitInfo* submits, VkFence fence)
+		{
+			return vkQueueSubmit(m_queue, submitCount, submits, fence);
+		}
 
-	VkResult Queue::waitIdle()
-	{
-		return vkQueueWaitIdle(m_queue);
+		VkResult Queue::waitIdle()
+		{
+			return vkQueueWaitIdle(m_queue);
+		}
 	}
-
 }

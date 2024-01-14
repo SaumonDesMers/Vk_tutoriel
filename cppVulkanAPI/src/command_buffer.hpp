@@ -6,41 +6,44 @@
 
 namespace LIB_NAMESPACE
 {
-	class CommandBuffer
+	namespace core
 	{
-		public:
-
-		struct AllocateInfo: public VkCommandBufferAllocateInfo
+		class CommandBuffer
 		{
-			AllocateInfo(): VkCommandBufferAllocateInfo()
+			public:
+
+			struct AllocateInfo: public VkCommandBufferAllocateInfo
 			{
-				this->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			}
-		};
+				AllocateInfo(): VkCommandBufferAllocateInfo()
+				{
+					this->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+				}
+			};
 
-		struct BeginInfo: public VkCommandBufferBeginInfo
-		{
-			BeginInfo(): VkCommandBufferBeginInfo()
+			struct BeginInfo: public VkCommandBufferBeginInfo
 			{
-				this->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			}
+				BeginInfo(): VkCommandBufferBeginInfo()
+				{
+					this->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+				}
+			};
+
+			CommandBuffer(VkDevice device, const VkCommandBufferAllocateInfo& allocateInfo);
+			~CommandBuffer();
+
+			VkCommandBuffer getVk() const { return m_commandBuffer; }
+
+			void begin(const VkCommandBufferBeginInfo& beginInfo);
+			void end();
+			VkResult reset(VkCommandBufferResetFlags flags = 0);
+		
+		private:
+		
+			VkCommandBuffer m_commandBuffer;
+
+			VkDevice m_device;
+			VkCommandPool m_commandPool;
+
 		};
-
-		CommandBuffer(VkDevice device, const VkCommandBufferAllocateInfo& allocateInfo);
-		~CommandBuffer();
-
-		VkCommandBuffer getVk() const { return m_commandBuffer; }
-
-		void begin(const VkCommandBufferBeginInfo& beginInfo);
-		void end();
-		VkResult reset(VkCommandBufferResetFlags flags = 0);
-	
-	private:
-	
-		VkCommandBuffer m_commandBuffer;
-
-		VkDevice m_device;
-		VkCommandPool m_commandPool;
-
-	};
+	}
 }

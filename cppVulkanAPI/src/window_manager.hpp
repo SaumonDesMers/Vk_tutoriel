@@ -10,22 +10,24 @@
 
 namespace LIB_NAMESPACE
 {
-
-	class WindowManager
+	namespace core
 	{
-	public:
 
-		WindowManager();
+		class WindowManager
+		{
+		public:
 
-		~WindowManager();
+			WindowManager();
 
-		std::unique_ptr<Window> createWindow(const WindowCreateInfo& createInfo);
+			~WindowManager();
 
-		void pollEvents();
-		void waitEvents();
+			std::unique_ptr<Window> createWindow(const WindowCreateInfo& createInfo);
 
-		std::vector<const char *> getRequiredInstanceExtensions();
-		
-	};
+			void pollEvents();
+			void waitEvents();
 
+			std::vector<const char *> getRequiredInstanceExtensions();
+			
+		};
+	}
 }

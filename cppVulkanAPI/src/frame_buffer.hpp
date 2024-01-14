@@ -6,28 +6,31 @@
 
 namespace LIB_NAMESPACE
 {
-	class Framebuffer
+	namespace core
 	{
-		public:
-
-		struct CreateInfo: public VkFramebufferCreateInfo
+		class Framebuffer
 		{
-			CreateInfo(): VkFramebufferCreateInfo()
+			public:
+
+			struct CreateInfo: public VkFramebufferCreateInfo
 			{
-				this->sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			}
+				CreateInfo(): VkFramebufferCreateInfo()
+				{
+					this->sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+				}
+			};
+
+			Framebuffer(VkDevice device, const CreateInfo& createInfo);
+			~Framebuffer();
+
+			VkFramebuffer getVk() const { return m_framebuffer; }
+
+		private:
+
+			VkFramebuffer m_framebuffer;
+
+			VkDevice m_device;
+
 		};
-
-		Framebuffer(VkDevice device, const CreateInfo& createInfo);
-		~Framebuffer();
-
-		VkFramebuffer getVk() const { return m_framebuffer; }
-
-	private:
-
-		VkFramebuffer m_framebuffer;
-
-		VkDevice m_device;
-
-	};
+	}
 }

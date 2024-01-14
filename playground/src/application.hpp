@@ -61,63 +61,63 @@ private:
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 
-	std::unique_ptr<ft::WindowManager> m_windowManager;
-	std::unique_ptr<ft::Window> m_window;
+	std::unique_ptr<ft::core::WindowManager> m_windowManager;
+	std::unique_ptr<ft::core::Window> m_window;
 
-	std::unique_ptr<ft::Instance> m_instance;
-	std::unique_ptr<ft::DebugMessenger> m_debugMessenger;
+	std::unique_ptr<ft::core::Instance> m_instance;
+	std::unique_ptr<ft::core::DebugMessenger> m_debugMessenger;
 
-	std::unique_ptr<ft::Window::Surface> m_surface;
+	std::unique_ptr<ft::core::Window::Surface> m_surface;
 
-	std::unique_ptr<ft::PhysicalDevice> m_physicalDevice;
-	std::unique_ptr<ft::Device> m_device;
+	std::unique_ptr<ft::core::PhysicalDevice> m_physicalDevice;
+	std::unique_ptr<ft::core::Device> m_device;
 
-	std::unique_ptr<ft::Queue> m_graphicsQueue;
-	std::unique_ptr<ft::Queue> m_presentQueue;
+	std::unique_ptr<ft::core::Queue> m_graphicsQueue;
+	std::unique_ptr<ft::core::Queue> m_presentQueue;
 
-	std::unique_ptr<ft::Swapchain> m_swapchain;
-	std::vector<std::unique_ptr<ft::ImageView>> m_swapchainImageViews;
+	std::unique_ptr<ft::core::Swapchain> m_swapchain;
+	std::vector<std::unique_ptr<ft::core::ImageView>> m_swapchainImageViews;
 
 	VkSampleCountFlagBits m_msaaSamples = VK_SAMPLE_COUNT_1_BIT;
-	std::unique_ptr<ft::RenderPass> m_renderPass;
-	std::unique_ptr<ft::DescriptorSetLayout> m_descriptorSetLayout;
-	std::unique_ptr<ft::PipelineLayout> m_pipelineLayout;
-	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
-	std::vector<std::unique_ptr<ft::Framebuffer>> m_swapchainFramebuffers;
+	std::unique_ptr<ft::core::RenderPass> m_renderPass;
+	std::unique_ptr<ft::core::DescriptorSetLayout> m_descriptorSetLayout;
+	std::unique_ptr<ft::core::PipelineLayout> m_pipelineLayout;
+	std::unique_ptr<ft::core::Pipeline> m_graphicPipeline;
+	std::vector<std::unique_ptr<ft::core::Framebuffer>> m_swapchainFramebuffers;
 
-	std::unique_ptr<ft::Image> m_colorImage;
-	std::unique_ptr<ft::DeviceMemory> m_colorImageMemory;
-	std::unique_ptr<ft::ImageView> m_colorImageView;
+	std::unique_ptr<ft::core::Image> m_colorImage;
+	std::unique_ptr<ft::core::DeviceMemory> m_colorImageMemory;
+	std::unique_ptr<ft::core::ImageView> m_colorImageView;
 
-	std::unique_ptr<ft::Image> m_depthImage;
-	std::unique_ptr<ft::DeviceMemory> m_depthImageMemory;
-	std::unique_ptr<ft::ImageView> m_depthImageView;
+	std::unique_ptr<ft::core::Image> m_depthImage;
+	std::unique_ptr<ft::core::DeviceMemory> m_depthImageMemory;
+	std::unique_ptr<ft::core::ImageView> m_depthImageView;
 
-	std::unique_ptr<ft::CommandPool> m_commandPool;
-	std::vector<std::unique_ptr<ft::CommandBuffer>> m_commandBuffers;
+	std::unique_ptr<ft::core::CommandPool> m_commandPool;
+	std::vector<std::unique_ptr<ft::core::CommandBuffer>> m_commandBuffers;
 
-	std::vector<std::unique_ptr<ft::Semaphore>> m_imageAvailableSemaphores;
-	std::vector<std::unique_ptr<ft::Semaphore>> m_renderFinishedSemaphores;
-	std::vector<std::unique_ptr<ft::Fence>> m_inFlightFences;
+	std::vector<std::unique_ptr<ft::core::Semaphore>> m_imageAvailableSemaphores;
+	std::vector<std::unique_ptr<ft::core::Semaphore>> m_renderFinishedSemaphores;
+	std::vector<std::unique_ptr<ft::core::Fence>> m_inFlightFences;
 
 	std::vector<Vertex> m_vertices;
 	std::vector<uint32_t> m_indices;
-	std::unique_ptr<ft::Buffer> m_vertexBuffer;
-	std::unique_ptr<ft::DeviceMemory> m_vertexBufferMemory;
-	std::unique_ptr<ft::Buffer> m_indexBuffer;
-	std::unique_ptr<ft::DeviceMemory> m_indexBufferMemory;
+	std::unique_ptr<ft::core::Buffer> m_vertexBuffer;
+	std::unique_ptr<ft::core::DeviceMemory> m_vertexBufferMemory;
+	std::unique_ptr<ft::core::Buffer> m_indexBuffer;
+	std::unique_ptr<ft::core::DeviceMemory> m_indexBufferMemory;
 
 	uint32_t m_mipLevels;
-	std::unique_ptr<ft::Image> m_textureImage;
-	std::unique_ptr<ft::DeviceMemory> m_textureImageMemory;
-	std::unique_ptr<ft::ImageView> m_textureImageView;
-	std::unique_ptr<ft::Sampler> m_textureSampler;
+	std::unique_ptr<ft::core::Image> m_textureImage;
+	std::unique_ptr<ft::core::DeviceMemory> m_textureImageMemory;
+	std::unique_ptr<ft::core::ImageView> m_textureImageView;
+	std::unique_ptr<ft::core::Sampler> m_textureSampler;
 
-	std::vector<std::unique_ptr<ft::Buffer>> m_uniformBuffers;
-	std::vector<std::unique_ptr<ft::DeviceMemory>> m_uniformBuffersMemory;
+	std::vector<std::unique_ptr<ft::core::Buffer>> m_uniformBuffers;
+	std::vector<std::unique_ptr<ft::core::DeviceMemory>> m_uniformBuffersMemory;
 
-	std::unique_ptr<ft::DescriptorPool> m_descriptorPool;
-	std::vector<std::unique_ptr<ft::DescriptorSet>> m_descriptorSets;
+	std::unique_ptr<ft::core::DescriptorPool> m_descriptorPool;
+	std::vector<std::unique_ptr<ft::core::DescriptorSet>> m_descriptorSets;
 
 	bool m_framebufferResized = false;
 	
@@ -156,7 +156,7 @@ private:
 	void createSyncObjects();
 
 	std::vector<const char*> getRequiredExtensions();
-	void populateDebugMessengerCreateInfo(ft::DebugMessenger::CreateInfo& createInfo);
+	void populateDebugMessengerCreateInfo(ft::core::DebugMessenger::CreateInfo& createInfo);
 	bool isDeviceSuitable(const VkPhysicalDevice& physicalDevice);
 	QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
 
@@ -171,13 +171,13 @@ private:
 
 	void copyBufferToBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-	ft::CommandBuffer* beginSingleTimeCommands();
-	void endSingleTimeCommands(ft::CommandBuffer* commandBuffer);
+	ft::core::CommandBuffer* beginSingleTimeCommands();
+	void endSingleTimeCommands(ft::core::CommandBuffer* commandBuffer);
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 	void generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
 
-	void recordCommandBuffer(const std::unique_ptr<ft::CommandBuffer>& commandBuffer, uint32_t imageIndex);
+	void recordCommandBuffer(const std::unique_ptr<ft::core::CommandBuffer>& commandBuffer, uint32_t imageIndex);
 	void drawFrame();
 	void updateUniformBuffer(uint32_t currentImage);
 };

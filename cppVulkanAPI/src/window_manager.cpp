@@ -2,39 +2,42 @@
 
 namespace LIB_NAMESPACE
 {
-
-	WindowManager::WindowManager()
+	namespace core
 	{
-		glfwInit();
-	}
 
-	WindowManager::~WindowManager()
-	{
-		glfwTerminate();
-	}
+		WindowManager::WindowManager()
+		{
+			glfwInit();
+		}
 
-	std::unique_ptr<Window> WindowManager::createWindow(const WindowCreateInfo& createInfo)
-	{
-		return std::make_unique<Window>(createInfo);
-	}
+		WindowManager::~WindowManager()
+		{
+			glfwTerminate();
+		}
 
-	void WindowManager::pollEvents()
-	{
-		glfwPollEvents();
-	}
+		std::unique_ptr<Window> WindowManager::createWindow(const WindowCreateInfo& createInfo)
+		{
+			return std::make_unique<Window>(createInfo);
+		}
 
-	void WindowManager::waitEvents()
-	{
-		glfwWaitEvents();
-	}
+		void WindowManager::pollEvents()
+		{
+			glfwPollEvents();
+		}
 
-	std::vector<const char *> WindowManager::getRequiredInstanceExtensions()
-	{
-		uint32_t glfwExtensionCount = 0;
-		const char ** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+		void WindowManager::waitEvents()
+		{
+			glfwWaitEvents();
+		}
 
-		std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+		std::vector<const char *> WindowManager::getRequiredInstanceExtensions()
+		{
+			uint32_t glfwExtensionCount = 0;
+			const char ** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-		return extensions;
+			std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+			return extensions;
+		}
 	}
 }

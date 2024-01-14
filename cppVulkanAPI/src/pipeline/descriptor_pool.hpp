@@ -6,21 +6,24 @@
 
 namespace LIB_NAMESPACE
 {
-	class DescriptorPool
+	namespace core
 	{
+		class DescriptorPool
+		{
 
-	public:
+		public:
 
-		DescriptorPool(VkDevice device, VkDescriptorPoolCreateInfo& createInfo);
-		DescriptorPool(VkDevice device, uint32_t maxSets, uint32_t poolSizeCount, VkDescriptorPoolSize* poolSizes);
-		~DescriptorPool();
+			DescriptorPool(VkDevice device, VkDescriptorPoolCreateInfo& createInfo);
+			DescriptorPool(VkDevice device, uint32_t maxSets, uint32_t poolSizeCount, VkDescriptorPoolSize* poolSizes);
+			~DescriptorPool();
 
-		VkDescriptorPool getVk() const { return m_descriptorPool; }
+			VkDescriptorPool getVk() const { return m_descriptorPool; }
 
-	private:
+		private:
 
-		VkDescriptorPool m_descriptorPool;
+			VkDescriptorPool m_descriptorPool;
 
-		VkDevice m_device;
-	};
+			VkDevice m_device;
+		};
+	}
 }

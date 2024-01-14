@@ -6,30 +6,32 @@
 
 namespace LIB_NAMESPACE
 {
-	class Pipeline
+	namespace core
 	{
-	
-	public:
-
-		struct CreateInfo: public VkGraphicsPipelineCreateInfo
+		class Pipeline
 		{
-			CreateInfo(): VkGraphicsPipelineCreateInfo()
+		
+		public:
+
+			struct CreateInfo: public VkGraphicsPipelineCreateInfo
 			{
-				this->sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-			}
+				CreateInfo(): VkGraphicsPipelineCreateInfo()
+				{
+					this->sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+				}
+			};
+
+			Pipeline(VkDevice device, const CreateInfo& createInfo);
+			~Pipeline();
+
+			VkPipeline getVk() const { return m_pipeline; }
+
+		private:
+
+			VkPipeline m_pipeline;
+
+			VkDevice m_device;
+
 		};
-
-		Pipeline(VkDevice device, const CreateInfo& createInfo);
-		~Pipeline();
-
-		VkPipeline getVk() const { return m_pipeline; }
-
-	private:
-
-		VkPipeline m_pipeline;
-
-		VkDevice m_device;
-
-	};
-
+	}
 }

@@ -6,28 +6,31 @@
 
 namespace LIB_NAMESPACE
 {
-	class Device
+	namespace core
 	{
-
-	public:
-
-		struct CreateInfo: public VkDeviceCreateInfo
+		class Device
 		{
-			CreateInfo(): VkDeviceCreateInfo()
+
+		public:
+
+			struct CreateInfo: public VkDeviceCreateInfo
 			{
-				sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-			}
+				CreateInfo(): VkDeviceCreateInfo()
+				{
+					sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+				}
+			};
+
+			Device(VkPhysicalDevice physicalDevice, const CreateInfo & createInfo);
+			~Device();
+
+			VkDevice getVk() const { return m_device; }
+
+			VkResult waitIdle();
+
+		private:
+
+			VkDevice m_device;
 		};
-
-		Device(VkPhysicalDevice physicalDevice, const CreateInfo & createInfo);
-		~Device();
-
-		VkDevice getVk() const { return m_device; }
-
-		VkResult waitIdle();
-
-	private:
-
-		VkDevice m_device;
-	};
+	}
 }

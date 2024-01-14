@@ -6,29 +6,32 @@
 
 namespace LIB_NAMESPACE
 {
-	class DescriptorSet
+	namespace core
 	{
+		class DescriptorSet
+		{
 
-	public:
+		public:
 
-		DescriptorSet(VkDevice device, VkDescriptorSetAllocateInfo& allocInfo);
-		~DescriptorSet();
+			DescriptorSet(VkDevice device, VkDescriptorSetAllocateInfo& allocInfo);
+			~DescriptorSet();
 
-		VkDescriptorSet getVk() const { return m_descriptorSet; }
-		VkDescriptorSet* getVkPtr() { return &m_descriptorSet; }
+			VkDescriptorSet getVk() const { return m_descriptorSet; }
+			VkDescriptorSet* getVkPtr() { return &m_descriptorSet; }
 
-		void update(
-			uint32_t descriptorWriteCount,
-			VkWriteDescriptorSet* descriptorWrites,
-			uint32_t descriptorCopyCount = 0,
-			VkCopyDescriptorSet* descriptorCopies = nullptr
-		);
+			void update(
+				uint32_t descriptorWriteCount,
+				VkWriteDescriptorSet* descriptorWrites,
+				uint32_t descriptorCopyCount = 0,
+				VkCopyDescriptorSet* descriptorCopies = nullptr
+			);
 
-	private:
+		private:
 
-		VkDescriptorSet m_descriptorSet;
+			VkDescriptorSet m_descriptorSet;
 
-		VkDevice m_device;
-		VkDescriptorPool m_descriptorPool;
-	};
+			VkDevice m_device;
+			VkDescriptorPool m_descriptorPool;
+		};
+	}
 }

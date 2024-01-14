@@ -4,18 +4,20 @@
 
 namespace LIB_NAMESPACE
 {
-	Pipeline::Pipeline(VkDevice device, const CreateInfo& createInfo)
-		: m_device(device)
+	namespace core
 	{
-		if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &createInfo, nullptr, &m_pipeline) != VK_SUCCESS)
+		Pipeline::Pipeline(VkDevice device, const CreateInfo& createInfo)
+			: m_device(device)
 		{
-			throw std::runtime_error("failed to create graphics pipeline.");
+			if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &createInfo, nullptr, &m_pipeline) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to create graphics pipeline.");
+			}
+		}
+
+		Pipeline::~Pipeline()
+		{
+			vkDestroyPipeline(m_device, m_pipeline, nullptr);
 		}
 	}
-
-	Pipeline::~Pipeline()
-	{
-		vkDestroyPipeline(m_device, m_pipeline, nullptr);
-	}
-
 }

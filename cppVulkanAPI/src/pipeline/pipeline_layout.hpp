@@ -6,30 +6,32 @@
 
 namespace LIB_NAMESPACE
 {
-	class PipelineLayout
+	namespace core
 	{
-	
-	public:
-
-		struct CreateInfo: public VkPipelineLayoutCreateInfo
+		class PipelineLayout
 		{
-			CreateInfo(): VkPipelineLayoutCreateInfo()
+		
+		public:
+
+			struct CreateInfo: public VkPipelineLayoutCreateInfo
 			{
-				this->sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-			}
+				CreateInfo(): VkPipelineLayoutCreateInfo()
+				{
+					this->sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+				}
+			};
+
+			PipelineLayout(VkDevice device, const VkPipelineLayoutCreateInfo& createInfo);
+			~PipelineLayout();
+
+			VkPipelineLayout getVk() const { return m_pipelineLayout; }
+
+		private:
+
+			VkPipelineLayout m_pipelineLayout;
+
+			VkDevice m_device;
+
 		};
-
-		PipelineLayout(VkDevice device, const VkPipelineLayoutCreateInfo& createInfo);
-		~PipelineLayout();
-
-		VkPipelineLayout getVk() const { return m_pipelineLayout; }
-
-	private:
-
-		VkPipelineLayout m_pipelineLayout;
-
-		VkDevice m_device;
-
-	};
-
+	}
 }

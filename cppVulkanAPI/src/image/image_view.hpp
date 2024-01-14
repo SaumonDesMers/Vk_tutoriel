@@ -6,30 +6,32 @@
 
 namespace LIB_NAMESPACE
 {
-	class ImageView
+	namespace core
 	{
-	
-	public:
-
-		struct CreateInfo: public VkImageViewCreateInfo
+		class ImageView
 		{
-			CreateInfo(): VkImageViewCreateInfo()
+		
+		public:
+
+			struct CreateInfo: public VkImageViewCreateInfo
 			{
-				this->sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			}
+				CreateInfo(): VkImageViewCreateInfo()
+				{
+					this->sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+				}
+			};
+
+			ImageView(VkDevice device, const VkImageViewCreateInfo& createInfo);
+			~ImageView();
+
+			VkImageView getVk() const { return m_imageView; }
+
+		private:
+
+			VkImageView m_imageView;
+
+			VkDevice m_device;
+
 		};
-
-		ImageView(VkDevice device, const VkImageViewCreateInfo& createInfo);
-		~ImageView();
-
-		VkImageView getVk() const { return m_imageView; }
-
-	private:
-
-		VkImageView m_imageView;
-
-		VkDevice m_device;
-
-	};
-
+	}
 }

@@ -6,29 +6,32 @@
 
 namespace LIB_NAMESPACE
 {
-	class RenderPass
+	namespace core
 	{
-
-	public:
-
-		struct CreateInfo: public VkRenderPassCreateInfo
+		class RenderPass
 		{
-			CreateInfo(): VkRenderPassCreateInfo()
+
+		public:
+
+			struct CreateInfo: public VkRenderPassCreateInfo
 			{
-				this->sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-			}
+				CreateInfo(): VkRenderPassCreateInfo()
+				{
+					this->sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+				}
+			};
+
+			RenderPass(VkDevice device, const CreateInfo& createInfo);
+			~RenderPass();
+
+			VkRenderPass getVk() const { return m_renderPass; }
+
+		private:
+
+			VkRenderPass m_renderPass;
+
+			VkDevice m_device;
+
 		};
-
-		RenderPass(VkDevice device, const CreateInfo& createInfo);
-		~RenderPass();
-
-		VkRenderPass getVk() const { return m_renderPass; }
-
-	private:
-
-		VkRenderPass m_renderPass;
-
-		VkDevice m_device;
-
-	};
+	}
 }

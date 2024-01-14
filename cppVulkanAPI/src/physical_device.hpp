@@ -10,72 +10,74 @@
 
 namespace LIB_NAMESPACE
 {
-	class PhysicalDevice
+	namespace core
 	{
-
-	public:
-
-		struct Properties: public VkPhysicalDeviceProperties
+		class PhysicalDevice
 		{
-			Properties() : VkPhysicalDeviceProperties() {}
 
-			Properties(const VkPhysicalDevice& physicalDevice)
+		public:
+
+			struct Properties: public VkPhysicalDeviceProperties
 			{
-				vkGetPhysicalDeviceProperties(physicalDevice, this);
-			}
-		};
+				Properties() : VkPhysicalDeviceProperties() {}
 
-		struct Features: public VkPhysicalDeviceFeatures
-		{
-			Features() : VkPhysicalDeviceFeatures() {}
+				Properties(const VkPhysicalDevice& physicalDevice)
+				{
+					vkGetPhysicalDeviceProperties(physicalDevice, this);
+				}
+			};
 
-			Features(const VkPhysicalDevice& physicalDevice)
-				: VkPhysicalDeviceFeatures()
+			struct Features: public VkPhysicalDeviceFeatures
 			{
-				vkGetPhysicalDeviceFeatures(physicalDevice, this);
-			}
+				Features() : VkPhysicalDeviceFeatures() {}
+
+				Features(const VkPhysicalDevice& physicalDevice)
+					: VkPhysicalDeviceFeatures()
+				{
+					vkGetPhysicalDeviceFeatures(physicalDevice, this);
+				}
+			};
+
+			PhysicalDevice(VkPhysicalDevice physicalDevice);
+
+			~PhysicalDevice();
+
+			VkPhysicalDevice getVk() const { return m_physicalDevice; }
+
+			static std::vector<VkQueueFamilyProperties> getQueueFamilyProperties(VkPhysicalDevice physicalDevice);
+
+			static bool getSurfaceSupport(
+				VkPhysicalDevice physicalDevice,
+				uint32_t queueFamilyIndex,
+				VkSurfaceKHR surface
+			);
+
+			static VkSurfaceCapabilitiesKHR getSurfaceCapabilities(
+				VkPhysicalDevice physicalDevice,
+				VkSurfaceKHR surface
+			);
+
+			static std::vector<VkSurfaceFormatKHR> getSurfaceFormats(
+				VkPhysicalDevice physicalDevice,
+				VkSurfaceKHR surface
+			);
+
+			static std::vector<VkPresentModeKHR> getSurfacePresentModes(
+				VkPhysicalDevice physicalDevice,
+				VkSurfaceKHR surface
+			);
+
+			static bool checkExtensionSupport(
+				const VkPhysicalDevice& physicalDevice,
+				const std::vector<const char*>& extensions
+			);
+
+			void getProperties(VkPhysicalDeviceProperties* properties) const;
+
+		private:
+
+			VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
+
 		};
-
-		PhysicalDevice(VkPhysicalDevice physicalDevice);
-
-		~PhysicalDevice();
-
-		VkPhysicalDevice getVk() const { return m_physicalDevice; }
-
-		static std::vector<VkQueueFamilyProperties> getQueueFamilyProperties(VkPhysicalDevice physicalDevice);
-
-		static bool getSurfaceSupport(
-			VkPhysicalDevice physicalDevice,
-			uint32_t queueFamilyIndex,
-			VkSurfaceKHR surface
-		);
-
-		static VkSurfaceCapabilitiesKHR getSurfaceCapabilities(
-			VkPhysicalDevice physicalDevice,
-			VkSurfaceKHR surface
-		);
-
-		static std::vector<VkSurfaceFormatKHR> getSurfaceFormats(
-			VkPhysicalDevice physicalDevice,
-			VkSurfaceKHR surface
-		);
-
-		static std::vector<VkPresentModeKHR> getSurfacePresentModes(
-			VkPhysicalDevice physicalDevice,
-			VkSurfaceKHR surface
-		);
-
-		static bool checkExtensionSupport(
-			const VkPhysicalDevice& physicalDevice,
-			const std::vector<const char*>& extensions
-		);
-
-		void getProperties(VkPhysicalDeviceProperties* properties) const;
-
-	private:
-
-		VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
-
-	};
-
+	}
 }

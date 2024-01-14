@@ -6,56 +6,58 @@
 
 namespace LIB_NAMESPACE
 {
-	class DeviceMemory
+	namespace core
 	{
-
-	public:
-
-		struct AllocateInfo: public VkMemoryAllocateInfo
+		class DeviceMemory
 		{
-			AllocateInfo(): VkMemoryAllocateInfo()
+
+		public:
+
+			struct AllocateInfo: public VkMemoryAllocateInfo
 			{
-				sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			}
-		};
+				AllocateInfo(): VkMemoryAllocateInfo()
+				{
+					sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+				}
+			};
 
-		DeviceMemory(
-			VkDevice device,
-			VkMemoryAllocateInfo& allocateInfo
-		);
-		~DeviceMemory();
+			DeviceMemory(
+				VkDevice device,
+				VkMemoryAllocateInfo& allocateInfo
+			);
+			~DeviceMemory();
 
-		VkDeviceMemory getVk() { return m_memory; }
+			VkDeviceMemory getVk() { return m_memory; }
 
-		VkResult map(
-			VkDeviceSize offset = 0,
-			VkDeviceSize size = VK_WHOLE_SIZE,
-			VkMemoryMapFlags flags = 0
-		);
-		void unmap();
+			VkResult map(
+				VkDeviceSize offset = 0,
+				VkDeviceSize size = VK_WHOLE_SIZE,
+				VkMemoryMapFlags flags = 0
+			);
+			void unmap();
 
-		void write(void *data, uint32_t size);
+			void write(void *data, uint32_t size);
 
-		static uint32_t findMemoryType(
-			VkPhysicalDevice physicalDevice,
-			uint32_t typeFilter,
-			VkMemoryPropertyFlags properties
-		);
-	
-	private:
-
-		VkDeviceMemory m_memory;
-
-		VkDevice m_device;
-
-		bool m_isMapped;
-		void *m_mappedMemory;
-
-		void init(
-			const VkMemoryAllocateInfo& allocateInfo,
-			VkMemoryPropertyFlags properties
-		);
-
+			static uint32_t findMemoryType(
+				VkPhysicalDevice physicalDevice,
+				uint32_t typeFilter,
+				VkMemoryPropertyFlags properties
+			);
 		
-	};
+		private:
+
+			VkDeviceMemory m_memory;
+
+			VkDevice m_device;
+
+			bool m_isMapped;
+			void *m_mappedMemory;
+
+			void init(
+				const VkMemoryAllocateInfo& allocateInfo,
+				VkMemoryPropertyFlags properties
+			);
+
+		};
+	}
 }

@@ -5,21 +5,24 @@
 
 namespace LIB_NAMESPACE
 {
-	Device::Device(VkPhysicalDevice physicalDevice, const CreateInfo & createInfo)
+	namespace core
 	{
-		if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &m_device) != VK_SUCCESS)
+		Device::Device(VkPhysicalDevice physicalDevice, const CreateInfo & createInfo)
 		{
-			throw std::runtime_error("failed to create logical device.");
+			if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &m_device) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to create logical device.");
+			}
 		}
-	}
 
-	Device::~Device()
-	{
-		vkDestroyDevice(m_device, nullptr);
-	}
+		Device::~Device()
+		{
+			vkDestroyDevice(m_device, nullptr);
+		}
 
-	VkResult Device::waitIdle()
-	{
-		return vkDeviceWaitIdle(m_device);
+		VkResult Device::waitIdle()
+		{
+			return vkDeviceWaitIdle(m_device);
+		}
 	}
 }

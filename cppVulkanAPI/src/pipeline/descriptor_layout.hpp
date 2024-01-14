@@ -6,22 +6,25 @@
 
 namespace LIB_NAMESPACE
 {
-	class DescriptorSetLayout
+	namespace core
 	{
-	
-	public:
+		class DescriptorSetLayout
+		{
+		
+		public:
 
-		DescriptorSetLayout(VkDevice device, VkDescriptorSetLayoutCreateInfo& createInfo);
-		~DescriptorSetLayout();
+			DescriptorSetLayout(VkDevice device, VkDescriptorSetLayoutCreateInfo& createInfo);
+			~DescriptorSetLayout();
 
-		VkDescriptorSetLayout getVk() const { return m_layout; }
-		VkDescriptorSetLayout& getVkRef() { return m_layout; }
+			VkDescriptorSetLayout getVk() const { return m_layout; }
+			VkDescriptorSetLayout& getVkRef() { return m_layout; }
 
-	private:
+		private:
 
-		VkDescriptorSetLayout m_layout;
+			VkDescriptorSetLayout m_layout;
 
-		VkDevice m_device;
+			VkDevice m_device;
 
-	};
+		};
+	}
 }
