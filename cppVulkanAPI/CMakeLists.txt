@@ -22,8 +22,6 @@ target_compile_options(${PROJECT_NAME}
 
 target_sources(${PROJECT_NAME}
 	PUBLIC
-		src/core/window_manager.cpp
-		src/core/window.cpp
 		src/core/instance.cpp
 		src/core/debug.cpp
 		src/core/physical_device.cpp
@@ -46,6 +44,9 @@ target_sources(${PROJECT_NAME}
 		src/core/sync_object.cpp
 		src/core/buffer.cpp
 		src/core/device_memory.cpp
+
+		src/framework/window/window.cpp
+		src/framework/device.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)

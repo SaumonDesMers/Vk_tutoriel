@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../src/defines.hpp"
-#include "../src/core/window_manager.hpp"
-#include "../src/core/window.hpp"
 #include "../src/core/instance.hpp"
 #include "../src/core/debug.hpp"
 #include "../src/core/physical_device.hpp"
@@ -25,3 +23,6 @@
 #include "../src/core/sync_object.hpp"
 #include "../src/core/buffer.hpp"
 #include "../src/core/device_memory.hpp"
+
+#include "../src/framework/device.hpp"
+#include "../src/framework/window/window.hpp"

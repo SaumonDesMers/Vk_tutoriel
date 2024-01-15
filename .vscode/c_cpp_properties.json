@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/cppVulkanAPI/include",
-"${workspaceFolder}/cppVulkanAPI/external/glm",
+				"${workspaceFolder}/cppVulkanAPI/external/glm",
                 "${workspaceFolder}/playground/src",
                 "${workspaceFolder}/playground/external/glm",
                 "${workspaceFolder}/playground/external/stb",

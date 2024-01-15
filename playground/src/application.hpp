@@ -61,16 +61,18 @@ private:
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 
-	std::unique_ptr<ft::core::WindowManager> m_windowManager;
-	std::unique_ptr<ft::core::Window> m_window;
+	// std::unique_ptr<ft::Window::Manager> m_windowManager;
+	// std::unique_ptr<ft::Window> m_window;
+
+	std::unique_ptr<ft::Device> m_device;
 
 	std::unique_ptr<ft::core::Instance> m_instance;
 	std::unique_ptr<ft::core::DebugMessenger> m_debugMessenger;
 
-	std::unique_ptr<ft::core::Window::Surface> m_surface;
+	std::unique_ptr<ft::Window::Surface> m_surface;
 
 	std::unique_ptr<ft::core::PhysicalDevice> m_physicalDevice;
-	std::unique_ptr<ft::core::Device> m_device;
+	std::unique_ptr<ft::core::Device> m_coreDevice;
 
 	std::unique_ptr<ft::core::Queue> m_graphicsQueue;
 	std::unique_ptr<ft::core::Queue> m_presentQueue;

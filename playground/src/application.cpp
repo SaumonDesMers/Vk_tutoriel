@@ -32,19 +32,20 @@ void Application::run()
 {
 	init();
 
-	while (m_window->shouldClose() == false)
+	while (m_device->window->shouldClose() == false)
 	{
-		m_windowManager->pollEvents();
+		m_device->windowManager->pollEvents();
 		drawFrame();
 	}
 
-	m_device->waitIdle();
+	m_coreDevice->waitIdle();
 }
 
 void Application::init()
 {
-	createWindowManager();
-	createWindow();
+	// createWindowManager();
+	// createWindow();
+	m_device = std::make_unique<ft::Device>();
 	createInstance();
 	setupDebugMessenger();
 	createSurface();
@@ -76,17 +77,17 @@ void Application::init()
 
 void Application::createWindowManager()
 {
-	m_windowManager = std::make_unique<ft::core::WindowManager>();
+	// m_device->windowManager = std::make_unique<ft::Window::Manager>();
 }
 
 void Application::createWindow()
 {
-	ft::core::WindowCreateInfo createInfo = {};
-	createInfo.title = "Playground";
-	createInfo.width = 800;
-	createInfo.height = 600;
+	// ft::Window::CreateInfo createInfo = {};
+	// createInfo.title = "Playground";
+	// createInfo.width = 800;
+	// createInfo.height = 600;
 
-	m_window = m_windowManager->createWindow(createInfo);
+	// m_device->window = m_device->windowManager->createWindow(createInfo);
 }
 
 void Application::createInstance()
@@ -143,7 +144,7 @@ void Application::setupDebugMessenger()
 
 void Application::createSurface()
 {
-	m_surface = std::make_unique<ft::core::Window::Surface>(m_instance->getVk(), m_window->getGLFWwindow());
+	m_surface = std::make_unique<ft::Window::Surface>(m_instance->getVk(), m_device->window->getGLFWwindow());
 }
 
 void Application::pickPhysicalDevice()
@@ -213,10 +214,10 @@ void Application::createLogicalDevice()
 		createInfo.enabledLayerCount = 0;
 	}
 
-	m_device = std::make_unique<ft::core::Device>(m_physicalDevice->getVk(), createInfo);
+	m_coreDevice = std::make_unique<ft::core::Device>(m_physicalDevice->getVk(), createInfo);
 
-	m_graphicsQueue = std::make_unique<ft::core::Queue>(m_device->getVk(), indices.graphicsFamily.value());
-	m_presentQueue = std::make_unique<ft::core::Queue>(m_device->getVk(), indices.presentFamily.value());
+	m_graphicsQueue = std::make_unique<ft::core::Queue>(m_coreDevice->getVk(), indices.graphicsFamily.value());
+	m_presentQueue = std::make_unique<ft::core::Queue>(m_coreDevice->getVk(), indices.presentFamily.value());
 }
 
 void Application::createSwapChain()
@@ -267,20 +268,20 @@ void Application::createSwapChain()
 
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	m_swapchain = std::make_unique<ft::core::Swapchain>(m_device->getVk(), createInfo);
+	m_swapchain = std::make_unique<ft::core::Swapchain>(m_coreDevice->getVk(), createInfo);
 }
 
 void Application::recreateSwapChain()
 {
 	int width = 0, height = 0;
-    m_window->getFramebufferSize(&width, &height);
+    m_device->window->getFramebufferSize(&width, &height);
     while (width == 0 || height == 0)
 	{
-        m_window->getFramebufferSize(&width, &height);
-        m_windowManager->waitEvents();
+        m_device->window->getFramebufferSize(&width, &height);
+        m_device->windowManager->waitEvents();
     }
 
-	m_device->waitIdle();
+	m_coreDevice->waitIdle();
 
 	m_swapchainFramebuffers.clear();
 	m_swapchainImageViews.clear();
@@ -319,7 +320,7 @@ void Application::createSwapchainImageViews()
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
 
-		m_swapchainImageViews[i] = std::make_unique<ft::core::ImageView>(m_device->getVk(), createInfo);
+		m_swapchainImageViews[i] = std::make_unique<ft::core::ImageView>(m_coreDevice->getVk(), createInfo);
 	}
 }
 
@@ -394,7 +395,7 @@ void Application::createRenderPass()
 	renderPassInfo.dependencyCount = 1;
 	renderPassInfo.pDependencies = &dependency;
 
-	m_renderPass = std::make_unique<ft::core::RenderPass>(m_device->getVk(), renderPassInfo);
+	m_renderPass = std::make_unique<ft::core::RenderPass>(m_coreDevice->getVk(), renderPassInfo);
 }
 
 void Application::createDescriptorSetLayout()
@@ -418,13 +419,13 @@ void Application::createDescriptorSetLayout()
 	layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
 	layoutInfo.pBindings = bindings.data();
 
-	m_descriptorSetLayout = std::make_unique<ft::core::DescriptorSetLayout>(m_device->getVk(), layoutInfo);
+	m_descriptorSetLayout = std::make_unique<ft::core::DescriptorSetLayout>(m_coreDevice->getVk(), layoutInfo);
 }
 
 void Application::createGraphicsPipeline()
 {
-	ft::core::ShaderModule vertShaderModule(m_device->getVk(), "playground/shaders/simple_shader.vert.spv");
-	ft::core::ShaderModule fragShaderModule(m_device->getVk(), "playground/shaders/simple_shader.frag.spv");
+	ft::core::ShaderModule vertShaderModule(m_coreDevice->getVk(), "playground/shaders/simple_shader.vert.spv");
+	ft::core::ShaderModule fragShaderModule(m_coreDevice->getVk(), "playground/shaders/simple_shader.frag.spv");
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -517,7 +518,7 @@ void Application::createGraphicsPipeline()
 	pipelineLayoutInfo.setLayoutCount = 1;
 	pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout->getVkRef();
 
-	m_pipelineLayout = std::make_unique<ft::core::PipelineLayout>(m_device->getVk(), pipelineLayoutInfo);
+	m_pipelineLayout = std::make_unique<ft::core::PipelineLayout>(m_coreDevice->getVk(), pipelineLayoutInfo);
 
 
 	ft::core::Pipeline::CreateInfo pipelineInfo = {};
@@ -535,7 +536,7 @@ void Application::createGraphicsPipeline()
 	pipelineInfo.renderPass = m_renderPass->getVk();
 	pipelineInfo.subpass = 0;
 
-	m_graphicPipeline = std::make_unique<ft::core::Pipeline>(m_device->getVk(), pipelineInfo);
+	m_graphicPipeline = std::make_unique<ft::core::Pipeline>(m_coreDevice->getVk(), pipelineInfo);
 }	
 
 void Application::createFramebuffers()
@@ -557,7 +558,7 @@ void Application::createFramebuffers()
 		framebufferInfo.height = m_swapchain->getExtent().height;
 		framebufferInfo.layers = 1;
 
-		m_swapchainFramebuffers[i] = std::make_unique<ft::core::Framebuffer>(m_device->getVk(), framebufferInfo);
+		m_swapchainFramebuffers[i] = std::make_unique<ft::core::Framebuffer>(m_coreDevice->getVk(), framebufferInfo);
 	}
 }
 
@@ -569,7 +570,7 @@ void Application::createCommandPool()
 	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-	m_commandPool = std::make_unique<ft::core::CommandPool>(m_device->getVk(), poolInfo);
+	m_commandPool = std::make_unique<ft::core::CommandPool>(m_coreDevice->getVk(), poolInfo);
 }
 
 void Application::createColorResources()
@@ -591,7 +592,7 @@ void Application::createColorResources()
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	imageInfo.samples = m_msaaSamples;
 
-	m_colorImage = std::make_unique<ft::core::Image>(m_device->getVk(), imageInfo);
+	m_colorImage = std::make_unique<ft::core::Image>(m_coreDevice->getVk(), imageInfo);
 
 	VkMemoryRequirements memRequirements = m_colorImage->getMemoryRequirements();
 
@@ -604,7 +605,7 @@ void Application::createColorResources()
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
 
-	m_colorImageMemory = std::make_unique<ft::core::DeviceMemory>(m_device->getVk(), allocInfo);
+	m_colorImageMemory = std::make_unique<ft::core::DeviceMemory>(m_coreDevice->getVk(), allocInfo);
 
 	m_colorImage->bindMemory(m_colorImageMemory->getVk());
 
@@ -619,7 +620,7 @@ void Application::createColorResources()
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount = 1;
 
-	m_colorImageView = std::make_unique<ft::core::ImageView>(m_device->getVk(), viewInfo);
+	m_colorImageView = std::make_unique<ft::core::ImageView>(m_coreDevice->getVk(), viewInfo);
 
 }
 
@@ -642,7 +643,7 @@ void Application::createDepthResources()
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	imageInfo.samples = m_msaaSamples;
 
-	m_depthImage = std::make_unique<ft::core::Image>(m_device->getVk(), imageInfo);
+	m_depthImage = std::make_unique<ft::core::Image>(m_coreDevice->getVk(), imageInfo);
 
 	VkMemoryRequirements memRequirements = m_depthImage->getMemoryRequirements();
 
@@ -655,7 +656,7 @@ void Application::createDepthResources()
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
 
-	m_depthImageMemory = std::make_unique<ft::core::DeviceMemory>(m_device->getVk(), allocInfo);
+	m_depthImageMemory = std::make_unique<ft::core::DeviceMemory>(m_coreDevice->getVk(), allocInfo);
 
 	m_depthImage->bindMemory(m_depthImageMemory->getVk());
 
@@ -671,7 +672,7 @@ void Application::createDepthResources()
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount = 1;
 
-	m_depthImageView = std::make_unique<ft::core::ImageView>(m_device->getVk(), viewInfo);
+	m_depthImageView = std::make_unique<ft::core::ImageView>(m_coreDevice->getVk(), viewInfo);
 
 }
 
@@ -694,7 +695,7 @@ void Application::createTextureImage()
 	stagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 	stagingBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	ft::core::Buffer stagingBuffer(m_device->getVk(), stagingBufferInfo);
+	ft::core::Buffer stagingBuffer(m_coreDevice->getVk(), stagingBufferInfo);
 
 	VkMemoryRequirements stagingMemRequirements = stagingBuffer.getMemoryRequirements();
 
@@ -707,9 +708,9 @@ void Application::createTextureImage()
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
 
-	ft::core::DeviceMemory stagingBufferMemory(m_device->getVk(), stagingMemoryInfo);
+	ft::core::DeviceMemory stagingBufferMemory(m_coreDevice->getVk(), stagingMemoryInfo);
 
-	vkBindBufferMemory(m_device->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
+	vkBindBufferMemory(m_coreDevice->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
 
 	stagingBufferMemory.map();
 	stagingBufferMemory.write((void*)pixels, imageSize);
@@ -738,7 +739,7 @@ void Application::createTextureImage()
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-	m_textureImage = std::make_unique<ft::core::Image>(m_device->getVk(), imageInfo);
+	m_textureImage = std::make_unique<ft::core::Image>(m_coreDevice->getVk(), imageInfo);
 
 	VkMemoryRequirements imageMemRequirements = m_textureImage->getMemoryRequirements();
 
@@ -751,7 +752,7 @@ void Application::createTextureImage()
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
 
-	m_textureImageMemory = std::make_unique<ft::core::DeviceMemory>(m_device->getVk(), imageMemoryInfo);
+	m_textureImageMemory = std::make_unique<ft::core::DeviceMemory>(m_coreDevice->getVk(), imageMemoryInfo);
 
 	m_textureImage->bindMemory(m_textureImageMemory->getVk());
 
@@ -796,7 +797,7 @@ void Application::createTextureImageView()
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount = 1;
 
-	m_textureImageView = std::make_unique<ft::core::ImageView>(m_device->getVk(), viewInfo);
+	m_textureImageView = std::make_unique<ft::core::ImageView>(m_coreDevice->getVk(), viewInfo);
 }
 
 void Application::createTextureSampler()
@@ -828,7 +829,7 @@ void Application::createTextureSampler()
 	samplerInfo.minLod = 0.0f;
 	samplerInfo.maxLod = static_cast<float>(m_mipLevels);
 
-	m_textureSampler = std::make_unique<ft::core::Sampler>(m_device->getVk(), samplerInfo);
+	m_textureSampler = std::make_unique<ft::core::Sampler>(m_coreDevice->getVk(), samplerInfo);
 }
 
 void Application::loadModel()
@@ -889,7 +890,7 @@ void Application::createVertexBuffer()
 	stagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 	stagingBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	ft::core::Buffer stagingBuffer(m_device->getVk(), stagingBufferInfo);
+	ft::core::Buffer stagingBuffer(m_coreDevice->getVk(), stagingBufferInfo);
 
 	VkMemoryRequirements memRequirements = stagingBuffer.getMemoryRequirements();
 	
@@ -902,9 +903,9 @@ void Application::createVertexBuffer()
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
 
-	ft::core::DeviceMemory stagingBufferMemory(m_device->getVk(), stagingMemoryInfo);
+	ft::core::DeviceMemory stagingBufferMemory(m_coreDevice->getVk(), stagingMemoryInfo);
 
-	vkBindBufferMemory(m_device->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
+	vkBindBufferMemory(m_coreDevice->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
 
 
 	stagingBufferMemory.map();
@@ -918,7 +919,7 @@ void Application::createVertexBuffer()
 	vertexBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 	vertexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	m_vertexBuffer = std::make_unique<ft::core::Buffer>(m_device->getVk(), vertexBufferInfo);
+	m_vertexBuffer = std::make_unique<ft::core::Buffer>(m_coreDevice->getVk(), vertexBufferInfo);
 
 	VkMemoryRequirements vertexMemRequirements = m_vertexBuffer->getMemoryRequirements();
 
@@ -931,9 +932,9 @@ void Application::createVertexBuffer()
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
 
-	m_vertexBufferMemory = std::make_unique<ft::core::DeviceMemory>(m_device->getVk(), vertexMemoryInfo);
+	m_vertexBufferMemory = std::make_unique<ft::core::DeviceMemory>(m_coreDevice->getVk(), vertexMemoryInfo);
 
-	vkBindBufferMemory(m_device->getVk(), m_vertexBuffer->getVk(), m_vertexBufferMemory->getVk(), 0);
+	vkBindBufferMemory(m_coreDevice->getVk(), m_vertexBuffer->getVk(), m_vertexBufferMemory->getVk(), 0);
 
 
 	copyBufferToBuffer(stagingBuffer.getVk(), m_vertexBuffer->getVk(), bufferSize);
@@ -949,7 +950,7 @@ void Application::createIndexBuffer()
 	stagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 	stagingBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	ft::core::Buffer stagingBuffer(m_device->getVk(), stagingBufferInfo);
+	ft::core::Buffer stagingBuffer(m_coreDevice->getVk(), stagingBufferInfo);
 
 	VkMemoryRequirements stagingMemRequirements = stagingBuffer.getMemoryRequirements();
 
@@ -962,9 +963,9 @@ void Application::createIndexBuffer()
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
 
-	ft::core::DeviceMemory stagingBufferMemory(m_device->getVk(), stagingMemoryInfo);
+	ft::core::DeviceMemory stagingBufferMemory(m_coreDevice->getVk(), stagingMemoryInfo);
 
-	vkBindBufferMemory(m_device->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
+	vkBindBufferMemory(m_coreDevice->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
 
 
 	stagingBufferMemory.map();
@@ -978,7 +979,7 @@ void Application::createIndexBuffer()
 	indexBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 	indexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	m_indexBuffer = std::make_unique<ft::core::Buffer>(m_device->getVk(), indexBufferInfo);
+	m_indexBuffer = std::make_unique<ft::core::Buffer>(m_coreDevice->getVk(), indexBufferInfo);
 
 	VkMemoryRequirements indexMemRequirements = m_indexBuffer->getMemoryRequirements();
 
@@ -991,9 +992,9 @@ void Application::createIndexBuffer()
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
 
-	m_indexBufferMemory = std::make_unique<ft::core::DeviceMemory>(m_device->getVk(), indexMemoryInfo);
+	m_indexBufferMemory = std::make_unique<ft::core::DeviceMemory>(m_coreDevice->getVk(), indexMemoryInfo);
 
-	vkBindBufferMemory(m_device->getVk(), m_indexBuffer->getVk(), m_indexBufferMemory->getVk(), 0);
+	vkBindBufferMemory(m_coreDevice->getVk(), m_indexBuffer->getVk(), m_indexBufferMemory->getVk(), 0);
 
 
 	copyBufferToBuffer(stagingBuffer.getVk(), m_indexBuffer->getVk(), bufferSize);
@@ -1014,7 +1015,7 @@ void Application::createUniformBuffers()
 		bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		m_uniformBuffers[i] = std::make_unique<ft::core::Buffer>(m_device->getVk(), bufferInfo);
+		m_uniformBuffers[i] = std::make_unique<ft::core::Buffer>(m_coreDevice->getVk(), bufferInfo);
 
 		VkMemoryRequirements memRequirements = m_uniformBuffers[i]->getMemoryRequirements();
 
@@ -1027,9 +1028,9 @@ void Application::createUniformBuffers()
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		);
 
-		m_uniformBuffersMemory[i] = std::make_unique<ft::core::DeviceMemory>(m_device->getVk(), allocInfo);
+		m_uniformBuffersMemory[i] = std::make_unique<ft::core::DeviceMemory>(m_coreDevice->getVk(), allocInfo);
 
-		vkBindBufferMemory(m_device->getVk(), m_uniformBuffers[i]->getVk(), m_uniformBuffersMemory[i]->getVk(), 0);
+		vkBindBufferMemory(m_coreDevice->getVk(), m_uniformBuffers[i]->getVk(), m_uniformBuffersMemory[i]->getVk(), 0);
 
 
 		m_uniformBuffersMemory[i]->map();
@@ -1050,7 +1051,7 @@ void Application::createDescriptorPool()
 	poolInfo.pPoolSizes = poolSizes.data();
 	poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
-	m_descriptorPool = std::make_unique<ft::core::DescriptorPool>(m_device->getVk(), poolInfo);
+	m_descriptorPool = std::make_unique<ft::core::DescriptorPool>(m_coreDevice->getVk(), poolInfo);
 }
 
 void Application::createDescriptorSets()
@@ -1070,7 +1071,7 @@ void Application::createDescriptorSets()
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
-		m_descriptorSets[i] = std::make_unique<ft::core::DescriptorSet>(m_device->getVk(), allocInfo);
+		m_descriptorSets[i] = std::make_unique<ft::core::DescriptorSet>(m_coreDevice->getVk(), allocInfo);
 
 		VkDescriptorBufferInfo bufferInfo{};
 		bufferInfo.buffer = m_uniformBuffers[i]->getVk();
@@ -1116,7 +1117,7 @@ void Application::createCommandBuffer()
 
 	for (size_t i = 0; i < m_commandBuffers.size(); i++)
 	{
-		m_commandBuffers[i] = std::make_unique<ft::core::CommandBuffer>(m_device->getVk(), allocInfo);
+		m_commandBuffers[i] = std::make_unique<ft::core::CommandBuffer>(m_coreDevice->getVk(), allocInfo);
 	}
 }
 
@@ -1133,16 +1134,16 @@ void Application::createSyncObjects()
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
-		m_imageAvailableSemaphores[i] = std::make_unique<ft::core::Semaphore>(m_device->getVk(), semaphoreInfo);
-		m_renderFinishedSemaphores[i] = std::make_unique<ft::core::Semaphore>(m_device->getVk(), semaphoreInfo);
-		m_inFlightFences[i] = std::make_unique<ft::core::Fence>(m_device->getVk(), fenceInfo);
+		m_imageAvailableSemaphores[i] = std::make_unique<ft::core::Semaphore>(m_coreDevice->getVk(), semaphoreInfo);
+		m_renderFinishedSemaphores[i] = std::make_unique<ft::core::Semaphore>(m_coreDevice->getVk(), semaphoreInfo);
+		m_inFlightFences[i] = std::make_unique<ft::core::Fence>(m_coreDevice->getVk(), fenceInfo);
 	}
 
 }
 
 
 std::vector<const char*> Application::getRequiredExtensions() {
-    std::vector<const char*> extensions = m_windowManager->getRequiredInstanceExtensions();
+    std::vector<const char*> extensions = m_device->windowManager->getRequiredInstanceExtensions();
 
     if (enableValidationLayers) {
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -1276,7 +1277,7 @@ VkExtent2D Application::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabil
 	else
 	{
 		int width, height;
-		m_window->getFramebufferSize(&width, &height);
+		m_device->window->getFramebufferSize(&width, &height);
 
 		VkExtent2D actualExtent = {
 			static_cast<uint32_t>(width),
@@ -1409,7 +1410,7 @@ ft::core::CommandBuffer* Application::beginSingleTimeCommands()
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	allocInfo.commandBufferCount = 1;
 
-	ft::core::CommandBuffer* commandBuffer = new ft::core::CommandBuffer(m_device->getVk(), allocInfo);
+	ft::core::CommandBuffer* commandBuffer = new ft::core::CommandBuffer(m_coreDevice->getVk(), allocInfo);
 
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
