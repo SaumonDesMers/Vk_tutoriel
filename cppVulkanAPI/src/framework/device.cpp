@@ -8,6 +8,7 @@ namespace LIB_NAMESPACE
 	{
 		createWindow();
 		createInstance();
+		setupDebugMessenger();
 	}
 
 	Device::~Device()
@@ -59,6 +60,19 @@ namespace LIB_NAMESPACE
 		}
 
 		instance = std::make_unique<ft::core::Instance>(createInfo);
+	}
+
+	void Device::setupDebugMessenger()
+	{
+		if (enableValidationLayers == false)
+		{
+			return;
+		}
+
+		ft::core::DebugMessenger::CreateInfo createInfo = {};
+		populateDebugMessengerCreateInfo(createInfo);
+
+		debugMessenger = std::make_unique<ft::core::DebugMessenger>(instance->getVk(), createInfo);
 	}
 
 

@@ -44,8 +44,8 @@ namespace LIB_NAMESPACE
 			};
 
 			DebugMessenger(
-				Instance* instance,
-				CreateInfo* pCreateInfo
+				VkInstance instance,
+				CreateInfo& createInfo
 			);
 
 			~DebugMessenger();
@@ -66,18 +66,18 @@ namespace LIB_NAMESPACE
 			} m_customUserData;
 
 			VkDebugUtilsMessengerEXT m_debugMessenger;
-			Instance *m_pInstance;
+			VkInstance m_instance;
 
 			static VkResult createDebugUtilsMessengerEXT(
-				const VkInstance& instance,
+				VkInstance instance,
 				const CreateInfo* pCreateInfo,
 				const VkAllocationCallbacks* pAllocator,
 				VkDebugUtilsMessengerEXT* pDebugMessenger
 			);
 
 			static void destroyDebugUtilsMessengerEXT(
-				const VkInstance& instance,
-				const VkDebugUtilsMessengerEXT& debugMessenger,
+				VkInstance instance,
+				VkDebugUtilsMessengerEXT debugMessenger,
 				const VkAllocationCallbacks* pAllocator
 			);
 

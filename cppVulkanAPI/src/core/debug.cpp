@@ -8,18 +8,18 @@ namespace LIB_NAMESPACE
 	namespace core
 	{
 		DebugMessenger::DebugMessenger(
-			Instance* pInstance,
-			CreateInfo* pCreateInfo
+			VkInstance instance,
+			CreateInfo& createInfo
 		):
-			m_pInstance(pInstance)
+			m_instance(instance)
 		{
-			m_customUserData.userCallback = pCreateInfo->userCallback;
-			m_customUserData.pUserData = pCreateInfo->pUserData;
-			pCreateInfo->pUserData = &m_customUserData;
+			m_customUserData.userCallback = createInfo.userCallback;
+			m_customUserData.pUserData = createInfo.pUserData;
+			createInfo.pUserData = &m_customUserData;
 
-			pCreateInfo->pfnUserCallback = debugCallback;
+			createInfo.pfnUserCallback = debugCallback;
 
-			if (createDebugUtilsMessengerEXT(m_pInstance->getVk(), pCreateInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)
+			if (createDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)
 			{
 				throw std::runtime_error("Failed to set up debug messenger.");
 			}
@@ -27,12 +27,12 @@ namespace LIB_NAMESPACE
 
 		DebugMessenger::~DebugMessenger()
 		{
-			destroyDebugUtilsMessengerEXT(m_pInstance->getVk(), m_debugMessenger, nullptr);
+			destroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
 		}
 
 		VkResult DebugMessenger::createDebugUtilsMessengerEXT(
-			const VkInstance& instance,
-			const CreateInfo* pCreateInfo,
+			VkInstance instance,
+			const CreateInfo* createInfo,
 			const VkAllocationCallbacks* pAllocator,
 			VkDebugUtilsMessengerEXT* pDebugMessenger
 		)
@@ -40,7 +40,7 @@ namespace LIB_NAMESPACE
 			auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
 			if (func != nullptr)
 			{
-				return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+				return func(instance, createInfo, pAllocator, pDebugMessenger);
 			}
 			else
 			{
@@ -49,8 +49,8 @@ namespace LIB_NAMESPACE
 		}
 
 		void DebugMessenger::destroyDebugUtilsMessengerEXT(
-			const VkInstance& instance,
-			const VkDebugUtilsMessengerEXT& debugMessenger,
+			VkInstance instance,
+			VkDebugUtilsMessengerEXT debugMessenger,
 			const VkAllocationCallbacks* pAllocator
 		)
 		{

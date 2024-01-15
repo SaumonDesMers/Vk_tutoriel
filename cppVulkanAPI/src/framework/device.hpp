@@ -24,6 +24,7 @@ namespace LIB_NAMESPACE
 		std::unique_ptr<Window> window;
 
 		std::unique_ptr<ft::core::Instance> instance;
+		std::unique_ptr<ft::core::DebugMessenger> debugMessenger;
 
 
 		Device();
@@ -41,6 +42,7 @@ namespace LIB_NAMESPACE
 
 		void createWindow();
 		void createInstance();
+		void setupDebugMessenger();
 
 		std::vector<const char*> getRequiredExtensions();
 		void populateDebugMessengerCreateInfo(ft::core::DebugMessenger::CreateInfo& createInfo);

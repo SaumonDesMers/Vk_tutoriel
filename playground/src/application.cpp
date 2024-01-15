@@ -44,7 +44,6 @@ void Application::run()
 void Application::init()
 {
 	m_device = std::make_unique<ft::Device>();
-	setupDebugMessenger();
 	createSurface();
 	pickPhysicalDevice();
 	createLogicalDevice();
@@ -72,18 +71,6 @@ void Application::init()
 	FT_INFO("Application initialized");
 }
 
-void Application::setupDebugMessenger()
-{
-	if (enableValidationLayers == false)
-	{
-		return;
-	}
-
-	ft::core::DebugMessenger::CreateInfo createInfo = {};
-	populateDebugMessengerCreateInfo(createInfo);
-
-	m_debugMessenger = std::make_unique<ft::core::DebugMessenger>(m_device->instance.get(), &createInfo);
-}
 
 void Application::createSurface()
 {

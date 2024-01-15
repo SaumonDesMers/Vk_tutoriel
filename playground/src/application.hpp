@@ -58,8 +58,6 @@ private:
 
 	std::unique_ptr<ft::Device> m_device;
 
-	std::unique_ptr<ft::core::DebugMessenger> m_debugMessenger;
-
 	std::unique_ptr<ft::Window::Surface> m_surface;
 
 	std::unique_ptr<ft::core::PhysicalDevice> m_physicalDevice;
@@ -119,7 +117,6 @@ private:
 
 	void init();
 
-	void setupDebugMessenger();
 	void createSurface();
 	void pickPhysicalDevice();
 	void createLogicalDevice();
