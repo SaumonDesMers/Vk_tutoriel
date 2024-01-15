@@ -7,7 +7,7 @@ namespace LIB_NAMESPACE
 	namespace core
 	{
 		DescriptorSet::DescriptorSet(VkDevice device, VkDescriptorSetAllocateInfo& allocInfo)
-			: m_device(device), m_descriptorPool(allocInfo.descriptorPool)
+			: m_device(device)
 		{
 			if (vkAllocateDescriptorSets(m_device, &allocInfo, &m_descriptorSet) != VK_SUCCESS)
 			{
@@ -17,7 +17,6 @@ namespace LIB_NAMESPACE
 
 		DescriptorSet::~DescriptorSet()
 		{
-			// vkFreeDescriptorSets(m_device, m_descriptorPool, 1, &m_descriptorSet);
 		}
 
 		void DescriptorSet::update(

@@ -31,7 +31,6 @@ namespace LIB_NAMESPACE
 			VkDescriptorSet m_descriptorSet;
 
 			VkDevice m_device;
-			VkDescriptorPool m_descriptorPool;
 		};
 	}
 }
