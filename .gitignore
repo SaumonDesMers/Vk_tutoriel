@@ -6,7 +6,6 @@ dep/*.d
 glslc
 *.spv
 
-external
 glm
 
 CMakeFiles
