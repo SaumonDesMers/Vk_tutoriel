@@ -5,9 +5,11 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/cppVulkanAPI/include",
-                "${workspaceFolder}/cppVulkanAPI/external/glm",
+"${workspaceFolder}/cppVulkanAPI/external/glm",
                 "${workspaceFolder}/playground/src",
-                "${workspaceFolder}/playground/external"
+                "${workspaceFolder}/playground/external/glm",
+                "${workspaceFolder}/playground/external/stb",
+                "${workspaceFolder}/playground/external/tinyobjloader"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

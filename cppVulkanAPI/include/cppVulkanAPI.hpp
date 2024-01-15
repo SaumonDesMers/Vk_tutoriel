@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../src/core/defines.hpp"
+#include "../src/defines.hpp"
 #include "../src/core/window_manager.hpp"
 #include "../src/core/window.hpp"
 #include "../src/core/instance.hpp"

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "defines.hpp"
-#include "device_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
