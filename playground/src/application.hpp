@@ -10,11 +10,6 @@
 #include <memory>
 #include <optional>
 
-#ifdef NDEBUG
-	const bool enableValidationLayers = false;
-#else
-	const bool enableValidationLayers = true;
-#endif
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -61,12 +56,8 @@ private:
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 
-	// std::unique_ptr<ft::Window::Manager> m_windowManager;
-	// std::unique_ptr<ft::Window> m_window;
-
 	std::unique_ptr<ft::Device> m_device;
 
-	std::unique_ptr<ft::core::Instance> m_instance;
 	std::unique_ptr<ft::core::DebugMessenger> m_debugMessenger;
 
 	std::unique_ptr<ft::Window::Surface> m_surface;
@@ -128,9 +119,6 @@ private:
 
 	void init();
 
-	void createWindowManager();
-	void createWindow();
-	void createInstance();
 	void setupDebugMessenger();
 	void createSurface();
 	void pickPhysicalDevice();
@@ -157,7 +145,6 @@ private:
 	void createCommandBuffer();
 	void createSyncObjects();
 
-	std::vector<const char*> getRequiredExtensions();
 	void populateDebugMessengerCreateInfo(ft::core::DebugMessenger::CreateInfo& createInfo);
 	bool isDeviceSuitable(const VkPhysicalDevice& physicalDevice);
 	QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);

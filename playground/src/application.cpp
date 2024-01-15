@@ -43,10 +43,7 @@ void Application::run()
 
 void Application::init()
 {
-	// createWindowManager();
-	// createWindow();
 	m_device = std::make_unique<ft::Device>();
-	createInstance();
 	setupDebugMessenger();
 	createSurface();
 	pickPhysicalDevice();
@@ -75,60 +72,6 @@ void Application::init()
 	FT_INFO("Application initialized");
 }
 
-void Application::createWindowManager()
-{
-	// m_device->windowManager = std::make_unique<ft::Window::Manager>();
-}
-
-void Application::createWindow()
-{
-	// ft::Window::CreateInfo createInfo = {};
-	// createInfo.title = "Playground";
-	// createInfo.width = 800;
-	// createInfo.height = 600;
-
-	// m_device->window = m_device->windowManager->createWindow(createInfo);
-}
-
-void Application::createInstance()
-{
-	if (enableValidationLayers && ft::core::Instance::checkValidationLayerSupport(validationLayers) == false)
-	{
-		throw std::runtime_error("Validation layers requested, but not available");
-	}
-
-	ft::core::ApplicationInfo appInfo = {};
-	appInfo.pApplicationName = "Playground";
-	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.pEngineName = "Playground Engine";
-	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.apiVersion = VK_API_VERSION_1_2;
-
-	ft::core::Instance::CreateInfo createInfo = {};
-	createInfo.pApplicationInfo = &appInfo;
-
-	std::vector<const char*> extensions = getRequiredExtensions();
-
-	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-	createInfo.ppEnabledExtensionNames = extensions.data();
-
-	ft::core::DebugMessenger::CreateInfo debugCreateInfo = {};
-	if (enableValidationLayers)
-	{
-		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-		createInfo.ppEnabledLayerNames = validationLayers.data();
-
-		populateDebugMessengerCreateInfo(debugCreateInfo);
-		createInfo.pNext = &debugCreateInfo;
-	}
-	else
-	{
-		createInfo.enabledLayerCount = 0;
-	}
-
-	m_instance = std::make_unique<ft::core::Instance>(createInfo);
-}
-
 void Application::setupDebugMessenger()
 {
 	if (enableValidationLayers == false)
@@ -139,17 +82,17 @@ void Application::setupDebugMessenger()
 	ft::core::DebugMessenger::CreateInfo createInfo = {};
 	populateDebugMessengerCreateInfo(createInfo);
 
-	m_debugMessenger = std::make_unique<ft::core::DebugMessenger>(m_instance.get(), &createInfo);
+	m_debugMessenger = std::make_unique<ft::core::DebugMessenger>(m_device->instance.get(), &createInfo);
 }
 
 void Application::createSurface()
 {
-	m_surface = std::make_unique<ft::Window::Surface>(m_instance->getVk(), m_device->window->getGLFWwindow());
+	m_surface = std::make_unique<ft::Window::Surface>(m_device->instance->getVk(), m_device->window->getGLFWwindow());
 }
 
 void Application::pickPhysicalDevice()
 {
-	std::vector<VkPhysicalDevice> physicalDevices = m_instance->getPhysicalDevices();
+	std::vector<VkPhysicalDevice> physicalDevices = m_device->instance->getPhysicalDevices();
 
 	if (physicalDevices.empty())
 	{
@@ -1141,16 +1084,6 @@ void Application::createSyncObjects()
 
 }
 
-
-std::vector<const char*> Application::getRequiredExtensions() {
-    std::vector<const char*> extensions = m_device->windowManager->getRequiredInstanceExtensions();
-
-    if (enableValidationLayers) {
-        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-    }
-
-    return extensions;
-}
 
 void Application::populateDebugMessengerCreateInfo(ft::core::DebugMessenger::CreateInfo& createInfo)
 {
