@@ -13,6 +13,7 @@ namespace LIB_NAMESPACE
 		createSurface();
 		pickPhysicalDevice();
 		createLogicalDevice();
+		createSwapchain();
 	}
 
 	Device::~Device()
@@ -114,47 +115,62 @@ namespace LIB_NAMESPACE
 
 	void Device::createLogicalDevice()
 	{
-		QueueFamilyIndices indices = findQueueFamilies(physicalDevice->getVk());
+		Queue::FamilyIndices indices = findQueueFamilies(physicalDevice->getVk());
 
-		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+		std::vector<VkDeviceQueueCreateInfo> queueInfos;
 		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 		float queuePriority = 1.0f;
 		for (uint32_t queueFamily : uniqueQueueFamilies)
 		{
-			ft::core::Queue::CreateInfo queueCreateInfo = {};
-			queueCreateInfo.queueFamilyIndex = queueFamily;
-			queueCreateInfo.queueCount = 1;
-			queueCreateInfo.pQueuePriorities = &queuePriority;
-			queueCreateInfos.push_back(queueCreateInfo);
+			ft::core::Queue::CreateInfo queueInfo = {};
+			queueInfo.queueFamilyIndex = queueFamily;
+			queueInfo.queueCount = 1;
+			queueInfo.pQueuePriorities = &queuePriority;
+			queueInfos.push_back(queueInfo);
 		}
 
 		ft::core::PhysicalDevice::Features deviceFeatures = {};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 
-		ft::core::Device::CreateInfo createInfo = {};
-		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-		createInfo.pQueueCreateInfos = queueCreateInfos.data();
-
-		createInfo.pEnabledFeatures = &deviceFeatures;
-
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
-		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+		ft::core::Device::CreateInfo deviceInfo = {};
+		deviceInfo.queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size());
+		deviceInfo.pQueueCreateInfos = queueInfos.data();
+		deviceInfo.pEnabledFeatures = &deviceFeatures;
+		deviceInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+		deviceInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 		if (enableValidationLayers)
 		{
-			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-			createInfo.ppEnabledLayerNames = validationLayers.data();
+			deviceInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+			deviceInfo.ppEnabledLayerNames = validationLayers.data();
 		}
 		else
 		{
-			createInfo.enabledLayerCount = 0;
+			deviceInfo.enabledLayerCount = 0;
 		}
 
-		device = std::make_unique<ft::core::Device>(physicalDevice->getVk(), createInfo);
+		device = std::make_unique<ft::core::Device>(physicalDevice->getVk(), deviceInfo);
 
 		graphicsQueue = std::make_unique<ft::core::Queue>(device->getVk(), indices.graphicsFamily.value());
 		presentQueue = std::make_unique<ft::core::Queue>(device->getVk(), indices.presentFamily.value());
+	}
+
+	void Device::createSwapchain()
+	{
+		Swapchain::CreateInfo swapchainInfo = {};
+		swapchainInfo.surface = surface->getVk();
+		swapchainInfo.supportDetails = querySwapChainSupport(physicalDevice->getVk());
+		
+		int width, height;
+		window->getFramebufferSize(&width, &height);
+		swapchainInfo.frameBufferExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+
+		swapchainInfo.queueFamilyIndices = findQueueFamilies(physicalDevice->getVk());
+
+		swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
+
+		swapchain = std::make_unique<Swapchain>(device->getVk(), swapchainInfo);
 	}
 
 
@@ -196,14 +212,14 @@ namespace LIB_NAMESPACE
 
 	bool Device::isDeviceSuitable(const VkPhysicalDevice& physicalDevice)
 	{
-		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+		Queue::FamilyIndices indices = findQueueFamilies(physicalDevice);
 
 		bool extensionsSupported = ft::core::PhysicalDevice::checkExtensionSupport(physicalDevice, deviceExtensions);
 
 		bool swapChainAdequate = false;
 		if (extensionsSupported)
 		{
-			SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
+			Swapchain::SupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 			swapChainAdequate = swapChainSupport.formats.empty() == false
 							&&	swapChainSupport.presentModes.empty() == false;
 		}
@@ -214,9 +230,9 @@ namespace LIB_NAMESPACE
 		return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 	}
 
-	Device::QueueFamilyIndices Device::findQueueFamilies(const VkPhysicalDevice& physicalDevice)
+	Queue::FamilyIndices Device::findQueueFamilies(const VkPhysicalDevice& physicalDevice)
 	{
-		QueueFamilyIndices indices;
+		Queue::FamilyIndices indices;
 
 		std::vector<VkQueueFamilyProperties> queueFamilyProperties = ft::core::PhysicalDevice::getQueueFamilyProperties(physicalDevice);
 
@@ -246,9 +262,9 @@ namespace LIB_NAMESPACE
 		return indices;
 	}
 
-	Device::SwapChainSupportDetails Device::querySwapChainSupport(const VkPhysicalDevice& device)
+	Swapchain::SupportDetails Device::querySwapChainSupport(const VkPhysicalDevice& device)
 	{
-		SwapChainSupportDetails details;
+		Swapchain::SupportDetails details;
 
 		details.capabilities = ft::core::PhysicalDevice::getSurfaceCapabilities(device, surface->getVk());
 		details.formats = ft::core::PhysicalDevice::getSurfaceFormats(device, surface->getVk());

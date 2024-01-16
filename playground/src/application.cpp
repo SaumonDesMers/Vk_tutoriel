@@ -44,8 +44,6 @@ void Application::run()
 void Application::init()
 {
 	m_device = std::make_unique<ft::Device>();
-	createSwapChain();
-	createSwapchainImageViews();
 	createRenderPass();
 	createDescriptorSetLayout();
 	createGraphicsPipeline();
@@ -69,57 +67,6 @@ void Application::init()
 }
 
 
-void Application::createSwapChain()
-{
-	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(m_device->physicalDevice->getVk());
-
-	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-	VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-	VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
-
-	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-
-	if (
-		swapChainSupport.capabilities.maxImageCount > 0
-		&& imageCount > swapChainSupport.capabilities.maxImageCount
-	)
-	{
-		imageCount = swapChainSupport.capabilities.maxImageCount;
-	}
-
-	ft::core::Swapchain::CreateInfo createInfo = {};
-	createInfo.surface = m_device->surface->getVk();
-	createInfo.minImageCount = imageCount;
-	createInfo.imageFormat = surfaceFormat.format;
-	createInfo.imageColorSpace = surfaceFormat.colorSpace;
-	createInfo.imageExtent = extent;
-	createInfo.imageArrayLayers = 1;
-	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-	QueueFamilyIndices indices = findQueueFamilies(m_device->physicalDevice->getVk());
-	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
-
-	if (indices.graphicsFamily != indices.presentFamily)
-	{
-		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-		createInfo.queueFamilyIndexCount = 2;
-		createInfo.pQueueFamilyIndices = queueFamilyIndices;
-	}
-	else
-	{
-		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	}
-
-	createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-	createInfo.presentMode = presentMode;
-	createInfo.clipped = VK_TRUE;
-
-	createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-	m_swapchain = std::make_unique<ft::core::Swapchain>(m_device->device->getVk(), createInfo);
-}
-
 void Application::recreateSwapChain()
 {
 	int width = 0, height = 0;
@@ -133,50 +80,28 @@ void Application::recreateSwapChain()
 	m_device->device->waitIdle();
 
 	m_swapchainFramebuffers.clear();
-	m_swapchainImageViews.clear();
+	m_device->swapchain->imageViews.clear();
+
 	m_colorImageView.reset();
 	m_colorImageMemory.reset();
 	m_colorImage.reset();
+
 	m_depthImageView.reset();
 	m_depthImageMemory.reset();
 	m_depthImage.reset();
-	m_swapchain.reset();
+	
+	m_device->swapchain->swapchain.reset();
 
-	createSwapChain();
-	createSwapchainImageViews();
 	createColorResources();
 	createDepthResources();
 	createFramebuffers();
 }
 
-void Application::createSwapchainImageViews()
-{
-	m_swapchainImageViews.resize(m_swapchain->getImageCount());
-
-	for (size_t i = 0; i < m_swapchain->getImageCount(); i++)
-	{
-		ft::core::ImageView::CreateInfo createInfo = {};
-		createInfo.image = m_swapchain->getImage(i);
-		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		createInfo.format = m_swapchain->getImageFormat();
-		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		createInfo.subresourceRange.baseMipLevel = 0;
-		createInfo.subresourceRange.levelCount = 1;
-		createInfo.subresourceRange.baseArrayLayer = 0;
-		createInfo.subresourceRange.layerCount = 1;
-
-		m_swapchainImageViews[i] = std::make_unique<ft::core::ImageView>(m_device->device->getVk(), createInfo);
-	}
-}
 
 void Application::createRenderPass()
 {
 	VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = m_swapchain->getImageFormat();
+    colorAttachment.format = m_device->swapchain->swapchain->getImageFormat();
     colorAttachment.samples = m_device->msaaSamples;
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -206,7 +131,7 @@ void Application::createRenderPass()
 
 
 	VkAttachmentDescription colorAttachmentResolve{};
-    colorAttachmentResolve.format = m_swapchain->getImageFormat();
+    colorAttachmentResolve.format = m_device->swapchain->swapchain->getImageFormat();
     colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -390,21 +315,21 @@ void Application::createGraphicsPipeline()
 
 void Application::createFramebuffers()
 {
-	m_swapchainFramebuffers.resize(m_swapchainImageViews.size());
+	m_swapchainFramebuffers.resize(m_device->swapchain->imageViews.size());
 
-	for (size_t i = 0; i < m_swapchainImageViews.size(); i++) {
+	for (size_t i = 0; i < m_device->swapchain->imageViews.size(); i++) {
 		std::array<VkImageView, 3> attachments = {
 			m_colorImageView->getVk(),
 			m_depthImageView->getVk(),
-			m_swapchainImageViews[i]->getVk()
+			m_device->swapchain->imageViews[i]->getVk()
 		};
 
 		ft::core::Framebuffer::CreateInfo framebufferInfo{};
 		framebufferInfo.renderPass = m_renderPass->getVk();
 		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
 		framebufferInfo.pAttachments = attachments.data();
-		framebufferInfo.width = m_swapchain->getExtent().width;
-		framebufferInfo.height = m_swapchain->getExtent().height;
+		framebufferInfo.width = m_device->swapchain->swapchain->getExtent().width;
+		framebufferInfo.height = m_device->swapchain->swapchain->getExtent().height;
 		framebufferInfo.layers = 1;
 
 		m_swapchainFramebuffers[i] = std::make_unique<ft::core::Framebuffer>(m_device->device->getVk(), framebufferInfo);
@@ -427,9 +352,9 @@ void Application::createColorResources()
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageInfo.format = m_swapchain->getImageFormat();
-	imageInfo.extent.width = m_swapchain->getExtent().width;
-	imageInfo.extent.height = m_swapchain->getExtent().height;
+	imageInfo.format = m_device->swapchain->swapchain->getImageFormat();
+	imageInfo.extent.width = m_device->swapchain->swapchain->getExtent().width;
+	imageInfo.extent.height = m_device->swapchain->swapchain->getExtent().height;
 	imageInfo.extent.depth = 1;
 	imageInfo.mipLevels = 1;
 	imageInfo.arrayLayers = 1;
@@ -462,7 +387,7 @@ void Application::createColorResources()
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image = m_colorImage->getVk();
 	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	viewInfo.format = m_swapchain->getImageFormat();
+	viewInfo.format = m_device->swapchain->swapchain->getImageFormat();
 	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	viewInfo.subresourceRange.baseMipLevel = 0;
 	viewInfo.subresourceRange.levelCount = 1;
@@ -480,8 +405,8 @@ void Application::createDepthResources()
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageInfo.extent.width = m_swapchain->getExtent().width;
-	imageInfo.extent.height = m_swapchain->getExtent().height;
+	imageInfo.extent.width = m_device->swapchain->swapchain->getExtent().width;
+	imageInfo.extent.height = m_device->swapchain->swapchain->getExtent().height;
 	imageInfo.extent.depth = 1;
 	imageInfo.mipLevels = 1;
 	imageInfo.arrayLayers = 1;
@@ -1024,76 +949,6 @@ QueueFamilyIndices Application::findQueueFamilies(const VkPhysicalDevice& physic
 	return indices;
 }
 
-SwapChainSupportDetails Application::querySwapChainSupport(const VkPhysicalDevice& device)
-{
-	SwapChainSupportDetails details;
-
-	details.capabilities = ft::core::PhysicalDevice::getSurfaceCapabilities(device, m_device->surface->getVk());
-	details.formats = ft::core::PhysicalDevice::getSurfaceFormats(device, m_device->surface->getVk());
-	details.presentModes = ft::core::PhysicalDevice::getSurfacePresentModes(device, m_device->surface->getVk());
-
-    return details;
-}
-
-VkSurfaceFormatKHR Application::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
-{
-	for (const auto& availableFormat : availableFormats)
-	{
-		if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB
-			&& availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-		{
-			return availableFormat;
-		}
-	}
-
-	return availableFormats[0];
-}
-
-VkPresentModeKHR Application::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
-{
-	for (const auto& availablePresentMode : availablePresentModes)
-	{
-		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-		{
-			return availablePresentMode;
-		}
-	}
-
-	return VK_PRESENT_MODE_FIFO_KHR;
-}
-
-VkExtent2D Application::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
-{
-	if (capabilities.currentExtent.width != UINT32_MAX)
-	{
-		return capabilities.currentExtent;
-	}
-	else
-	{
-		int width, height;
-		m_device->window->getFramebufferSize(&width, &height);
-
-		VkExtent2D actualExtent = {
-			static_cast<uint32_t>(width),
-			static_cast<uint32_t>(height)
-		};
-
-		actualExtent.width = std::clamp(
-			actualExtent.width,
-			capabilities.minImageExtent.width,
-			capabilities.maxImageExtent.width
-		);
-
-		actualExtent.height = std::clamp(
-			actualExtent.height,
-			capabilities.minImageExtent.height,
-			capabilities.maxImageExtent.height
-		);
-
-		return actualExtent;
-	}
-}
-
 VkFormat Application::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 {
 	for (const auto& format : candidates)
@@ -1388,7 +1243,7 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::core::CommandBuf
 	renderPassInfo.renderPass = m_renderPass->getVk();
 	renderPassInfo.framebuffer = m_swapchainFramebuffers[imageIndex]->getVk();
 	renderPassInfo.renderArea.offset = {0, 0};
-	renderPassInfo.renderArea.extent = m_swapchain->getExtent();
+	renderPassInfo.renderArea.extent = m_device->swapchain->swapchain->getExtent();
 
 	std::array<VkClearValue, 2> clearValues{};
 	clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -1413,15 +1268,15 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::core::CommandBuf
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.width = static_cast<float>(m_swapchain->getExtent().width);
-	viewport.height = static_cast<float>(m_swapchain->getExtent().height);
+	viewport.width = static_cast<float>(m_device->swapchain->swapchain->getExtent().width);
+	viewport.height = static_cast<float>(m_device->swapchain->swapchain->getExtent().height);
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 	vkCmdSetViewport(commandBuffer->getVk(), 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = {0, 0};
-	scissor.extent = m_swapchain->getExtent();
+	scissor.extent = m_device->swapchain->swapchain->getExtent();
 	vkCmdSetScissor(commandBuffer->getVk(), 0, 1, &scissor);
 
 	VkBuffer vertexBuffers[] = {m_vertexBuffer->getVk()};
@@ -1442,7 +1297,7 @@ void Application::drawFrame()
 	m_inFlightFences[m_currentFrame]->wait();
 
 	uint32_t imageIndex;
-	VkResult result = m_swapchain->acquireNextImage(UINT64_MAX, m_imageAvailableSemaphores[m_currentFrame]->getVk(), VK_NULL_HANDLE, &imageIndex);
+	VkResult result = m_device->swapchain->swapchain->acquireNextImage(UINT64_MAX, m_imageAvailableSemaphores[m_currentFrame]->getVk(), VK_NULL_HANDLE, &imageIndex);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
 	{
@@ -1486,7 +1341,7 @@ void Application::drawFrame()
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = signalSemaphores;
 
-	VkSwapchainKHR swapChains[] = {m_swapchain->getVk()};
+	VkSwapchainKHR swapChains[] = {m_device->swapchain->swapchain->getVk()};
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
 	presentInfo.pImageIndices = &imageIndex;
@@ -1516,7 +1371,7 @@ void Application::updateUniformBuffer(uint32_t currentImage)
 	UniformBufferObject ubo{};
 	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), m_swapchain->getExtent().width / (float) m_swapchain->getExtent().height, 0.1f, 10.0f);
+	ubo.proj = glm::perspective(glm::radians(45.0f), m_device->swapchain->swapchain->getExtent().width / (float) m_device->swapchain->swapchain->getExtent().height, 0.1f, 10.0f);
 
 	ubo.proj[1][1] *= -1;
 

@@ -59,9 +59,6 @@ private:
 	std::unique_ptr<ft::Device> m_device;
 
 
-	std::unique_ptr<ft::core::Swapchain> m_swapchain;
-	std::vector<std::unique_ptr<ft::core::ImageView>> m_swapchainImageViews;
-
 	std::unique_ptr<ft::core::RenderPass> m_renderPass;
 	std::unique_ptr<ft::core::DescriptorSetLayout> m_descriptorSetLayout;
 	std::unique_ptr<ft::core::PipelineLayout> m_pipelineLayout;
@@ -109,9 +106,7 @@ private:
 
 	void init();
 
-	void createSwapChain();
 	void recreateSwapChain();
-	void createSwapchainImageViews();
 	void createRenderPass();
 	void createDescriptorSetLayout();
 	void createGraphicsPipeline();
@@ -132,10 +127,6 @@ private:
 	void createSyncObjects();
 
 	QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
-	SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice& device);
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 	VkFormat findDepthFormat();
 	bool hasStencilComponent(VkFormat format);
@@ -146,7 +137,6 @@ private:
 	void endSingleTimeCommands(ft::core::CommandBuffer* commandBuffer);
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 	void generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
-
 
 	void recordCommandBuffer(const std::unique_ptr<ft::core::CommandBuffer>& commandBuffer, uint32_t imageIndex);
 	void drawFrame();

@@ -6,13 +6,15 @@
 #include "core/debug.hpp"
 #include "core/physical_device.hpp"
 #include "core/device.hpp"
+#include "swapchain.hpp"
+#include "queue.hpp"
 
 #include <memory>
 #include <optional>
 
 namespace LIB_NAMESPACE
 {
-	
+
 	class Device
 	{
 
@@ -21,40 +23,25 @@ namespace LIB_NAMESPACE
 		std::unique_ptr<Window::Manager> windowManager;
 		std::unique_ptr<Window> window;
 
-		std::unique_ptr<ft::core::Instance> instance;
-		std::unique_ptr<ft::core::DebugMessenger> debugMessenger;
+		std::unique_ptr<core::Instance> instance;
+		std::unique_ptr<core::DebugMessenger> debugMessenger;
 
-		std::unique_ptr<ft::Window::Surface> surface;
+		std::unique_ptr<Window::Surface> surface;
 
-		std::unique_ptr<ft::core::PhysicalDevice> physicalDevice;
+		std::unique_ptr<core::PhysicalDevice> physicalDevice;
 		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
-		std::unique_ptr<ft::core::Device> device;
-		std::unique_ptr<ft::core::Queue> graphicsQueue;
-		std::unique_ptr<ft::core::Queue> presentQueue;
+		std::unique_ptr<core::Device> device;
+		std::unique_ptr<core::Queue> graphicsQueue;
+		std::unique_ptr<core::Queue> presentQueue;
+
+		std::unique_ptr<Swapchain> swapchain;
 
 
 		Device();
 		~Device();
 
 	private:
-
-
-		struct QueueFamilyIndices {
-			std::optional<uint32_t> graphicsFamily;
-			std::optional<uint32_t> presentFamily;
-
-			bool isComplete() {
-				return graphicsFamily.has_value() && presentFamily.has_value();
-			}
-		};
-
-		struct SwapChainSupportDetails
-		{
-			VkSurfaceCapabilitiesKHR capabilities;
-			std::vector<VkSurfaceFormatKHR> formats;
-			std::vector<VkPresentModeKHR> presentModes;
-		};
 
 		const std::vector<const char*> validationLayers = {
 			"VK_LAYER_KHRONOS_validation"
@@ -70,12 +57,13 @@ namespace LIB_NAMESPACE
 		void createSurface();
 		void pickPhysicalDevice();
 		void createLogicalDevice();
+		void createSwapchain();
 
 		std::vector<const char*> getRequiredExtensions();
 		void populateDebugMessengerCreateInfo(ft::core::DebugMessenger::CreateInfo& createInfo);
 		bool isDeviceSuitable(const VkPhysicalDevice& physicalDevice);
-		QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
-		SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice& device);
+		Queue::FamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
+		Swapchain::SupportDetails querySwapChainSupport(const VkPhysicalDevice& device);
 		VkSampleCountFlagBits getMaxUsableSampleCount(const VkPhysicalDevice& physicalDevice);
 
 	};
