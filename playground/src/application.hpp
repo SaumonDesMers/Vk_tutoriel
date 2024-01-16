@@ -61,8 +61,9 @@ private:
 
 	std::unique_ptr<ft::core::RenderPass> m_renderPass;
 	std::unique_ptr<ft::core::DescriptorSetLayout> m_descriptorSetLayout;
-	std::unique_ptr<ft::core::PipelineLayout> m_pipelineLayout;
-	std::unique_ptr<ft::core::Pipeline> m_graphicPipeline;
+	// std::unique_ptr<ft::core::PipelineLayout> m_pipelineLayout;
+	// std::unique_ptr<ft::core::Pipeline> m_graphicPipeline;
+	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
 	std::vector<std::unique_ptr<ft::core::Framebuffer>> m_swapchainFramebuffers;
 
 	std::unique_ptr<ft::core::Image> m_colorImage;

@@ -21,7 +21,7 @@ namespace LIB_NAMESPACE
 				}
 			};
 
-			Pipeline(VkDevice device, const CreateInfo& createInfo);
+			Pipeline(VkDevice device, const VkGraphicsPipelineCreateInfo& createInfo);
 			~Pipeline();
 
 			VkPipeline getVk() const { return m_pipeline; }

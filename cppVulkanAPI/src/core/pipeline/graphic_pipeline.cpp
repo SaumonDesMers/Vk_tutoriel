@@ -6,7 +6,7 @@ namespace LIB_NAMESPACE
 {
 	namespace core
 	{
-		Pipeline::Pipeline(VkDevice device, const CreateInfo& createInfo)
+		Pipeline::Pipeline(VkDevice device, const VkGraphicsPipelineCreateInfo& createInfo)
 			: m_device(device)
 		{
 			if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &createInfo, nullptr, &m_pipeline) != VK_SUCCESS)
