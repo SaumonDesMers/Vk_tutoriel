@@ -58,7 +58,6 @@ private:
 
 	std::unique_ptr<ft::Device> m_device;
 
-	std::unique_ptr<ft::Window::Surface> m_surface;
 
 	std::unique_ptr<ft::core::PhysicalDevice> m_physicalDevice;
 	std::unique_ptr<ft::core::Device> m_coreDevice;
@@ -117,7 +116,6 @@ private:
 
 	void init();
 
-	void createSurface();
 	void pickPhysicalDevice();
 	void createLogicalDevice();
 	void createSwapChain();

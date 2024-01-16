@@ -7,12 +7,6 @@
 
 #include <memory>
 
-#ifdef NDEBUG
-	const bool enableValidationLayers = false;
-#else
-	const bool enableValidationLayers = true;
-#endif
-
 namespace LIB_NAMESPACE
 {
 	class Device
@@ -25,6 +19,8 @@ namespace LIB_NAMESPACE
 
 		std::unique_ptr<ft::core::Instance> instance;
 		std::unique_ptr<ft::core::DebugMessenger> debugMessenger;
+
+		std::unique_ptr<ft::Window::Surface> surface;
 
 
 		Device();
@@ -43,6 +39,7 @@ namespace LIB_NAMESPACE
 		void createWindow();
 		void createInstance();
 		void setupDebugMessenger();
+		void createSurface();
 
 		std::vector<const char*> getRequiredExtensions();
 		void populateDebugMessengerCreateInfo(ft::core::DebugMessenger::CreateInfo& createInfo);

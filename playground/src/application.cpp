@@ -44,7 +44,6 @@ void Application::run()
 void Application::init()
 {
 	m_device = std::make_unique<ft::Device>();
-	createSurface();
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapChain();
@@ -71,11 +70,6 @@ void Application::init()
 	FT_INFO("Application initialized");
 }
 
-
-void Application::createSurface()
-{
-	m_surface = std::make_unique<ft::Window::Surface>(m_device->instance->getVk(), m_device->window->getGLFWwindow());
-}
 
 void Application::pickPhysicalDevice()
 {
@@ -169,7 +163,7 @@ void Application::createSwapChain()
 	}
 
 	ft::core::Swapchain::CreateInfo createInfo = {};
-	createInfo.surface = m_surface->getVk();
+	createInfo.surface = m_device->surface->getVk();
 	createInfo.minImageCount = imageCount;
 	createInfo.imageFormat = surfaceFormat.format;
 	createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -1132,7 +1126,7 @@ QueueFamilyIndices Application::findQueueFamilies(const VkPhysicalDevice& physic
 			indices.graphicsFamily = i;
 		}
 
-		VkBool32 presentSupport = ft::core::PhysicalDevice::getSurfaceSupport(physicalDevice, i, m_surface->getVk());
+		VkBool32 presentSupport = ft::core::PhysicalDevice::getSurfaceSupport(physicalDevice, i, m_device->surface->getVk());
 
 		if (presentSupport)
 		{
@@ -1154,9 +1148,9 @@ SwapChainSupportDetails Application::querySwapChainSupport(const VkPhysicalDevic
 {
 	SwapChainSupportDetails details;
 
-	details.capabilities = ft::core::PhysicalDevice::getSurfaceCapabilities(device, m_surface->getVk());
-	details.formats = ft::core::PhysicalDevice::getSurfaceFormats(device, m_surface->getVk());
-	details.presentModes = ft::core::PhysicalDevice::getSurfacePresentModes(device, m_surface->getVk());
+	details.capabilities = ft::core::PhysicalDevice::getSurfaceCapabilities(device, m_device->surface->getVk());
+	details.formats = ft::core::PhysicalDevice::getSurfaceFormats(device, m_device->surface->getVk());
+	details.presentModes = ft::core::PhysicalDevice::getSurfacePresentModes(device, m_device->surface->getVk());
 
     return details;
 }

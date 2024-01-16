@@ -9,6 +9,7 @@ namespace LIB_NAMESPACE
 		createWindow();
 		createInstance();
 		setupDebugMessenger();
+		createSurface();
 	}
 
 	Device::~Device()
@@ -73,6 +74,11 @@ namespace LIB_NAMESPACE
 		populateDebugMessengerCreateInfo(createInfo);
 
 		debugMessenger = std::make_unique<ft::core::DebugMessenger>(instance->getVk(), createInfo);
+	}
+
+	void Device::createSurface()
+	{
+		surface = std::make_unique<ft::Window::Surface>(instance->getVk(), window->getGLFWwindow());
 	}
 
 
