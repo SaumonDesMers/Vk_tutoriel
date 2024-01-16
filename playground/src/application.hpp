@@ -58,11 +58,9 @@ private:
 
 	std::unique_ptr<ft::Device> m_device;
 
+	std::unique_ptr<ft::Descriptor> m_descriptor;
 
 	std::unique_ptr<ft::core::RenderPass> m_renderPass;
-	std::unique_ptr<ft::core::DescriptorSetLayout> m_descriptorSetLayout;
-	// std::unique_ptr<ft::core::PipelineLayout> m_pipelineLayout;
-	// std::unique_ptr<ft::core::Pipeline> m_graphicPipeline;
 	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
 	std::vector<std::unique_ptr<ft::core::Framebuffer>> m_swapchainFramebuffers;
 
@@ -97,9 +95,6 @@ private:
 	std::vector<std::unique_ptr<ft::core::Buffer>> m_uniformBuffers;
 	std::vector<std::unique_ptr<ft::core::DeviceMemory>> m_uniformBuffersMemory;
 
-	std::unique_ptr<ft::core::DescriptorPool> m_descriptorPool;
-	std::vector<std::unique_ptr<ft::core::DescriptorSet>> m_descriptorSets;
-
 	bool m_framebufferResized = false;
 	
 	uint32_t m_currentFrame = 0;
@@ -107,9 +102,10 @@ private:
 
 	void init();
 
+	void createDevice();
 	void recreateSwapChain();
 	void createRenderPass();
-	void createDescriptorSetLayout();
+	void createDescriptor();
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
@@ -122,8 +118,7 @@ private:
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();
-	void createDescriptorPool();
-	void createDescriptorSets();
+	void updateDescriptorSets();
 	void createCommandBuffer();
 	void createSyncObjects();
 

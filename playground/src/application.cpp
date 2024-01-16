@@ -43,9 +43,9 @@ void Application::run()
 
 void Application::init()
 {
-	m_device = std::make_unique<ft::Device>();
+	createDevice();
 	createRenderPass();
-	createDescriptorSetLayout();
+	createDescriptor();
 	createGraphicsPipeline();
 	createCommandPool();
 	createColorResources();
@@ -58,14 +58,18 @@ void Application::init()
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
-	createDescriptorPool();
-	createDescriptorSets();
+	updateDescriptorSets();
 	createCommandBuffer();
 	createSyncObjects();
 
 	FT_INFO("Application initialized");
 }
 
+
+void Application::createDevice()
+{
+	m_device = std::make_unique<ft::Device>();
+}
 
 void Application::recreateSwapChain()
 {
@@ -171,7 +175,7 @@ void Application::createRenderPass()
 	m_renderPass = std::make_unique<ft::core::RenderPass>(m_device->device->getVk(), renderPassInfo);
 }
 
-void Application::createDescriptorSetLayout()
+void Application::createDescriptor()
 {
 	VkDescriptorSetLayoutBinding uboLayoutBinding{};
     uboLayoutBinding.binding = 0;
@@ -186,13 +190,12 @@ void Application::createDescriptorSetLayout()
 	samplerLayoutBinding.pImmutableSamplers = nullptr;
 	samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-	std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
-	VkDescriptorSetLayoutCreateInfo layoutInfo{};
-	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-	layoutInfo.pBindings = bindings.data();
 
-	m_descriptorSetLayout = std::make_unique<ft::core::DescriptorSetLayout>(m_device->device->getVk(), layoutInfo);
+	ft::Descriptor::CreateInfo descriptorInfo{};
+	descriptorInfo.bindings = { uboLayoutBinding, samplerLayoutBinding };
+	descriptorInfo.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+	m_descriptor = std::make_unique<ft::Descriptor>(m_device->device->getVk(), descriptorInfo);
 }
 
 void Application::createGraphicsPipeline()
@@ -204,7 +207,7 @@ void Application::createGraphicsPipeline()
 
 	pipelineInfo.msaaSamples = m_device->msaaSamples;
 
-	pipelineInfo.descriptorSetLayouts = { m_descriptorSetLayout->getVk() };
+	pipelineInfo.descriptorSetLayouts = { m_descriptor->layout };
 
 	pipelineInfo.renderPass = m_renderPass->getVk();
 
@@ -709,42 +712,10 @@ void Application::createUniformBuffers()
     }
 }
 
-void Application::createDescriptorPool()
+void Application::updateDescriptorSets()
 {
-	std::array<VkDescriptorPoolSize, 2> poolSizes{};
-	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-	poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-
-	VkDescriptorPoolCreateInfo poolInfo{};
-	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
-	poolInfo.pPoolSizes = poolSizes.data();
-	poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-
-	m_descriptorPool = std::make_unique<ft::core::DescriptorPool>(m_device->device->getVk(), poolInfo);
-}
-
-void Application::createDescriptorSets()
-{
-	// TODO: rework all descriptor set stuff so that I can allocate all descriptor sets at once
-	// also don't allow to create descriptor sets without a descriptor pool
-
-	std::vector<VkDescriptorSetLayout> layouts(1, m_descriptorSetLayout->getVk());
-
-	VkDescriptorSetAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	allocInfo.descriptorPool = m_descriptorPool->getVk();
-	allocInfo.descriptorSetCount = 1;
-	allocInfo.pSetLayouts = layouts.data();
-
-	m_descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
-		m_descriptorSets[i] = std::make_unique<ft::core::DescriptorSet>(m_device->device->getVk(), allocInfo);
-
 		VkDescriptorBufferInfo bufferInfo{};
 		bufferInfo.buffer = m_uniformBuffers[i]->getVk();
 		bufferInfo.offset = 0;
@@ -758,7 +729,7 @@ void Application::createDescriptorSets()
 		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
 		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[0].dstSet = m_descriptorSets[i]->getVk();
+		descriptorWrites[0].dstSet = m_descriptor->sets[i];
 		descriptorWrites[0].dstBinding = 0;
 		descriptorWrites[0].dstArrayElement = 0;
 		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -766,14 +737,19 @@ void Application::createDescriptorSets()
 		descriptorWrites[0].pBufferInfo = &bufferInfo;
 
 		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[1].dstSet = m_descriptorSets[i]->getVk();
+		descriptorWrites[1].dstSet = m_descriptor->sets[i];
 		descriptorWrites[1].dstBinding = 1;
 		descriptorWrites[1].dstArrayElement = 0;
 		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		descriptorWrites[1].descriptorCount = 1;
 		descriptorWrites[1].pImageInfo = &imageInfo;
 
-		m_descriptorSets[i]->update(static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data());
+		vkUpdateDescriptorSets(
+			m_device->device->getVk(),
+			static_cast<uint32_t>(descriptorWrites.size()),
+			descriptorWrites.data(),
+			0, nullptr
+		);
 	}
 
 }
@@ -812,7 +788,6 @@ void Application::createSyncObjects()
 	}
 
 }
-
 
 
 QueueFamilyIndices Application::findQueueFamilies(const VkPhysicalDevice& physicalDevice)
@@ -1159,7 +1134,7 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::core::CommandBuf
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
 		m_graphicPipeline->layout->getVk(),
 		0, 1,
-		m_descriptorSets[m_currentFrame]->getVkPtr(),
+		&m_descriptor->sets[m_currentFrame],
 		0, nullptr
 	);
 

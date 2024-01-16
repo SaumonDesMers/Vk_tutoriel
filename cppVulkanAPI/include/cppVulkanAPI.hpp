@@ -27,3 +27,4 @@
 #include "../src/framework/device.hpp"
 #include "../src/framework/window/window.hpp"
 #include "../src/framework/pipeline.hpp"
+#include "../src/framework/descriptor.hpp"
