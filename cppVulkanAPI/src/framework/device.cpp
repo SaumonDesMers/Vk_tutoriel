@@ -1,6 +1,7 @@
 #include "device.hpp"
 
 #include <stdexcept>
+#include <set>
 
 namespace LIB_NAMESPACE
 {
@@ -11,6 +12,7 @@ namespace LIB_NAMESPACE
 		setupDebugMessenger();
 		createSurface();
 		pickPhysicalDevice();
+		createLogicalDevice();
 	}
 
 	Device::~Device()
@@ -108,6 +110,51 @@ namespace LIB_NAMESPACE
 		}
 
 		physicalDevice = std::make_unique<ft::core::PhysicalDevice>(pickedPhysicalDevice);
+	}
+
+	void Device::createLogicalDevice()
+	{
+		QueueFamilyIndices indices = findQueueFamilies(physicalDevice->getVk());
+
+		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+
+		float queuePriority = 1.0f;
+		for (uint32_t queueFamily : uniqueQueueFamilies)
+		{
+			ft::core::Queue::CreateInfo queueCreateInfo = {};
+			queueCreateInfo.queueFamilyIndex = queueFamily;
+			queueCreateInfo.queueCount = 1;
+			queueCreateInfo.pQueuePriorities = &queuePriority;
+			queueCreateInfos.push_back(queueCreateInfo);
+		}
+
+		ft::core::PhysicalDevice::Features deviceFeatures = {};
+		deviceFeatures.samplerAnisotropy = VK_TRUE;
+
+		ft::core::Device::CreateInfo createInfo = {};
+		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+		createInfo.pQueueCreateInfos = queueCreateInfos.data();
+
+		createInfo.pEnabledFeatures = &deviceFeatures;
+
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+		if (enableValidationLayers)
+		{
+			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+			createInfo.ppEnabledLayerNames = validationLayers.data();
+		}
+		else
+		{
+			createInfo.enabledLayerCount = 0;
+		}
+
+		device = std::make_unique<ft::core::Device>(physicalDevice->getVk(), createInfo);
+
+		graphicsQueue = std::make_unique<ft::core::Queue>(device->getVk(), indices.graphicsFamily.value());
+		presentQueue = std::make_unique<ft::core::Queue>(device->getVk(), indices.presentFamily.value());
 	}
 
 

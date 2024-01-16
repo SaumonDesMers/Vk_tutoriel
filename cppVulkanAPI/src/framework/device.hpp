@@ -5,6 +5,7 @@
 #include "core/instance.hpp"
 #include "core/debug.hpp"
 #include "core/physical_device.hpp"
+#include "core/device.hpp"
 
 #include <memory>
 #include <optional>
@@ -27,6 +28,10 @@ namespace LIB_NAMESPACE
 
 		std::unique_ptr<ft::core::PhysicalDevice> physicalDevice;
 		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+
+		std::unique_ptr<ft::core::Device> device;
+		std::unique_ptr<ft::core::Queue> graphicsQueue;
+		std::unique_ptr<ft::core::Queue> presentQueue;
 
 
 		Device();
@@ -64,6 +69,7 @@ namespace LIB_NAMESPACE
 		void setupDebugMessenger();
 		void createSurface();
 		void pickPhysicalDevice();
+		void createLogicalDevice();
 
 		std::vector<const char*> getRequiredExtensions();
 		void populateDebugMessengerCreateInfo(ft::core::DebugMessenger::CreateInfo& createInfo);

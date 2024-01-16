@@ -59,11 +59,6 @@ private:
 	std::unique_ptr<ft::Device> m_device;
 
 
-	std::unique_ptr<ft::core::Device> m_coreDevice;
-
-	std::unique_ptr<ft::core::Queue> m_graphicsQueue;
-	std::unique_ptr<ft::core::Queue> m_presentQueue;
-
 	std::unique_ptr<ft::core::Swapchain> m_swapchain;
 	std::vector<std::unique_ptr<ft::core::ImageView>> m_swapchainImageViews;
 
@@ -114,8 +109,6 @@ private:
 
 	void init();
 
-	void pickPhysicalDevice();
-	void createLogicalDevice();
 	void createSwapChain();
 	void recreateSwapChain();
 	void createSwapchainImageViews();
@@ -138,7 +131,6 @@ private:
 	void createCommandBuffer();
 	void createSyncObjects();
 
-	void populateDebugMessengerCreateInfo(ft::core::DebugMessenger::CreateInfo& createInfo);
 	QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
 	SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice& device);
 	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -147,7 +139,6 @@ private:
 	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 	VkFormat findDepthFormat();
 	bool hasStencilComponent(VkFormat format);
-	VkSampleCountFlagBits getMaxUsableSampleCount(VkPhysicalDevice physicalDevice);
 
 	void copyBufferToBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
