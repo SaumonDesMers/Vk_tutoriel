@@ -10,6 +10,7 @@ namespace LIB_NAMESPACE
 		createInstance();
 		setupDebugMessenger();
 		createSurface();
+		pickPhysicalDevice();
 	}
 
 	Device::~Device()
@@ -81,6 +82,34 @@ namespace LIB_NAMESPACE
 		surface = std::make_unique<ft::Window::Surface>(instance->getVk(), window->getGLFWwindow());
 	}
 
+	void Device::pickPhysicalDevice()
+	{
+		std::vector<VkPhysicalDevice> physicalDevices = instance->getPhysicalDevices();
+
+		if (physicalDevices.empty())
+		{
+			throw std::runtime_error("Failed to find GPUs with Vulkan support");
+		}
+
+		VkPhysicalDevice pickedPhysicalDevice = VK_NULL_HANDLE;
+		for (const auto& phyDev : physicalDevices)
+		{
+			if (isDeviceSuitable(phyDev))
+			{
+				pickedPhysicalDevice = phyDev;
+				msaaSamples = getMaxUsableSampleCount(pickedPhysicalDevice);
+				break;
+			}
+		}
+
+		if (pickedPhysicalDevice == VK_NULL_HANDLE)
+		{
+			throw std::runtime_error("Failed to find a suitable GPU");
+		}
+
+		physicalDevice = std::make_unique<ft::core::PhysicalDevice>(pickedPhysicalDevice);
+	}
+
 
 	std::vector<const char*> Device::getRequiredExtensions() {
 		std::vector<const char*> extensions = windowManager->getRequiredInstanceExtensions();
@@ -117,4 +146,87 @@ namespace LIB_NAMESPACE
 			Which has the default value: ft::core::DebugMessenger::debugCallback
 		*/
 	}
+
+	bool Device::isDeviceSuitable(const VkPhysicalDevice& physicalDevice)
+	{
+		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+
+		bool extensionsSupported = ft::core::PhysicalDevice::checkExtensionSupport(physicalDevice, deviceExtensions);
+
+		bool swapChainAdequate = false;
+		if (extensionsSupported)
+		{
+			SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
+			swapChainAdequate = swapChainSupport.formats.empty() == false
+							&&	swapChainSupport.presentModes.empty() == false;
+		}
+
+		VkPhysicalDeviceFeatures supportedFeatures;
+		vkGetPhysicalDeviceFeatures(physicalDevice, &supportedFeatures);
+
+		return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+	}
+
+	Device::QueueFamilyIndices Device::findQueueFamilies(const VkPhysicalDevice& physicalDevice)
+	{
+		QueueFamilyIndices indices;
+
+		std::vector<VkQueueFamilyProperties> queueFamilyProperties = ft::core::PhysicalDevice::getQueueFamilyProperties(physicalDevice);
+
+		int i = 0;
+		for (const auto& queueFamily : queueFamilyProperties)
+		{
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			{
+				indices.graphicsFamily = i;
+			}
+
+			VkBool32 presentSupport = ft::core::PhysicalDevice::getSurfaceSupport(physicalDevice, i, surface->getVk());
+
+			if (presentSupport)
+			{
+				indices.presentFamily = i;
+			}
+
+			if (indices.isComplete())
+			{
+				break;
+			}
+
+			i++;
+		}
+
+		return indices;
+	}
+
+	Device::SwapChainSupportDetails Device::querySwapChainSupport(const VkPhysicalDevice& device)
+	{
+		SwapChainSupportDetails details;
+
+		details.capabilities = ft::core::PhysicalDevice::getSurfaceCapabilities(device, surface->getVk());
+		details.formats = ft::core::PhysicalDevice::getSurfaceFormats(device, surface->getVk());
+		details.presentModes = ft::core::PhysicalDevice::getSurfacePresentModes(device, surface->getVk());
+
+		return details;
+	}
+
+	VkSampleCountFlagBits Device::getMaxUsableSampleCount(const VkPhysicalDevice& physicalDevice)
+	{
+		VkPhysicalDeviceProperties physicalDeviceProperties;
+		vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+
+		VkSampleCountFlags counts =
+			physicalDeviceProperties.limits.framebufferColorSampleCounts &
+			physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+
+		if (counts & VK_SAMPLE_COUNT_64_BIT) return VK_SAMPLE_COUNT_64_BIT;
+		if (counts & VK_SAMPLE_COUNT_32_BIT) return VK_SAMPLE_COUNT_32_BIT;
+		if (counts & VK_SAMPLE_COUNT_16_BIT) return VK_SAMPLE_COUNT_16_BIT;
+		if (counts & VK_SAMPLE_COUNT_8_BIT) return VK_SAMPLE_COUNT_8_BIT;
+		if (counts & VK_SAMPLE_COUNT_4_BIT) return VK_SAMPLE_COUNT_4_BIT;
+		if (counts & VK_SAMPLE_COUNT_2_BIT) return VK_SAMPLE_COUNT_2_BIT;
+
+		return VK_SAMPLE_COUNT_1_BIT;
+	}
+
 }

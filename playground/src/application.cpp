@@ -44,7 +44,7 @@ void Application::run()
 void Application::init()
 {
 	m_device = std::make_unique<ft::Device>();
-	pickPhysicalDevice();
+	// pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapChain();
 	createSwapchainImageViews();
@@ -71,37 +71,9 @@ void Application::init()
 }
 
 
-void Application::pickPhysicalDevice()
-{
-	std::vector<VkPhysicalDevice> physicalDevices = m_device->instance->getPhysicalDevices();
-
-	if (physicalDevices.empty())
-	{
-		throw std::runtime_error("Failed to find GPUs with Vulkan support");
-	}
-
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-	for (const auto& phyDev : physicalDevices)
-	{
-		if (isDeviceSuitable(phyDev))
-		{
-			physicalDevice = phyDev;
-			m_msaaSamples = getMaxUsableSampleCount(physicalDevice);
-			break;
-		}
-	}
-
-	if (physicalDevice == VK_NULL_HANDLE)
-	{
-		throw std::runtime_error("Failed to find a suitable GPU");
-	}
-
-	m_physicalDevice = std::make_unique<ft::core::PhysicalDevice>(physicalDevice);
-}
-
 void Application::createLogicalDevice()
 {
-	QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice->getVk());
+	QueueFamilyIndices indices = findQueueFamilies(m_device->physicalDevice->getVk());
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -138,7 +110,7 @@ void Application::createLogicalDevice()
 		createInfo.enabledLayerCount = 0;
 	}
 
-	m_coreDevice = std::make_unique<ft::core::Device>(m_physicalDevice->getVk(), createInfo);
+	m_coreDevice = std::make_unique<ft::core::Device>(m_device->physicalDevice->getVk(), createInfo);
 
 	m_graphicsQueue = std::make_unique<ft::core::Queue>(m_coreDevice->getVk(), indices.graphicsFamily.value());
 	m_presentQueue = std::make_unique<ft::core::Queue>(m_coreDevice->getVk(), indices.presentFamily.value());
@@ -146,7 +118,7 @@ void Application::createLogicalDevice()
 
 void Application::createSwapChain()
 {
-	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(m_physicalDevice->getVk());
+	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(m_device->physicalDevice->getVk());
 
 	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 	VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -171,7 +143,7 @@ void Application::createSwapChain()
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice->getVk());
+	QueueFamilyIndices indices = findQueueFamilies(m_device->physicalDevice->getVk());
 	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 	if (indices.graphicsFamily != indices.presentFamily)
@@ -252,7 +224,7 @@ void Application::createRenderPass()
 {
 	VkAttachmentDescription colorAttachment{};
     colorAttachment.format = m_swapchain->getImageFormat();
-    colorAttachment.samples = m_msaaSamples;
+    colorAttachment.samples = m_device->msaaSamples;
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -267,7 +239,7 @@ void Application::createRenderPass()
 
 	VkAttachmentDescription depthAttachment{};
 	depthAttachment.format = findDepthFormat();
-	depthAttachment.samples = m_msaaSamples;
+	depthAttachment.samples = m_device->msaaSamples;
 	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -414,7 +386,7 @@ void Application::createGraphicsPipeline()
 	VkPipelineMultisampleStateCreateInfo multisampling{};
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	multisampling.sampleShadingEnable = VK_FALSE;
-	multisampling.rasterizationSamples = m_msaaSamples;
+	multisampling.rasterizationSamples = m_device->msaaSamples;
 
 
 	VkPipelineColorBlendAttachmentState colorBlendAttachment{};
@@ -488,7 +460,7 @@ void Application::createFramebuffers()
 
 void Application::createCommandPool()
 {
-	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(m_physicalDevice->getVk());
+	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(m_device->physicalDevice->getVk());
 
 	ft::core::CommandPool::CreateInfo poolInfo{};
 	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
@@ -514,7 +486,7 @@ void Application::createColorResources()
 		VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
 		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	imageInfo.samples = m_msaaSamples;
+	imageInfo.samples = m_device->msaaSamples;
 
 	m_colorImage = std::make_unique<ft::core::Image>(m_coreDevice->getVk(), imageInfo);
 
@@ -524,7 +496,7 @@ void Application::createColorResources()
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
 	allocInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
-		m_physicalDevice->getVk(),
+		m_device->physicalDevice->getVk(),
 		memRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
@@ -565,7 +537,7 @@ void Application::createDepthResources()
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	imageInfo.samples = m_msaaSamples;
+	imageInfo.samples = m_device->msaaSamples;
 
 	m_depthImage = std::make_unique<ft::core::Image>(m_coreDevice->getVk(), imageInfo);
 
@@ -575,7 +547,7 @@ void Application::createDepthResources()
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
 	allocInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
-		m_physicalDevice->getVk(),
+		m_device->physicalDevice->getVk(),
 		memRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
@@ -627,7 +599,7 @@ void Application::createTextureImage()
 	stagingMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	stagingMemoryInfo.allocationSize = stagingMemRequirements.size;
 	stagingMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
-		m_physicalDevice->getVk(),
+		m_device->physicalDevice->getVk(),
 		stagingMemRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
@@ -671,7 +643,7 @@ void Application::createTextureImage()
 	imageMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	imageMemoryInfo.allocationSize = imageMemRequirements.size;
 	imageMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
-		m_physicalDevice->getVk(),
+		m_device->physicalDevice->getVk(),
 		imageMemRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
@@ -736,7 +708,7 @@ void Application::createTextureSampler()
 	samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 
 	VkPhysicalDeviceProperties properties{};
-	m_physicalDevice->getProperties(&properties);
+	m_device->physicalDevice->getProperties(&properties);
 
 	samplerInfo.anisotropyEnable = VK_TRUE;
 	samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
@@ -822,7 +794,7 @@ void Application::createVertexBuffer()
 	stagingMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	stagingMemoryInfo.allocationSize = memRequirements.size;
 	stagingMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
-		m_physicalDevice->getVk(),
+		m_device->physicalDevice->getVk(),
 		memRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
@@ -851,7 +823,7 @@ void Application::createVertexBuffer()
 	vertexMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	vertexMemoryInfo.allocationSize = vertexMemRequirements.size;
 	vertexMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
-		m_physicalDevice->getVk(),
+		m_device->physicalDevice->getVk(),
 		vertexMemRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
@@ -882,7 +854,7 @@ void Application::createIndexBuffer()
 	stagingMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	stagingMemoryInfo.allocationSize = stagingMemRequirements.size;
 	stagingMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
-		m_physicalDevice->getVk(),
+		m_device->physicalDevice->getVk(),
 		stagingMemRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
@@ -911,7 +883,7 @@ void Application::createIndexBuffer()
 	indexMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	indexMemoryInfo.allocationSize = indexMemRequirements.size;
 	indexMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
-		m_physicalDevice->getVk(),
+		m_device->physicalDevice->getVk(),
 		indexMemRequirements.memoryTypeBits,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
@@ -947,7 +919,7 @@ void Application::createUniformBuffers()
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
-			m_physicalDevice->getVk(),
+			m_device->physicalDevice->getVk(),
 			memRequirements.memoryTypeBits,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		);
@@ -1092,26 +1064,6 @@ void Application::populateDebugMessengerCreateInfo(ft::core::DebugMessenger::Cre
 	*/
 }
 
-bool Application::isDeviceSuitable(const VkPhysicalDevice& physicalDevice)
-{
-	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
-
-	bool extensionsSupported = ft::core::PhysicalDevice::checkExtensionSupport(physicalDevice, deviceExtensions);
-
-	bool swapChainAdequate = false;
-	if (extensionsSupported)
-	{
-		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
-		swapChainAdequate = swapChainSupport.formats.empty() == false
-						&&	swapChainSupport.presentModes.empty() == false;
-	}
-
-	VkPhysicalDeviceFeatures supportedFeatures;
-	vkGetPhysicalDeviceFeatures(physicalDevice, &supportedFeatures);
-
-	return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
-}
-
 QueueFamilyIndices Application::findQueueFamilies(const VkPhysicalDevice& physicalDevice)
 {
 	QueueFamilyIndices indices;
@@ -1219,7 +1171,7 @@ VkFormat Application::findSupportedFormat(const std::vector<VkFormat>& candidate
 	for (const auto& format : candidates)
 	{
 		VkFormatProperties props;
-		vkGetPhysicalDeviceFormatProperties(m_physicalDevice->getVk(), format, &props);
+		vkGetPhysicalDeviceFormatProperties(m_device->physicalDevice->getVk(), format, &props);
 
 		if (
 			tiling == VK_IMAGE_TILING_LINEAR &&
@@ -1416,7 +1368,7 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 {
 	// Check if image format supports linear blitting
 	VkFormatProperties formatProperties;
-	vkGetPhysicalDeviceFormatProperties(m_physicalDevice->getVk(), format, &formatProperties);
+	vkGetPhysicalDeviceFormatProperties(m_device->physicalDevice->getVk(), format, &formatProperties);
 
 	ft::core::CommandBuffer* commandBuffer = beginSingleTimeCommands();
 

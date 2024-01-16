@@ -59,7 +59,6 @@ private:
 	std::unique_ptr<ft::Device> m_device;
 
 
-	std::unique_ptr<ft::core::PhysicalDevice> m_physicalDevice;
 	std::unique_ptr<ft::core::Device> m_coreDevice;
 
 	std::unique_ptr<ft::core::Queue> m_graphicsQueue;
@@ -68,7 +67,6 @@ private:
 	std::unique_ptr<ft::core::Swapchain> m_swapchain;
 	std::vector<std::unique_ptr<ft::core::ImageView>> m_swapchainImageViews;
 
-	VkSampleCountFlagBits m_msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 	std::unique_ptr<ft::core::RenderPass> m_renderPass;
 	std::unique_ptr<ft::core::DescriptorSetLayout> m_descriptorSetLayout;
 	std::unique_ptr<ft::core::PipelineLayout> m_pipelineLayout;
@@ -141,9 +139,7 @@ private:
 	void createSyncObjects();
 
 	void populateDebugMessengerCreateInfo(ft::core::DebugMessenger::CreateInfo& createInfo);
-	bool isDeviceSuitable(const VkPhysicalDevice& physicalDevice);
 	QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
-
 	SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice& device);
 	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
