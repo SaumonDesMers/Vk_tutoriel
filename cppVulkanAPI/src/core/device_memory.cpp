@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <string.h>
+#include <iostream>
 
 namespace LIB_NAMESPACE
 {
@@ -13,8 +14,6 @@ namespace LIB_NAMESPACE
 		):
 			m_device(device)
 		{
-			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-
 			if (vkAllocateMemory(device, &allocInfo, nullptr, &m_memory) != VK_SUCCESS)
 			{
 				throw std::runtime_error("failed to allocate vertex buffer memory.");

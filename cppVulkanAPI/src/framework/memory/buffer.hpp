@@ -19,7 +19,12 @@ namespace LIB_NAMESPACE
 			VkBufferCreateInfo bufferInfo,
 			VkMemoryPropertyFlags properties
 		);
+		Buffer(const Buffer&) = delete;
+		Buffer(Buffer&&);
 		~Buffer();
+
+		VkBuffer buffer() const { return m_buffer->getVk(); }
+		VkDeviceMemory memory() const { return m_memory->getVk(); }
 
 		VkResult map(
 			VkDeviceSize offset = 0,
@@ -30,7 +35,23 @@ namespace LIB_NAMESPACE
 
 		void write(void *data, uint32_t size);
 
-		void copyToBuffer(Buffer& buffer);
+		static Buffer createStagingBuffer(
+			VkDevice device,
+			VkPhysicalDevice physicalDevice,
+			VkDeviceSize size
+		);
+
+		static Buffer&& createVertexBuffer(
+			VkDevice device,
+			VkPhysicalDevice physicalDevice,
+			VkDeviceSize size
+		);
+
+		static Buffer&& createIndexBuffer(
+			VkDevice device,
+			VkPhysicalDevice physicalDevice,
+			VkDeviceSize size
+		);
 
 	private:
 

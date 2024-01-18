@@ -385,32 +385,15 @@ void Application::createTextureImage()
 		throw std::runtime_error("failed to load texture: " + modelPath);
 	}
 
-	VkBufferCreateInfo stagingBufferInfo{};
-	stagingBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	stagingBufferInfo.size = imageSize;
-	stagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-	stagingBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-	ft::core::Buffer stagingBuffer(m_device->device->getVk(), stagingBufferInfo);
-
-	VkMemoryRequirements stagingMemRequirements = stagingBuffer.getMemoryRequirements();
-
-	VkMemoryAllocateInfo stagingMemoryInfo{};
-	stagingMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	stagingMemoryInfo.allocationSize = stagingMemRequirements.size;
-	stagingMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
+	ft::Buffer stagingBuffer = ft::Buffer::createStagingBuffer(
+		m_device->device->getVk(),
 		m_device->physicalDevice->getVk(),
-		stagingMemRequirements.memoryTypeBits,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		imageSize
 	);
 
-	ft::core::DeviceMemory stagingBufferMemory(m_device->device->getVk(), stagingMemoryInfo);
-
-	vkBindBufferMemory(m_device->device->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
-
-	stagingBufferMemory.map();
-	stagingBufferMemory.write((void*)pixels, imageSize);
-	stagingBufferMemory.unmap();
+	stagingBuffer.map();
+	stagingBuffer.write((void*)pixels, imageSize);
+	stagingBuffer.unmap();
 
 	stbi_image_free(pixels);
 
@@ -461,7 +444,7 @@ void Application::createTextureImage()
 	);
 
 	copyBufferToImage(
-		stagingBuffer.getVk(),
+		stagingBuffer.buffer(),
 		m_textureImage->getVk(),
 		static_cast<uint32_t>(texWidth),
 		static_cast<uint32_t>(texHeight)
@@ -579,33 +562,15 @@ void Application::createVertexBuffer()
 	VkDeviceSize bufferSize = sizeof(m_vertices[0]) * m_vertices.size();
 
 
-	VkBufferCreateInfo stagingBufferInfo{};
-	stagingBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	stagingBufferInfo.size = bufferSize;
-	stagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-	stagingBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-	ft::core::Buffer stagingBuffer(m_device->device->getVk(), stagingBufferInfo);
-
-	VkMemoryRequirements memRequirements = stagingBuffer.getMemoryRequirements();
-	
-	VkMemoryAllocateInfo stagingMemoryInfo{};
-	stagingMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	stagingMemoryInfo.allocationSize = memRequirements.size;
-	stagingMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
+	ft::Buffer stagingBuffer = ft::Buffer::createStagingBuffer(
+		m_device->device->getVk(),
 		m_device->physicalDevice->getVk(),
-		memRequirements.memoryTypeBits,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		bufferSize
 	);
 
-	ft::core::DeviceMemory stagingBufferMemory(m_device->device->getVk(), stagingMemoryInfo);
-
-	vkBindBufferMemory(m_device->device->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
-
-
-	stagingBufferMemory.map();
-	stagingBufferMemory.write((void*)m_vertices.data(), bufferSize);
-	stagingBufferMemory.unmap();
+	stagingBuffer.map();
+	stagingBuffer.write((void*)m_vertices.data(), bufferSize);
+	stagingBuffer.unmap();
 
 
 	VkBufferCreateInfo vertexBufferInfo{};
@@ -632,40 +597,23 @@ void Application::createVertexBuffer()
 	vkBindBufferMemory(m_device->device->getVk(), m_vertexBuffer->getVk(), m_vertexBufferMemory->getVk(), 0);
 
 
-	copyBufferToBuffer(stagingBuffer.getVk(), m_vertexBuffer->getVk(), bufferSize);
+	copyBufferToBuffer(stagingBuffer.buffer(), m_vertexBuffer->getVk(), bufferSize);
 }
 
 void Application::createIndexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(m_indices[0]) * m_indices.size();
 
-	VkBufferCreateInfo stagingBufferInfo{};
-	stagingBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	stagingBufferInfo.size = bufferSize;
-	stagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-	stagingBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	ft::core::Buffer stagingBuffer(m_device->device->getVk(), stagingBufferInfo);
-
-	VkMemoryRequirements stagingMemRequirements = stagingBuffer.getMemoryRequirements();
-
-	VkMemoryAllocateInfo stagingMemoryInfo{};
-	stagingMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	stagingMemoryInfo.allocationSize = stagingMemRequirements.size;
-	stagingMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
+	ft::Buffer stagingBuffer = ft::Buffer::createStagingBuffer(
+		m_device->device->getVk(),
 		m_device->physicalDevice->getVk(),
-		stagingMemRequirements.memoryTypeBits,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		bufferSize
 	);
 
-	ft::core::DeviceMemory stagingBufferMemory(m_device->device->getVk(), stagingMemoryInfo);
-
-	vkBindBufferMemory(m_device->device->getVk(), stagingBuffer.getVk(), stagingBufferMemory.getVk(), 0);
-
-
-	stagingBufferMemory.map();
-	stagingBufferMemory.write((void*)m_indices.data(), bufferSize);
-	stagingBufferMemory.unmap();
+	stagingBuffer.map();
+	stagingBuffer.write((void*)m_indices.data(), bufferSize);
+	stagingBuffer.unmap();
 
 
 	VkBufferCreateInfo indexBufferInfo{};
@@ -692,7 +640,7 @@ void Application::createIndexBuffer()
 	vkBindBufferMemory(m_device->device->getVk(), m_indexBuffer->getVk(), m_indexBufferMemory->getVk(), 0);
 
 
-	copyBufferToBuffer(stagingBuffer.getVk(), m_indexBuffer->getVk(), bufferSize);
+	copyBufferToBuffer(stagingBuffer.buffer(), m_indexBuffer->getVk(), bufferSize);
 }
 
 void Application::createUniformBuffers()

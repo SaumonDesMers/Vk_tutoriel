@@ -1,6 +1,7 @@
 #include "buffer.hpp"
 
 #include <stdexcept>
+#include <iostream>
 
 namespace LIB_NAMESPACE
 {
@@ -12,8 +13,6 @@ namespace LIB_NAMESPACE
 		)
 			:m_device(device)
 		{
-			createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-
 			if (vkCreateBuffer(m_device, &createInfo, nullptr, &m_buffer) != VK_SUCCESS)
 			{
 				throw std::runtime_error("failed to create vertex buffer.");

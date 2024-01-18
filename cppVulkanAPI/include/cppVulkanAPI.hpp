@@ -30,3 +30,4 @@
 #include "../src/framework/pipeline.hpp"
 #include "../src/framework/descriptor.hpp"
 #include "../src/framework/command.hpp"
+#include "../src/framework/memory/buffer.hpp"
