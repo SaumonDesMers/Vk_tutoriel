@@ -259,7 +259,7 @@ void Application::createFramebuffers()
 
 void Application::createCommandPool()
 {
-	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(m_device->physicalDevice->getVk());
+	ft::Queue::FamilyIndices queueFamilyIndices = m_device->findQueueFamilies(m_device->physicalDevice->getVk());
 
 	ft::Command::CreateInfo commandInfo{};
 	commandInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
@@ -804,38 +804,6 @@ void Application::createSyncObjects()
 
 }
 
-
-QueueFamilyIndices Application::findQueueFamilies(const VkPhysicalDevice& physicalDevice)
-{
-	QueueFamilyIndices indices;
-
-	std::vector<VkQueueFamilyProperties> queueFamilyProperties = ft::core::PhysicalDevice::getQueueFamilyProperties(physicalDevice);
-
-	int i = 0;
-	for (const auto& queueFamily : queueFamilyProperties)
-	{
-		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-		{
-			indices.graphicsFamily = i;
-		}
-
-		VkBool32 presentSupport = ft::core::PhysicalDevice::getSurfaceSupport(physicalDevice, i, m_device->surface->getVk());
-
-		if (presentSupport)
-		{
-			indices.presentFamily = i;
-		}
-
-		if (indices.isComplete())
-		{
-			break;
-		}
-
-		i++;
-	}
-
-	return indices;
-}
 
 VkFormat Application::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 {

@@ -125,7 +125,6 @@ private:
 	void createCommandBuffer();
 	void createSyncObjects();
 
-	QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
 	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 	VkFormat findDepthFormat();
 	bool hasStencilComponent(VkFormat format);
