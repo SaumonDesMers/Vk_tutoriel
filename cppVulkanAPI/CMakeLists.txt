@@ -50,6 +50,7 @@ target_sources(${PROJECT_NAME}
 		src/framework/swapchain.cpp
 		src/framework/pipeline.cpp
 		src/framework/descriptor.cpp
+		src/framework/command.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)

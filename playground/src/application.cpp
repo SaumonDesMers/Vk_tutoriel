@@ -241,11 +241,12 @@ void Application::createCommandPool()
 {
 	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(m_device->physicalDevice->getVk());
 
-	ft::core::CommandPool::CreateInfo poolInfo{};
-	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+	ft::Command::CreateInfo commandInfo{};
+	commandInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+	commandInfo.queue = m_device->graphicsQueue->getVk();
+	commandInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-	m_commandPool = std::make_unique<ft::core::CommandPool>(m_device->device->getVk(), poolInfo);
+	m_command = std::make_unique<ft::Command>(m_device->device->getVk(), commandInfo);
 }
 
 void Application::createColorResources()
@@ -430,7 +431,6 @@ void Application::createTextureImage()
 	m_textureImageMemory = std::make_unique<ft::core::DeviceMemory>(m_device->device->getVk(), imageMemoryInfo);
 
 	m_textureImage->bindMemory(m_textureImageMemory->getVk());
-
 
 	transitionImageLayout(
 		m_textureImage->getVk(),
@@ -756,16 +756,11 @@ void Application::updateDescriptorSets()
 
 void Application::createCommandBuffer()
 {
-	m_commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+	m_vkCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
-	ft::core::CommandBuffer::AllocateInfo allocInfo{};
-	allocInfo.commandPool = m_commandPool->getVk();
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = 1;
-
-	for (size_t i = 0; i < m_commandBuffers.size(); i++)
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
-		m_commandBuffers[i] = std::make_unique<ft::core::CommandBuffer>(m_device->device->getVk(), allocInfo);
+		m_vkCommandBuffers[i] = m_command->allocateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 	}
 }
 
@@ -863,18 +858,18 @@ bool Application::hasStencilComponent(VkFormat format) {
 
 void Application::copyBufferToBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
-	ft::core::CommandBuffer* commandBuffer = beginSingleTimeCommands();
+	VkCommandBuffer commandBuffer = m_command->beginSingleTimeCommands();
 
 	VkBufferCopy copyRegion{};
 	copyRegion.size = size;
-	vkCmdCopyBuffer(commandBuffer->getVk(), srcBuffer, dstBuffer, 1, &copyRegion);
+	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-	endSingleTimeCommands(commandBuffer);
+	m_command->endSingleTimeCommands(commandBuffer);
 }
 
 void Application::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
 {
-	ft::core::CommandBuffer* commandBuffer = beginSingleTimeCommands();
+	VkCommandBuffer commandBuffer = m_command->beginSingleTimeCommands();
 
 	VkBufferImageCopy region{};
 	region.bufferOffset = 0;
@@ -894,7 +889,7 @@ void Application::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t wid
 	};
 
 	vkCmdCopyBufferToImage(
-		commandBuffer->getVk(),
+		commandBuffer,
 		buffer,
 		image,
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -902,47 +897,12 @@ void Application::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t wid
 		&region
 	);
 
-	endSingleTimeCommands(commandBuffer);
-}
-
-ft::core::CommandBuffer* Application::beginSingleTimeCommands()
-{
-	VkCommandBufferAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.commandPool = m_commandPool->getVk();
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = 1;
-
-	ft::core::CommandBuffer* commandBuffer = new ft::core::CommandBuffer(m_device->device->getVk(), allocInfo);
-
-	VkCommandBufferBeginInfo beginInfo{};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-	commandBuffer->begin(beginInfo);
-
-	return commandBuffer;
-}
-
-void Application::endSingleTimeCommands(ft::core::CommandBuffer* commandBuffer)
-{
-	commandBuffer->end();
-
-	VkSubmitInfo submitInfo{};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.commandBufferCount = 1;
-	VkCommandBuffer cmdBuf = commandBuffer->getVk();
-	submitInfo.pCommandBuffers = &cmdBuf;
-
-	m_device->graphicsQueue->submit(1, &submitInfo);
-	m_device->graphicsQueue->waitIdle();
-
-	delete commandBuffer;
+	m_command->endSingleTimeCommands(commandBuffer);
 }
 
 void Application::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
 {
-	ft::core::CommandBuffer* commandBuffer = beginSingleTimeCommands();
+	VkCommandBuffer commandBuffer = m_command->beginSingleTimeCommands();
 
 	VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -990,7 +950,7 @@ void Application::transitionImageLayout(VkImage image, VkFormat format, VkImageL
 	}
 
 	vkCmdPipelineBarrier(
-		commandBuffer->getVk(),
+		commandBuffer,
 		sourceStage, destinationStage,
 		0,
 		0, nullptr,
@@ -998,7 +958,7 @@ void Application::transitionImageLayout(VkImage image, VkFormat format, VkImageL
 		1, &barrier
 	);
 
-	endSingleTimeCommands(commandBuffer);
+	m_command->endSingleTimeCommands(commandBuffer);
 }
 
 void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
@@ -1007,7 +967,7 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 	VkFormatProperties formatProperties;
 	vkGetPhysicalDeviceFormatProperties(m_device->physicalDevice->getVk(), format, &formatProperties);
 
-	ft::core::CommandBuffer* commandBuffer = beginSingleTimeCommands();
+	VkCommandBuffer commandBuffer = m_command->beginSingleTimeCommands();
 
 	VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -1033,7 +993,7 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 		barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
 		vkCmdPipelineBarrier(
-			commandBuffer->getVk(),
+			commandBuffer,
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
 			0,
 			0, nullptr,
@@ -1061,7 +1021,7 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 		blit.dstSubresource.layerCount = 1;
 
 		vkCmdBlitImage(
-			commandBuffer->getVk(),
+			commandBuffer,
 			image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 			image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1, &blit,
@@ -1074,7 +1034,7 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
 		vkCmdPipelineBarrier(
-			commandBuffer->getVk(),
+			commandBuffer,
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 			0,
 			0, nullptr,
@@ -1093,7 +1053,7 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
 	vkCmdPipelineBarrier(
-		commandBuffer->getVk(),
+		commandBuffer,
 		VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 		0,
 		0, nullptr,
@@ -1101,15 +1061,15 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 		1, &barrier
 	);
 
-	endSingleTimeCommands(commandBuffer);
+	m_command->endSingleTimeCommands(commandBuffer);
 }
 
 
-void Application::recordCommandBuffer(const std::unique_ptr<ft::core::CommandBuffer>& commandBuffer, uint32_t imageIndex)
+void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
 	ft::core::CommandBuffer::BeginInfo beginInfo = {};
 
-	commandBuffer->begin(beginInfo);
+	vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -1125,12 +1085,12 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::core::CommandBuf
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
 
-	vkCmdBeginRenderPass(commandBuffer->getVk(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	vkCmdBindPipeline(commandBuffer->getVk(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicPipeline->pipeline->getVk());
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicPipeline->pipeline->getVk());
 
 	vkCmdBindDescriptorSets(
-		commandBuffer->getVk(),
+		commandBuffer,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
 		m_graphicPipeline->layout->getVk(),
 		0, 1,
@@ -1145,24 +1105,24 @@ void Application::recordCommandBuffer(const std::unique_ptr<ft::core::CommandBuf
 	viewport.height = static_cast<float>(m_device->swapchain->swapchain->getExtent().height);
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(commandBuffer->getVk(), 0, 1, &viewport);
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = {0, 0};
 	scissor.extent = m_device->swapchain->swapchain->getExtent();
-	vkCmdSetScissor(commandBuffer->getVk(), 0, 1, &scissor);
+	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 	VkBuffer vertexBuffers[] = {m_vertexBuffer->getVk()};
 	VkDeviceSize offsets[] = {0};
-	vkCmdBindVertexBuffers(commandBuffer->getVk(), 0, 1, vertexBuffers, offsets);
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-	vkCmdBindIndexBuffer(commandBuffer->getVk(), m_indexBuffer->getVk(), 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->getVk(), 0, VK_INDEX_TYPE_UINT32);
 
-	vkCmdDrawIndexed(commandBuffer->getVk(), static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
+	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
 
-	vkCmdEndRenderPass(commandBuffer->getVk());
+	vkCmdEndRenderPass(commandBuffer);
 
-	commandBuffer->end();
+	vkEndCommandBuffer(commandBuffer);
 }
 
 void Application::drawFrame()
@@ -1184,8 +1144,8 @@ void Application::drawFrame()
 
 	m_inFlightFences[m_currentFrame]->reset();
 
-	m_commandBuffers[m_currentFrame]->reset();
-	recordCommandBuffer(m_commandBuffers[m_currentFrame], imageIndex);
+	vkResetCommandBuffer(m_vkCommandBuffers[m_currentFrame], 0);
+	recordCommandBuffer(m_vkCommandBuffers[m_currentFrame], imageIndex);
 
 	updateUniformBuffer(m_currentFrame);
 
@@ -1198,7 +1158,7 @@ void Application::drawFrame()
 	submitInfo.pWaitSemaphores = waitSemaphores;
 	submitInfo.pWaitDstStageMask = waitStages;
 
-	VkCommandBuffer commandBuffers[] = {m_commandBuffers[m_currentFrame]->getVk()};
+	VkCommandBuffer commandBuffers[] = {m_vkCommandBuffers[m_currentFrame]};
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = commandBuffers;
 

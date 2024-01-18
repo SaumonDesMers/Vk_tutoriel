@@ -60,6 +60,9 @@ private:
 
 	std::unique_ptr<ft::Descriptor> m_descriptor;
 
+	std::unique_ptr<ft::Command> m_command;
+	std::vector<VkCommandBuffer> m_vkCommandBuffers;
+
 	std::unique_ptr<ft::core::RenderPass> m_renderPass;
 	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
 	std::vector<std::unique_ptr<ft::core::Framebuffer>> m_swapchainFramebuffers;
@@ -71,9 +74,6 @@ private:
 	std::unique_ptr<ft::core::Image> m_depthImage;
 	std::unique_ptr<ft::core::DeviceMemory> m_depthImageMemory;
 	std::unique_ptr<ft::core::ImageView> m_depthImageView;
-
-	std::unique_ptr<ft::core::CommandPool> m_commandPool;
-	std::vector<std::unique_ptr<ft::core::CommandBuffer>> m_commandBuffers;
 
 	std::vector<std::unique_ptr<ft::core::Semaphore>> m_imageAvailableSemaphores;
 	std::vector<std::unique_ptr<ft::core::Semaphore>> m_renderFinishedSemaphores;
@@ -129,12 +129,10 @@ private:
 
 	void copyBufferToBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-	ft::core::CommandBuffer* beginSingleTimeCommands();
-	void endSingleTimeCommands(ft::core::CommandBuffer* commandBuffer);
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 	void generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
-	void recordCommandBuffer(const std::unique_ptr<ft::core::CommandBuffer>& commandBuffer, uint32_t imageIndex);
+	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void drawFrame();
 	void updateUniformBuffer(uint32_t currentImage);
 };

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vulkan/vulkan.h>
+#include <vulkan/vk_enum_string_helper.h>
+
 // Define project namespace
 #ifndef LIB_NAMESPACE
 #	define LIB_NAMESPACE ft
