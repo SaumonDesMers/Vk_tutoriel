@@ -85,8 +85,7 @@ private:
 	std::unique_ptr<ft::Buffer> m_vertexBuffer;
 
 	std::vector<uint32_t> m_indices;
-	std::unique_ptr<ft::core::Buffer> m_indexBuffer;
-	std::unique_ptr<ft::core::DeviceMemory> m_indexBufferMemory;
+	std::unique_ptr<ft::Buffer> m_indexBuffer;
 
 	uint32_t m_mipLevels;
 	std::unique_ptr<ft::core::Image> m_textureImage;

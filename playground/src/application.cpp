@@ -598,31 +598,13 @@ void Application::createIndexBuffer()
 	stagingBuffer.unmap();
 
 
-	VkBufferCreateInfo indexBufferInfo{};
-	indexBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	indexBufferInfo.size = bufferSize;
-	indexBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-	indexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-	m_indexBuffer = std::make_unique<ft::core::Buffer>(m_device->device->getVk(), indexBufferInfo);
-
-	VkMemoryRequirements indexMemRequirements = m_indexBuffer->getMemoryRequirements();
-
-	VkMemoryAllocateInfo indexMemoryInfo{};
-	indexMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	indexMemoryInfo.allocationSize = indexMemRequirements.size;
-	indexMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
+	m_indexBuffer = std::make_unique<ft::Buffer>(ft::Buffer::createIndexBuffer(
+		m_device->device->getVk(),
 		m_device->physicalDevice->getVk(),
-		indexMemRequirements.memoryTypeBits,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	);
+		bufferSize
+	));
 
-	m_indexBufferMemory = std::make_unique<ft::core::DeviceMemory>(m_device->device->getVk(), indexMemoryInfo);
-
-	vkBindBufferMemory(m_device->device->getVk(), m_indexBuffer->getVk(), m_indexBufferMemory->getVk(), 0);
-
-
-	copyBufferToBuffer(stagingBuffer.buffer(), m_indexBuffer->getVk(), bufferSize);
+	copyBufferToBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), bufferSize);
 }
 
 void Application::createUniformBuffers()
@@ -1034,7 +1016,7 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	VkDeviceSize offsets[] = {0};
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-	vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->getVk(), 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
 
 	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
 
