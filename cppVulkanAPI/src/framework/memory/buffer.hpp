@@ -41,13 +41,13 @@ namespace LIB_NAMESPACE
 			VkDeviceSize size
 		);
 
-		static Buffer&& createVertexBuffer(
+		static Buffer createVertexBuffer(
 			VkDevice device,
 			VkPhysicalDevice physicalDevice,
 			VkDeviceSize size
 		);
 
-		static Buffer&& createIndexBuffer(
+		static Buffer createIndexBuffer(
 			VkDevice device,
 			VkPhysicalDevice physicalDevice,
 			VkDeviceSize size

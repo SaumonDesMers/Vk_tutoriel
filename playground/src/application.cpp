@@ -573,31 +573,13 @@ void Application::createVertexBuffer()
 	stagingBuffer.unmap();
 
 
-	VkBufferCreateInfo vertexBufferInfo{};
-	vertexBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	vertexBufferInfo.size = bufferSize;
-	vertexBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	vertexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-	m_vertexBuffer = std::make_unique<ft::core::Buffer>(m_device->device->getVk(), vertexBufferInfo);
-
-	VkMemoryRequirements vertexMemRequirements = m_vertexBuffer->getMemoryRequirements();
-
-	VkMemoryAllocateInfo vertexMemoryInfo{};
-	vertexMemoryInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	vertexMemoryInfo.allocationSize = vertexMemRequirements.size;
-	vertexMemoryInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
+	m_vertexBuffer = std::make_unique<ft::Buffer>(ft::Buffer::createVertexBuffer(
+		m_device->device->getVk(),
 		m_device->physicalDevice->getVk(),
-		vertexMemRequirements.memoryTypeBits,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	);
+		bufferSize
+	));
 
-	m_vertexBufferMemory = std::make_unique<ft::core::DeviceMemory>(m_device->device->getVk(), vertexMemoryInfo);
-
-	vkBindBufferMemory(m_device->device->getVk(), m_vertexBuffer->getVk(), m_vertexBufferMemory->getVk(), 0);
-
-
-	copyBufferToBuffer(stagingBuffer.buffer(), m_vertexBuffer->getVk(), bufferSize);
+	copyBufferToBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), bufferSize);
 }
 
 void Application::createIndexBuffer()
@@ -1048,7 +1030,7 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	scissor.extent = m_swapchain->swapchain->getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	VkBuffer vertexBuffers[] = {m_vertexBuffer->getVk()};
+	VkBuffer vertexBuffers[] = {m_vertexBuffer->buffer()};
 	VkDeviceSize offsets[] = {0};
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 

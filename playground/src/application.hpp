@@ -82,9 +82,9 @@ private:
 	std::vector<std::unique_ptr<ft::core::Fence>> m_inFlightFences;
 
 	std::vector<Vertex> m_vertices;
+	std::unique_ptr<ft::Buffer> m_vertexBuffer;
+
 	std::vector<uint32_t> m_indices;
-	std::unique_ptr<ft::core::Buffer> m_vertexBuffer;
-	std::unique_ptr<ft::core::DeviceMemory> m_vertexBufferMemory;
 	std::unique_ptr<ft::core::Buffer> m_indexBuffer;
 	std::unique_ptr<ft::core::DeviceMemory> m_indexBufferMemory;
 

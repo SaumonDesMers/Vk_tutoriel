@@ -33,7 +33,7 @@ namespace LIB_NAMESPACE
 	Buffer::Buffer(Buffer&& other)
 	{
 		std::cout << "test to see if the unique pointers are still valid before move" << std::endl;
-		std::cout << "buffer: " << m_buffer->getVk() << std::endl;
+		std::cout << "buffer: " << other.m_buffer->getVk() << std::endl;
 
 		m_buffer = std::move(other.m_buffer);
 		m_memory = std::move(other.m_memory);
@@ -87,7 +87,7 @@ namespace LIB_NAMESPACE
 		);
 	}
 
-	Buffer&& Buffer::createVertexBuffer(
+	Buffer Buffer::createVertexBuffer(
 		VkDevice device,
 		VkPhysicalDevice physicalDevice,
 		VkDeviceSize size
@@ -99,15 +99,15 @@ namespace LIB_NAMESPACE
 		bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		return std::move(Buffer(
+		return Buffer(
 			device,
 			physicalDevice,
 			bufferInfo,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-		));
+		);
 	}
 
-	Buffer&& Buffer::createIndexBuffer(
+	Buffer Buffer::createIndexBuffer(
 		VkDevice device,
 		VkPhysicalDevice physicalDevice,
 		VkDeviceSize size
@@ -119,11 +119,11 @@ namespace LIB_NAMESPACE
 		bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		return std::move(Buffer(
+		return Buffer(
 			device,
 			physicalDevice,
 			bufferInfo,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-		));
+		);
 	}
 }
