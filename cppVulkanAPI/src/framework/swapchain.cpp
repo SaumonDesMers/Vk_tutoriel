@@ -64,7 +64,7 @@ namespace LIB_NAMESPACE
 		swapchainInfo.presentMode = presentMode;
 		swapchainInfo.clipped = VK_TRUE;
 
-		swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
+		swapchainInfo.oldSwapchain = createInfo.oldSwapchain;
 
 		swapchain = std::make_unique<ft::core::Swapchain>(device, swapchainInfo);
 	}

@@ -13,7 +13,6 @@ namespace LIB_NAMESPACE
 		createSurface();
 		pickPhysicalDevice();
 		createLogicalDevice();
-		createSwapchain();
 	}
 
 	Device::~Device()
@@ -154,23 +153,6 @@ namespace LIB_NAMESPACE
 
 		graphicsQueue = std::make_unique<ft::core::Queue>(device->getVk(), indices.graphicsFamily.value());
 		presentQueue = std::make_unique<ft::core::Queue>(device->getVk(), indices.presentFamily.value());
-	}
-
-	void Device::createSwapchain()
-	{
-		Swapchain::CreateInfo swapchainInfo = {};
-		swapchainInfo.surface = surface->getVk();
-		swapchainInfo.supportDetails = querySwapChainSupport(physicalDevice->getVk());
-		
-		int width, height;
-		window->getFramebufferSize(&width, &height);
-		swapchainInfo.frameBufferExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
-
-		swapchainInfo.queueFamilyIndices = findQueueFamilies(physicalDevice->getVk());
-
-		swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
-
-		swapchain = std::make_unique<Swapchain>(device->getVk(), swapchainInfo);
 	}
 
 

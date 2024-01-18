@@ -44,6 +44,7 @@ void Application::run()
 void Application::init()
 {
 	createDevice();
+	createSwapchain();
 	createRenderPass();
 	createDescriptor();
 	createGraphicsPipeline();
@@ -71,6 +72,23 @@ void Application::createDevice()
 	m_device = std::make_unique<ft::Device>();
 }
 
+void Application::createSwapchain()
+{
+	ft::Swapchain::CreateInfo swapchainInfo = {};
+	swapchainInfo.surface = m_device->surface->getVk();
+	swapchainInfo.supportDetails = m_device->querySwapChainSupport(m_device->physicalDevice->getVk());
+	
+	int width, height;
+	m_device->window->getFramebufferSize(&width, &height);
+	swapchainInfo.frameBufferExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+
+	swapchainInfo.queueFamilyIndices = m_device->findQueueFamilies(m_device->physicalDevice->getVk());
+
+	swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
+
+	m_swapchain = std::make_unique<ft::Swapchain>(m_device->device->getVk(), swapchainInfo);
+}
+
 void Application::recreateSwapChain()
 {
 	int width = 0, height = 0;
@@ -83,8 +101,8 @@ void Application::recreateSwapChain()
 
 	m_device->device->waitIdle();
 
+
 	m_swapchainFramebuffers.clear();
-	m_device->swapchain->imageViews.clear();
 
 	m_colorImageView.reset();
 	m_colorImageMemory.reset();
@@ -94,8 +112,10 @@ void Application::recreateSwapChain()
 	m_depthImageMemory.reset();
 	m_depthImage.reset();
 
-	m_device->swapchain->swapchain.reset();
+	m_swapchain.reset();
 
+
+	createSwapchain();
 	createColorResources();
 	createDepthResources();
 	createFramebuffers();
@@ -104,7 +124,7 @@ void Application::recreateSwapChain()
 void Application::createRenderPass()
 {
 	VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = m_device->swapchain->swapchain->getImageFormat();
+    colorAttachment.format = m_swapchain->swapchain->getImageFormat();
     colorAttachment.samples = m_device->msaaSamples;
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -134,7 +154,7 @@ void Application::createRenderPass()
 
 
 	VkAttachmentDescription colorAttachmentResolve{};
-    colorAttachmentResolve.format = m_device->swapchain->swapchain->getImageFormat();
+    colorAttachmentResolve.format = m_swapchain->swapchain->getImageFormat();
     colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -216,21 +236,21 @@ void Application::createGraphicsPipeline()
 
 void Application::createFramebuffers()
 {
-	m_swapchainFramebuffers.resize(m_device->swapchain->imageViews.size());
+	m_swapchainFramebuffers.resize(m_swapchain->imageViews.size());
 
-	for (size_t i = 0; i < m_device->swapchain->imageViews.size(); i++) {
+	for (size_t i = 0; i < m_swapchain->imageViews.size(); i++) {
 		std::array<VkImageView, 3> attachments = {
 			m_colorImageView->getVk(),
 			m_depthImageView->getVk(),
-			m_device->swapchain->imageViews[i]->getVk()
+			m_swapchain->imageViews[i]->getVk()
 		};
 
 		ft::core::Framebuffer::CreateInfo framebufferInfo{};
 		framebufferInfo.renderPass = m_renderPass->getVk();
 		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
 		framebufferInfo.pAttachments = attachments.data();
-		framebufferInfo.width = m_device->swapchain->swapchain->getExtent().width;
-		framebufferInfo.height = m_device->swapchain->swapchain->getExtent().height;
+		framebufferInfo.width = m_swapchain->swapchain->getExtent().width;
+		framebufferInfo.height = m_swapchain->swapchain->getExtent().height;
 		framebufferInfo.layers = 1;
 
 		m_swapchainFramebuffers[i] = std::make_unique<ft::core::Framebuffer>(m_device->device->getVk(), framebufferInfo);
@@ -254,9 +274,9 @@ void Application::createColorResources()
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageInfo.format = m_device->swapchain->swapchain->getImageFormat();
-	imageInfo.extent.width = m_device->swapchain->swapchain->getExtent().width;
-	imageInfo.extent.height = m_device->swapchain->swapchain->getExtent().height;
+	imageInfo.format = m_swapchain->swapchain->getImageFormat();
+	imageInfo.extent.width = m_swapchain->swapchain->getExtent().width;
+	imageInfo.extent.height = m_swapchain->swapchain->getExtent().height;
 	imageInfo.extent.depth = 1;
 	imageInfo.mipLevels = 1;
 	imageInfo.arrayLayers = 1;
@@ -289,7 +309,7 @@ void Application::createColorResources()
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image = m_colorImage->getVk();
 	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	viewInfo.format = m_device->swapchain->swapchain->getImageFormat();
+	viewInfo.format = m_swapchain->swapchain->getImageFormat();
 	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	viewInfo.subresourceRange.baseMipLevel = 0;
 	viewInfo.subresourceRange.levelCount = 1;
@@ -307,8 +327,8 @@ void Application::createDepthResources()
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageInfo.extent.width = m_device->swapchain->swapchain->getExtent().width;
-	imageInfo.extent.height = m_device->swapchain->swapchain->getExtent().height;
+	imageInfo.extent.width = m_swapchain->swapchain->getExtent().width;
+	imageInfo.extent.height = m_swapchain->swapchain->getExtent().height;
 	imageInfo.extent.depth = 1;
 	imageInfo.mipLevels = 1;
 	imageInfo.arrayLayers = 1;
@@ -1076,7 +1096,7 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	renderPassInfo.renderPass = m_renderPass->getVk();
 	renderPassInfo.framebuffer = m_swapchainFramebuffers[imageIndex]->getVk();
 	renderPassInfo.renderArea.offset = {0, 0};
-	renderPassInfo.renderArea.extent = m_device->swapchain->swapchain->getExtent();
+	renderPassInfo.renderArea.extent = m_swapchain->swapchain->getExtent();
 
 	std::array<VkClearValue, 2> clearValues{};
 	clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -1101,15 +1121,15 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.width = static_cast<float>(m_device->swapchain->swapchain->getExtent().width);
-	viewport.height = static_cast<float>(m_device->swapchain->swapchain->getExtent().height);
+	viewport.width = static_cast<float>(m_swapchain->swapchain->getExtent().width);
+	viewport.height = static_cast<float>(m_swapchain->swapchain->getExtent().height);
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = {0, 0};
-	scissor.extent = m_device->swapchain->swapchain->getExtent();
+	scissor.extent = m_swapchain->swapchain->getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 	VkBuffer vertexBuffers[] = {m_vertexBuffer->getVk()};
@@ -1130,7 +1150,7 @@ void Application::drawFrame()
 	m_inFlightFences[m_currentFrame]->wait();
 
 	uint32_t imageIndex;
-	VkResult result = m_device->swapchain->swapchain->acquireNextImage(UINT64_MAX, m_imageAvailableSemaphores[m_currentFrame]->getVk(), VK_NULL_HANDLE, &imageIndex);
+	VkResult result = m_swapchain->swapchain->acquireNextImage(UINT64_MAX, m_imageAvailableSemaphores[m_currentFrame]->getVk(), VK_NULL_HANDLE, &imageIndex);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
 	{
@@ -1174,7 +1194,7 @@ void Application::drawFrame()
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = signalSemaphores;
 
-	VkSwapchainKHR swapChains[] = {m_device->swapchain->swapchain->getVk()};
+	VkSwapchainKHR swapChains[] = {m_swapchain->swapchain->getVk()};
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
 	presentInfo.pImageIndices = &imageIndex;
@@ -1188,7 +1208,7 @@ void Application::drawFrame()
 	}
 	else if (result != VK_SUCCESS)
 	{
-		throw std::runtime_error("failed to present swap chain image!");
+		throw std::runtime_error("failed to present swap chain image.");
 	}
 
 	m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -1204,7 +1224,7 @@ void Application::updateUniformBuffer(uint32_t currentImage)
 	UniformBufferObject ubo{};
 	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), m_device->swapchain->swapchain->getExtent().width / (float) m_device->swapchain->swapchain->getExtent().height, 0.1f, 10.0f);
+	ubo.proj = glm::perspective(glm::radians(45.0f), m_swapchain->swapchain->getExtent().width / (float) m_swapchain->swapchain->getExtent().height, 0.1f, 10.0f);
 
 	ubo.proj[1][1] *= -1;
 

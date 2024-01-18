@@ -35,11 +35,12 @@ namespace LIB_NAMESPACE
 		std::unique_ptr<core::Queue> graphicsQueue;
 		std::unique_ptr<core::Queue> presentQueue;
 
-		std::unique_ptr<Swapchain> swapchain;
-
 
 		Device();
 		~Device();
+
+		Swapchain::SupportDetails querySwapChainSupport(const VkPhysicalDevice& device);
+		Queue::FamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
 
 	private:
 
@@ -57,13 +58,10 @@ namespace LIB_NAMESPACE
 		void createSurface();
 		void pickPhysicalDevice();
 		void createLogicalDevice();
-		void createSwapchain();
 
 		std::vector<const char*> getRequiredExtensions();
 		void populateDebugMessengerCreateInfo(ft::core::DebugMessenger::CreateInfo& createInfo);
 		bool isDeviceSuitable(const VkPhysicalDevice& physicalDevice);
-		Queue::FamilyIndices findQueueFamilies(const VkPhysicalDevice& physicalDevice);
-		Swapchain::SupportDetails querySwapChainSupport(const VkPhysicalDevice& device);
 		VkSampleCountFlagBits getMaxUsableSampleCount(const VkPhysicalDevice& physicalDevice);
 
 	};

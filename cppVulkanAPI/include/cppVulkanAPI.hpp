@@ -25,6 +25,7 @@
 #include "../src/core/device_memory.hpp"
 
 #include "../src/framework/device.hpp"
+#include "../src/framework/swapchain.hpp"
 #include "../src/framework/window/window.hpp"
 #include "../src/framework/pipeline.hpp"
 #include "../src/framework/descriptor.hpp"

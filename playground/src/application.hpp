@@ -58,6 +58,8 @@ private:
 
 	std::unique_ptr<ft::Device> m_device;
 
+	std::unique_ptr<ft::Swapchain> m_swapchain;
+
 	std::unique_ptr<ft::Descriptor> m_descriptor;
 
 	std::unique_ptr<ft::Command> m_command;
@@ -103,6 +105,7 @@ private:
 	void init();
 
 	void createDevice();
+	void createSwapchain();
 	void recreateSwapChain();
 	void createRenderPass();
 	void createDescriptor();
