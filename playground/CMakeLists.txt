@@ -35,8 +35,3 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE
 		cppVulkanAPI
 )
-
-target_include_directories(${PROJECT_NAME}
-	PRIVATE
-		${CMAKE_CURRENT_SOURCE_DIR}/external/glm
-)
