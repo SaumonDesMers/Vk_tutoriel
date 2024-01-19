@@ -108,8 +108,6 @@ void Application::recreateSwapChain()
 	m_colorImageMemory.reset();
 	m_colorImage.reset();
 
-	m_depthImageView.reset();
-	m_depthImageMemory.reset();
 	m_depthImage.reset();
 
 	m_swapchain.reset();
@@ -241,7 +239,7 @@ void Application::createFramebuffers()
 	for (size_t i = 0; i < m_swapchain->imageViews.size(); i++) {
 		std::array<VkImageView, 3> attachments = {
 			m_colorImageView->getVk(),
-			m_depthImageView->getVk(),
+			m_depthImage->view(),
 			m_swapchain->imageViews[i]->getVk()
 		};
 
@@ -324,52 +322,13 @@ void Application::createDepthResources()
 {
 	VkFormat depthFormat = findDepthFormat();
 
-	VkImageCreateInfo imageInfo{};
-	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-	imageInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageInfo.extent.width = m_swapchain->swapchain->getExtent().width;
-	imageInfo.extent.height = m_swapchain->swapchain->getExtent().height;
-	imageInfo.extent.depth = 1;
-	imageInfo.mipLevels = 1;
-	imageInfo.arrayLayers = 1;
-	imageInfo.format = depthFormat;
-	imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	imageInfo.samples = m_device->msaaSamples;
-
-	m_depthImage = std::make_unique<ft::core::Image>(m_device->device->getVk(), imageInfo);
-
-	VkMemoryRequirements memRequirements = m_depthImage->getMemoryRequirements();
-
-	VkMemoryAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
+	m_depthImage = std::make_unique<ft::Image>(ft::Image::createDepthImage(
+		m_device->device->getVk(),
 		m_device->physicalDevice->getVk(),
-		memRequirements.memoryTypeBits,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	);
-
-	m_depthImageMemory = std::make_unique<ft::core::DeviceMemory>(m_device->device->getVk(), allocInfo);
-
-	m_depthImage->bindMemory(m_depthImageMemory->getVk());
-
-	VkImageViewCreateInfo viewInfo{};
-	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewInfo.image = m_depthImage->getVk();
-	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	viewInfo.format = depthFormat;
-
-	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = 1;
-	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount = 1;
-
-	m_depthImageView = std::make_unique<ft::core::ImageView>(m_device->device->getVk(), viewInfo);
-
+		m_swapchain->swapchain->getExtent(),
+		depthFormat,
+		m_device->msaaSamples
+	));
 }
 
 void Application::createTextureImage()

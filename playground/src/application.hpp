@@ -73,9 +73,7 @@ private:
 	std::unique_ptr<ft::core::DeviceMemory> m_colorImageMemory;
 	std::unique_ptr<ft::core::ImageView> m_colorImageView;
 
-	std::unique_ptr<ft::core::Image> m_depthImage;
-	std::unique_ptr<ft::core::DeviceMemory> m_depthImageMemory;
-	std::unique_ptr<ft::core::ImageView> m_depthImageView;
+	std::unique_ptr<ft::Image> m_depthImage;
 
 	std::vector<std::unique_ptr<ft::core::Semaphore>> m_imageAvailableSemaphores;
 	std::vector<std::unique_ptr<ft::core::Semaphore>> m_renderFinishedSemaphores;
