@@ -32,3 +32,4 @@
 #include "../src/framework/command.hpp"
 #include "../src/framework/memory/buffer.hpp"
 #include "../src/framework/memory/image.hpp"
+#include "../src/framework/memory/texture.hpp"

@@ -31,6 +31,8 @@ namespace LIB_NAMESPACE
 		VkDeviceMemory memory() const { return m_memory->getVk(); }
 		VkImageView view() const { return m_imageView->getVk(); }
 
+		uint32_t mipLevels() const { return m_mipLevels; }
+
 		static Image createDepthImage(
 			VkDevice device,
 			VkPhysicalDevice physicalDevice,
@@ -52,6 +54,8 @@ namespace LIB_NAMESPACE
 		std::unique_ptr<core::Image> m_image;
 		std::unique_ptr<core::DeviceMemory> m_memory;
 		std::unique_ptr<core::ImageView> m_imageView;
+
+		uint32_t m_mipLevels;
 
 	};
 }

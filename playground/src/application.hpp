@@ -83,9 +83,7 @@ private:
 	std::unique_ptr<ft::Buffer> m_indexBuffer;
 
 	uint32_t m_mipLevels;
-	std::unique_ptr<ft::core::Image> m_textureImage;
-	std::unique_ptr<ft::core::DeviceMemory> m_textureImageMemory;
-	std::unique_ptr<ft::core::ImageView> m_textureImageView;
+	std::unique_ptr<ft::Texture> m_texture;
 	std::unique_ptr<ft::core::Sampler> m_textureSampler;
 
 	std::vector<std::unique_ptr<ft::Buffer>> m_uniformBuffers;
@@ -108,7 +106,6 @@ private:
 	void createColorResources();
 	void createDepthResources();
 	void createTextureImage();
-	void createTextureImageView();
 	void createTextureSampler();
 	void loadModel();
 	void createVertexBuffer();
@@ -124,7 +121,6 @@ private:
 
 	void copyBufferToBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 	void generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);

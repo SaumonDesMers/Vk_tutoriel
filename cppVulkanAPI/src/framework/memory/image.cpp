@@ -10,7 +10,8 @@ namespace LIB_NAMESPACE
 		VkImageCreateInfo imageInfo,
 		VkMemoryPropertyFlags properties,
 		VkImageViewCreateInfo viewInfo
-	)
+	):
+		m_mipLevels(imageInfo.mipLevels)
 	{
 
 		m_image = std::make_unique<core::Image>(device, imageInfo);

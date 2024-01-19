@@ -29,6 +29,22 @@ namespace LIB_NAMESPACE
 		VkCommandBuffer beginSingleTimeCommands();
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
+		void copyBufferToImage(
+			VkBuffer srcBuffer,
+			VkImage dstImage,
+			VkImageLayout dstImageLayout,
+			uint32_t regionCount,
+			const VkBufferImageCopy *pRegions
+		);
+
+		void transitionImageLayout(
+			VkImage image,
+			VkFormat format,
+			VkImageLayout oldLayout,
+			VkImageLayout newLayout,
+			uint32_t mipLevels
+		);
+
 	private:
 
 		VkCommandPool m_commandPool;
