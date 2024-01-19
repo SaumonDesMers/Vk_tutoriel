@@ -215,7 +215,17 @@ void Application::createGraphicsPipeline()
 
 	pipelineInfo.descriptorSetLayouts = { m_descriptor->layout };
 
-	pipelineInfo.renderPass = m_renderPass->getVk();
+	// pipelineInfo.renderPass = m_renderPass->getVk();
+	pipelineInfo.renderPass = VK_NULL_HANDLE;
+
+	VkFormat swapchainImageFormat = m_swapchain->swapchain->getImageFormat();
+
+	VkPipelineRenderingCreateInfo renderingInfo = {};
+	renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+	renderingInfo.colorAttachmentCount = 1;
+	renderingInfo.pColorAttachmentFormats = &swapchainImageFormat;
+
+	pipelineInfo.pNext = &renderingInfo;
 
 	m_graphicPipeline = std::make_unique<ft::Pipeline>(m_device->device->getVk(), pipelineInfo);
 }
@@ -599,21 +609,50 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 
 	vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
-	VkRenderPassBeginInfo renderPassInfo{};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass = m_renderPass->getVk();
-	renderPassInfo.framebuffer = m_swapchainFramebuffers[imageIndex]->getVk();
-	renderPassInfo.renderArea.offset = {0, 0};
-	renderPassInfo.renderArea.extent = m_swapchain->swapchain->getExtent();
+	m_command->transitionImageLayout(
+		m_swapchain->swapchain->getImage(imageIndex),
+		VK_IMAGE_LAYOUT_UNDEFINED,
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		1,
+		0,
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+	);
 
-	std::array<VkClearValue, 2> clearValues{};
-	clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
-	clearValues[1].depthStencil = {1.0f, 0};
+	// VkRenderPassBeginInfo renderPassInfo{};
+	// renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	// renderPassInfo.renderPass = m_renderPass->getVk();
+	// renderPassInfo.framebuffer = m_swapchainFramebuffers[imageIndex]->getVk();
+	// renderPassInfo.renderArea.offset = {0, 0};
+	// renderPassInfo.renderArea.extent = m_swapchain->swapchain->getExtent();
 
-	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-	renderPassInfo.pClearValues = clearValues.data();
+	// std::array<VkClearValue, 2> clearValues{};
+	// clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
+	// clearValues[1].depthStencil = {1.0f, 0};
 
-	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	// renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+	// renderPassInfo.pClearValues = clearValues.data();
+
+	// vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	VkRenderingAttachmentInfo colorAttachment{};
+	colorAttachment.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	colorAttachment.imageView = m_swapchain->imageViews[imageIndex]->getVk();
+	colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachment.clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+
+	VkRenderingInfo renderingInfo{};
+	renderingInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderingInfo.renderArea = {0, 0, m_swapchain->swapchain->getExtent().width, m_swapchain->swapchain->getExtent().height};
+	renderingInfo.layerCount = 1;
+	renderingInfo.colorAttachmentCount = 1;
+	renderingInfo.pColorAttachments = &colorAttachment;
+
+	vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicPipeline->pipeline->getVk());
 
@@ -648,7 +687,20 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 
 	vkCmdDrawIndexed(commandBuffer, m_mesh->indexCount(), 1, 0, 0, 0);
 
-	vkCmdEndRenderPass(commandBuffer);
+	// vkCmdEndRenderPass(commandBuffer);
+	vkCmdEndRendering(commandBuffer);
+
+	m_command->transitionImageLayout(
+		m_swapchain->swapchain->getImage(imageIndex),
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		1,
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		0,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
+	);
 
 	vkEndCommandBuffer(commandBuffer);
 }

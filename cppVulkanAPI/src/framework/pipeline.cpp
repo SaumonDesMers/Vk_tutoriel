@@ -125,6 +125,7 @@ namespace LIB_NAMESPACE
 		pipelineInfo.layout = layout->getVk();
 		pipelineInfo.renderPass = createInfo.renderPass;
 		pipelineInfo.subpass = 0;
+		pipelineInfo.pNext = createInfo.pNext;
 
 		pipeline = std::make_unique<ft::core::Pipeline>(device, pipelineInfo);
 	}

@@ -26,6 +26,8 @@ namespace LIB_NAMESPACE
 			std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
 
 			VkRenderPass renderPass;
+
+			void* pNext = nullptr;
 		};
 
 		std::unique_ptr<core::PipelineLayout> layout;

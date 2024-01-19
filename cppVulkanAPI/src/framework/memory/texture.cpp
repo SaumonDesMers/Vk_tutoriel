@@ -40,10 +40,14 @@ namespace LIB_NAMESPACE
 
 		command.transitionImageLayout(
 			m_image->image(),
-			VK_FORMAT_R8G8B8A8_SRGB,
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			m_image->mipLevels()
+			VK_IMAGE_ASPECT_COLOR_BIT,
+			m_image->mipLevels(),
+			0,
+			VK_ACCESS_TRANSFER_WRITE_BIT,
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+			VK_PIPELINE_STAGE_TRANSFER_BIT
 		);
 
 		VkBufferImageCopy region{};

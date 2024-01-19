@@ -39,7 +39,7 @@ namespace LIB_NAMESPACE
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.pEngineName = "Playground Engine";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_2;
+		appInfo.apiVersion = VK_API_VERSION_1_3;
 
 		ft::core::Instance::CreateInfo createInfo = {};
 		createInfo.pApplicationInfo = &appInfo;
@@ -136,6 +136,13 @@ namespace LIB_NAMESPACE
 		deviceInfo.queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size());
 		deviceInfo.pQueueCreateInfos = queueInfos.data();
 		deviceInfo.pEnabledFeatures = &deviceFeatures;
+
+		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures = {};
+		dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+		dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
+
+		deviceInfo.pNext = &dynamicRenderingFeatures;
+
 		deviceInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 		deviceInfo.ppEnabledExtensionNames = deviceExtensions.data();
 

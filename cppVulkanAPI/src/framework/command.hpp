@@ -46,10 +46,14 @@ namespace LIB_NAMESPACE
 
 		void transitionImageLayout(
 			VkImage image,
-			VkFormat format,
 			VkImageLayout oldLayout,
 			VkImageLayout newLayout,
-			uint32_t mipLevels
+			VkImageAspectFlags aspectMask,
+			uint32_t mipLevels,
+			VkAccessFlags srcAccessMask,
+			VkAccessFlags dstAccessMask,
+			VkPipelineStageFlags srcStageMask,
+			VkPipelineStageFlags dstStageMask
 		);
 
 	private:
