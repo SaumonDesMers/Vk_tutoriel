@@ -770,6 +770,11 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 	VkFormatProperties formatProperties;
 	vkGetPhysicalDeviceFormatProperties(m_device->physicalDevice->getVk(), format, &formatProperties);
 
+	if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
+	{
+		throw std::runtime_error("texture image format does not support linear blitting.");
+	}
+
 	VkCommandBuffer commandBuffer = m_command->beginSingleTimeCommands();
 
 	VkImageMemoryBarrier barrier{};
