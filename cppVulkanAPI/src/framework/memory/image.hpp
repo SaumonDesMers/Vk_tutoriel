@@ -39,6 +39,14 @@ namespace LIB_NAMESPACE
 			VkSampleCountFlagBits msaaSamples
 		);
 
+		static Image createColorImage(
+			VkDevice device,
+			VkPhysicalDevice physicalDevice,
+			VkExtent2D extent,
+			VkFormat format,
+			VkSampleCountFlagBits msaaSamples
+		);
+
 	private:
 
 		std::unique_ptr<core::Image> m_image;

@@ -69,10 +69,7 @@ private:
 	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
 	std::vector<std::unique_ptr<ft::core::Framebuffer>> m_swapchainFramebuffers;
 
-	std::unique_ptr<ft::core::Image> m_colorImage;
-	std::unique_ptr<ft::core::DeviceMemory> m_colorImageMemory;
-	std::unique_ptr<ft::core::ImageView> m_colorImageView;
-
+	std::unique_ptr<ft::Image> m_colorImage;
 	std::unique_ptr<ft::Image> m_depthImage;
 
 	std::vector<std::unique_ptr<ft::core::Semaphore>> m_imageAvailableSemaphores;
