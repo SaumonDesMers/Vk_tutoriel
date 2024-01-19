@@ -612,7 +612,6 @@ void Application::createUniformBuffers()
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
     m_uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-	m_uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
@@ -622,25 +621,14 @@ void Application::createUniformBuffers()
 		bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		m_uniformBuffers[i] = std::make_unique<ft::core::Buffer>(m_device->device->getVk(), bufferInfo);
-
-		VkMemoryRequirements memRequirements = m_uniformBuffers[i]->getMemoryRequirements();
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = ft::core::DeviceMemory::findMemoryType(
+		m_uniformBuffers[i] = std::make_unique<ft::Buffer>(
+			m_device->device->getVk(),
 			m_device->physicalDevice->getVk(),
-			memRequirements.memoryTypeBits,
+			bufferInfo,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		);
 
-		m_uniformBuffersMemory[i] = std::make_unique<ft::core::DeviceMemory>(m_device->device->getVk(), allocInfo);
-
-		vkBindBufferMemory(m_device->device->getVk(), m_uniformBuffers[i]->getVk(), m_uniformBuffersMemory[i]->getVk(), 0);
-
-
-		m_uniformBuffersMemory[i]->map();
+		m_uniformBuffers[i]->map();
     }
 }
 
@@ -649,7 +637,7 @@ void Application::updateDescriptorSets()
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
 		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = m_uniformBuffers[i]->getVk();
+		bufferInfo.buffer = m_uniformBuffers[i]->buffer();
 		bufferInfo.offset = 0;
 		bufferInfo.range = sizeof(UniformBufferObject);
 
@@ -1108,5 +1096,5 @@ void Application::updateUniformBuffer(uint32_t currentImage)
 
 	ubo.proj[1][1] *= -1;
 
-	m_uniformBuffersMemory[currentImage]->write(&ubo, sizeof(ubo));
+	m_uniformBuffers[currentImage]->write(&ubo, sizeof(ubo));
 }

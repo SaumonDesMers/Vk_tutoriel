@@ -32,14 +32,14 @@ namespace LIB_NAMESPACE
 
 	Buffer::Buffer(Buffer&& other)
 	{
-		std::cout << "test to see if the unique pointers are still valid before move" << std::endl;
-		std::cout << "buffer: " << other.m_buffer->getVk() << std::endl;
+		// std::cout << "test to see if the unique pointers are still valid before move" << std::endl;
+		// std::cout << "buffer: " << other.m_buffer->getVk() << std::endl;
 
 		m_buffer = std::move(other.m_buffer);
 		m_memory = std::move(other.m_memory);
 
-		std::cout << "test to see if the unique pointers are still valid after move" << std::endl;
-		std::cout << "buffer: " << m_buffer->getVk() << std::endl;
+		// std::cout << "test to see if the unique pointers are still valid after move" << std::endl;
+		// std::cout << "buffer: " << m_buffer->getVk() << std::endl;
 	}
 
 	Buffer::~Buffer()
@@ -126,4 +126,5 @@ namespace LIB_NAMESPACE
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		);
 	}
+
 }

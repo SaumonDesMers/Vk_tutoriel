@@ -93,8 +93,7 @@ private:
 	std::unique_ptr<ft::core::ImageView> m_textureImageView;
 	std::unique_ptr<ft::core::Sampler> m_textureSampler;
 
-	std::vector<std::unique_ptr<ft::core::Buffer>> m_uniformBuffers;
-	std::vector<std::unique_ptr<ft::core::DeviceMemory>> m_uniformBuffersMemory;
+	std::vector<std::unique_ptr<ft::Buffer>> m_uniformBuffers;
 
 	bool m_framebufferResized = false;
 	
