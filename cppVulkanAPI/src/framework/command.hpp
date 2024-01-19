@@ -29,6 +29,13 @@ namespace LIB_NAMESPACE
 		VkCommandBuffer beginSingleTimeCommands();
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
+		void copyBufferToBuffer(
+			VkBuffer srcBuffer,
+			VkBuffer dstBuffer,
+			uint32_t regionCount,
+			const VkBufferCopy *pRegions
+		);
+
 		void copyBufferToImage(
 			VkBuffer srcBuffer,
 			VkImage dstImage,

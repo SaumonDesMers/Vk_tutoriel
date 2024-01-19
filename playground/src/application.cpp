@@ -1,6 +1,5 @@
 #include "application.hpp"
 #include "logger.hpp"
-#include "vertex.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -8,9 +7,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <vulkan/vulkan.h>
-
-#define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
 
 #include <set>
 #include <chrono>
@@ -55,8 +51,6 @@ void Application::init()
 	createTextureImage();
 	createTextureSampler();
 	loadModel();
-	createVertexBuffer();
-	createIndexBuffer();
 	createUniformBuffers();
 	updateDescriptorSets();
 	createCommandBuffer();
@@ -341,97 +335,16 @@ void Application::loadModel()
 {
 	std::string modelPath = "playground/models/viking_room.obj";
 
-	tinyobj::attrib_t attrib;
-	std::vector<tinyobj::shape_t> shapes;
-	std::vector<tinyobj::material_t> materials;
-	std::string warning, error;
+	ft::Mesh::CreateInfo meshInfo = {};
 
-	if (tinyobj::LoadObj(&attrib, &shapes, &materials, &warning, &error, modelPath.c_str()) == false)
-	{
-		throw std::runtime_error(warning + error);
-	}
+	ft::Mesh::readObjFile(modelPath, meshInfo.vertices, meshInfo.indices);
 
-	std::unordered_map<Vertex, uint32_t> uniqueVertices = {};
-
-	for (const auto& shape : shapes)
-	{
-		for (const auto& index : shape.mesh.indices)
-		{
-			Vertex vertex = {};
-
-			vertex.pos = {
-				attrib.vertices[3 * index.vertex_index + 0],
-				attrib.vertices[3 * index.vertex_index + 1],
-				attrib.vertices[3 * index.vertex_index + 2]
-			};
-
-			vertex.texCoord = {
-				attrib.texcoords[2 * index.texcoord_index + 0],
-				1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-			};
-
-			vertex.color = { 1.0f, 1.0f, 1.0f };
-
-			if (uniqueVertices.count(vertex) == 0)
-			{
-				uniqueVertices[vertex] = static_cast<uint32_t>(m_vertices.size());
-				m_vertices.push_back(vertex);
-			}
-
-			m_indices.push_back(uniqueVertices[vertex]);
-		}
-	}
-
-}
-
-void Application::createVertexBuffer()
-{
-	VkDeviceSize bufferSize = sizeof(m_vertices[0]) * m_vertices.size();
-
-
-	ft::Buffer stagingBuffer = ft::Buffer::createStagingBuffer(
+	m_mesh = std::make_unique<ft::Mesh>(
 		m_device->device->getVk(),
 		m_device->physicalDevice->getVk(),
-		bufferSize
+		*m_command.get(),
+		meshInfo
 	);
-
-	stagingBuffer.map();
-	stagingBuffer.write((void*)m_vertices.data(), bufferSize);
-	stagingBuffer.unmap();
-
-
-	m_vertexBuffer = std::make_unique<ft::Buffer>(ft::Buffer::createVertexBuffer(
-		m_device->device->getVk(),
-		m_device->physicalDevice->getVk(),
-		bufferSize
-	));
-
-	copyBufferToBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), bufferSize);
-}
-
-void Application::createIndexBuffer()
-{
-	VkDeviceSize bufferSize = sizeof(m_indices[0]) * m_indices.size();
-
-
-	ft::Buffer stagingBuffer = ft::Buffer::createStagingBuffer(
-		m_device->device->getVk(),
-		m_device->physicalDevice->getVk(),
-		bufferSize
-	);
-
-	stagingBuffer.map();
-	stagingBuffer.write((void*)m_indices.data(), bufferSize);
-	stagingBuffer.unmap();
-
-
-	m_indexBuffer = std::make_unique<ft::Buffer>(ft::Buffer::createIndexBuffer(
-		m_device->device->getVk(),
-		m_device->physicalDevice->getVk(),
-		bufferSize
-	));
-
-	copyBufferToBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), bufferSize);
 }
 
 void Application::createUniformBuffers()
@@ -570,17 +483,6 @@ bool Application::hasStencilComponent(VkFormat format) {
 	return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
-
-void Application::copyBufferToBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
-{
-	VkCommandBuffer commandBuffer = m_command->beginSingleTimeCommands();
-
-	VkBufferCopy copyRegion{};
-	copyRegion.size = size;
-	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
-	m_command->endSingleTimeCommands(commandBuffer);
-}
 
 void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 {
@@ -738,13 +640,13 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	scissor.extent = m_swapchain->swapchain->getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	VkBuffer vertexBuffers[] = {m_vertexBuffer->buffer()};
+	VkBuffer vertexBuffers[] = {m_mesh->vertexBuffer().buffer()};
 	VkDeviceSize offsets[] = {0};
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-	vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindIndexBuffer(commandBuffer, m_mesh->indexBuffer().buffer(), 0, VK_INDEX_TYPE_UINT32);
 
-	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
+	vkCmdDrawIndexed(commandBuffer, m_mesh->indexCount(), 1, 0, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer);
 

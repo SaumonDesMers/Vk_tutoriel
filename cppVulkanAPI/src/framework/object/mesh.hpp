@@ -2,6 +2,7 @@
 
 #include "defines.hpp"
 #include "framework/memory/buffer.hpp"
+#include "framework/command.hpp"
 #include "vertex.hpp"
 
 #include <vector>
@@ -13,23 +14,51 @@ namespace LIB_NAMESPACE
     
     public:
 
-		struct MeshCreateInfo
+		struct CreateInfo
 		{
-			std::vector<Vertex>& vertices;
-			std::vector<uint32_t>& indices;
+			std::vector<Vertex> vertices;
+			std::vector<uint32_t> indices;
 		};
 
 		Mesh(
 			VkDevice device,
 			VkPhysicalDevice physicalDevice,
-			MeshCreateInfo meshInfo
+			Command& command,
+			CreateInfo& meshInfo
 		);
 		~Mesh();
 
+		inline Buffer& vertexBuffer() { return *m_vertexBuffer; }
+		inline uint32_t vertexCount() { return m_vertexCount; }
+		inline Buffer& indexBuffer() { return *m_indexBuffer; }
+		inline uint32_t indexCount() { return m_indexCount; }
+
+		static void readObjFile(
+			const std::string& filename,
+			std::vector<Vertex>& vertices,
+			std::vector<uint32_t>& indices
+		);
+
     private:
 
-		std::unique_ptr<core::Buffer> m_vertexBuffer;
-		std::unique_ptr<core::Buffer> m_indexBuffer;
+		std::unique_ptr<Buffer> m_vertexBuffer;
+		uint32_t m_vertexCount;
+		std::unique_ptr<Buffer> m_indexBuffer;
+		uint32_t m_indexCount;
+
+		void createVertexBuffer(
+			VkDevice device,
+			VkPhysicalDevice physicalDevice,
+			Command& command,
+			const std::vector<Vertex>& vertices
+		);
+
+		void createIndexBuffer(
+			VkDevice device,
+			VkPhysicalDevice physicalDevice,
+			Command& command,
+			const std::vector<uint32_t>& indices
+		);
 
     };
 }

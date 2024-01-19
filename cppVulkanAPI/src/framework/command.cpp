@@ -97,6 +97,26 @@ namespace LIB_NAMESPACE
 		freeCommandBuffer(commandBuffer);
 	}
 
+	void Command::copyBufferToBuffer(
+		VkBuffer srcBuffer,
+		VkBuffer dstBuffer,
+		uint32_t regionCount,
+		const VkBufferCopy *pRegions
+	)
+	{
+		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+		vkCmdCopyBuffer(
+			commandBuffer,
+			srcBuffer,
+			dstBuffer,
+			regionCount,
+			pRegions
+		);
+
+		endSingleTimeCommands(commandBuffer);
+	}
+
 	void Command::copyBufferToImage(
 		VkBuffer srcBuffer,
 		VkImage dstImage,

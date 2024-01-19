@@ -1,7 +1,5 @@
 #pragma once
 
-#include "vertex.hpp"
-
 #include <cppVulkanAPI.hpp>
 
 #include <glm/glm.hpp>
@@ -76,11 +74,7 @@ private:
 	std::vector<std::unique_ptr<ft::core::Semaphore>> m_renderFinishedSemaphores;
 	std::vector<std::unique_ptr<ft::core::Fence>> m_inFlightFences;
 
-	std::vector<Vertex> m_vertices;
-	std::unique_ptr<ft::Buffer> m_vertexBuffer;
-
-	std::vector<uint32_t> m_indices;
-	std::unique_ptr<ft::Buffer> m_indexBuffer;
+	std::unique_ptr<ft::Mesh> m_mesh;
 
 	uint32_t m_mipLevels;
 	std::unique_ptr<ft::Texture> m_texture;
@@ -108,8 +102,6 @@ private:
 	void createTextureImage();
 	void createTextureSampler();
 	void loadModel();
-	void createVertexBuffer();
-	void createIndexBuffer();
 	void createUniformBuffers();
 	void updateDescriptorSets();
 	void createCommandBuffer();
@@ -119,8 +111,6 @@ private:
 	VkFormat findDepthFormat();
 	bool hasStencilComponent(VkFormat format);
 
-	void copyBufferToBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
