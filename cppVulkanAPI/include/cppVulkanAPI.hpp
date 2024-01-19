@@ -31,3 +31,4 @@
 #include "../src/framework/descriptor.hpp"
 #include "../src/framework/command.hpp"
 #include "../src/framework/memory/buffer.hpp"
+#include "../src/framework/memory/image.hpp"
