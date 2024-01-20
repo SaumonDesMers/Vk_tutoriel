@@ -97,6 +97,19 @@ namespace LIB_NAMESPACE
 		freeCommandBuffer(commandBuffer);
 	}
 
+	void Command::submit(
+		uint32_t submitCount,
+		const VkSubmitInfo *pSubmits,
+		VkFence fence
+	)
+	{
+		VkResult result = vkQueueSubmit(m_queue, submitCount, pSubmits, fence);
+		if (result != VK_SUCCESS)
+		{
+			TROW("Failed to submit queue", result);
+		}
+	}
+
 	void Command::copyBufferToBuffer(
 		VkBuffer srcBuffer,
 		VkBuffer dstBuffer,
@@ -130,6 +143,30 @@ namespace LIB_NAMESPACE
 		vkCmdCopyBufferToImage(
 			commandBuffer,
 			srcBuffer,
+			dstImage,
+			dstImageLayout,
+			regionCount,
+			pRegions
+		);
+
+		endSingleTimeCommands(commandBuffer);
+	}
+
+	void Command::copyImageToImage(
+		VkImage srcImage,
+		VkImageLayout srcImageLayout,
+		VkImage dstImage,
+		VkImageLayout dstImageLayout,
+		uint32_t regionCount,
+		const VkImageCopy *pRegions
+	)
+	{
+		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+		vkCmdCopyImage(
+			commandBuffer,
+			srcImage,
+			srcImageLayout,
 			dstImage,
 			dstImageLayout,
 			regionCount,

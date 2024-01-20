@@ -41,7 +41,9 @@ namespace LIB_NAMESPACE
 		swapchainInfo.imageColorSpace = surfaceFormat.colorSpace;
 		swapchainInfo.imageExtent = extent;
 		swapchainInfo.imageArrayLayers = 1;
-		swapchainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		swapchainInfo.imageUsage =
+			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+			VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 		uint32_t queueFamilyIndices[] = {
 			createInfo.queueFamilyIndices.graphicsFamily.value(),

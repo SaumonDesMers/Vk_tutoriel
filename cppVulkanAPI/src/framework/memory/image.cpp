@@ -1,6 +1,7 @@
 #include "image.hpp"
 
 #include <stdexcept>
+#include <iostream>
 
 namespace LIB_NAMESPACE
 {
@@ -11,9 +12,9 @@ namespace LIB_NAMESPACE
 		VkMemoryPropertyFlags properties,
 		VkImageViewCreateInfo viewInfo
 	):
+		m_format(imageInfo.format),
 		m_mipLevels(imageInfo.mipLevels)
 	{
-
 		m_image = std::make_unique<core::Image>(device, imageInfo);
 
 		VkMemoryRequirements memRequirements = m_image->getMemoryRequirements();
@@ -42,6 +43,9 @@ namespace LIB_NAMESPACE
 		m_image = std::move(other.m_image);
 		m_memory = std::move(other.m_memory);
 		m_imageView = std::move(other.m_imageView);
+
+		m_format = other.m_format;
+		m_mipLevels = other.m_mipLevels;
 	}
 
 	Image::~Image()
@@ -106,7 +110,7 @@ namespace LIB_NAMESPACE
 		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageInfo.usage =
-			VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
+			VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
 			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.samples = msaaSamples;

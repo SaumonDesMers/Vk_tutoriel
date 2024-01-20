@@ -11,22 +11,6 @@
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
-struct QueueFamilyIndices {
-	std::optional<uint32_t> graphicsFamily;
-	std::optional<uint32_t> presentFamily;
-
-	bool isComplete() {
-		return graphicsFamily.has_value() && presentFamily.has_value();
-	}
-};
-
-struct SwapChainSupportDetails
-{
-	VkSurfaceCapabilitiesKHR capabilities;
-	std::vector<VkSurfaceFormatKHR> formats;
-	std::vector<VkPresentModeKHR> presentModes;
-};
-
 struct ViewProj_UBO {
 	glm::mat4 view;
 	glm::mat4 proj;
@@ -84,15 +68,15 @@ private:
 	std::unique_ptr<ft::Command> m_command;
 	std::vector<VkCommandBuffer> m_vkCommandBuffers;
 
-	std::unique_ptr<ft::core::RenderPass> m_renderPass;
 	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
-	std::vector<std::unique_ptr<ft::core::Framebuffer>> m_swapchainFramebuffers;
 
-	std::unique_ptr<ft::Image> m_colorImage;
+	// std::unique_ptr<ft::Image> m_colorImage;
+	std::vector<std::unique_ptr<ft::Image>> m_colorImages;
 	std::unique_ptr<ft::Image> m_depthImage;
 
 	std::vector<std::unique_ptr<ft::core::Semaphore>> m_imageAvailableSemaphores;
 	std::vector<std::unique_ptr<ft::core::Semaphore>> m_renderFinishedSemaphores;
+	std::vector<std::unique_ptr<ft::core::Semaphore>> m_swapchainUpdatedSemaphores;
 	std::vector<std::unique_ptr<ft::core::Fence>> m_inFlightFences;
 
 	std::unique_ptr<ft::Mesh> m_mesh;

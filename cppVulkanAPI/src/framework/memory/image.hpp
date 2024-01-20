@@ -31,6 +31,7 @@ namespace LIB_NAMESPACE
 		VkDeviceMemory memory() const { return m_memory->getVk(); }
 		VkImageView view() const { return m_imageView->getVk(); }
 
+		VkFormat format() const { return m_format; }
 		uint32_t mipLevels() const { return m_mipLevels; }
 
 		static Image createDepthImage(
@@ -49,6 +50,7 @@ namespace LIB_NAMESPACE
 			VkSampleCountFlagBits msaaSamples
 		);
 
+		VkFormat m_format;
 	private:
 
 		std::unique_ptr<core::Image> m_image;

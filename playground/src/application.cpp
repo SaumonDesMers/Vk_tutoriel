@@ -42,10 +42,10 @@ void Application::init()
 	createDevice();
 	createSwapchain();
 	createDescriptor();
-	createGraphicsPipeline();
-	createCommandPool();
 	createColorResources();
 	createDepthResources();
+	createGraphicsPipeline();
+	createCommandPool();
 	createTextureImage();
 	createTextureSampler();
 	loadModel();
@@ -92,7 +92,7 @@ void Application::recreateSwapChain()
 
 	m_device->device->waitIdle();
 
-	m_colorImage.reset();
+	m_colorImages.clear();
 	m_depthImage.reset();
 	m_swapchain.reset();
 
@@ -142,11 +142,11 @@ void Application::createGraphicsPipeline()
 	pushConstantRange.size = sizeof(ModelMatrix_push_constant);
 	pipelineInfo.pushConstantRanges = { pushConstantRange };
 
-	VkFormat swapchainImageFormat = m_swapchain->swapchain->getImageFormat();
+	VkFormat colorAttachementFormat = m_colorImages[0]->format();
 	VkPipelineRenderingCreateInfo renderingInfo = {};
 	renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 	renderingInfo.colorAttachmentCount = 1;
-	renderingInfo.pColorAttachmentFormats = &swapchainImageFormat;
+	renderingInfo.pColorAttachmentFormats = &colorAttachementFormat;
 	renderingInfo.depthAttachmentFormat = findDepthFormat();
 
 	pipelineInfo.pNext = &renderingInfo;
@@ -168,13 +168,18 @@ void Application::createCommandPool()
 
 void Application::createColorResources()
 {
-	m_colorImage = std::make_unique<ft::Image>(ft::Image::createColorImage(
-		m_device->device->getVk(),
-		m_device->physicalDevice->getVk(),
-		m_swapchain->swapchain->getExtent(),
-		m_swapchain->swapchain->getImageFormat(),
-		m_device->msaaSamples
-	));
+	m_colorImages.resize(MAX_FRAMES_IN_FLIGHT);
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		m_colorImages[i] = std::make_unique<ft::Image>(ft::Image::createColorImage(
+			m_device->device->getVk(),
+			m_device->physicalDevice->getVk(),
+			m_swapchain->swapchain->getExtent(),
+			m_swapchain->swapchain->getImageFormat(),
+			m_device->msaaSamples
+		));
+	}
 
 }
 
@@ -280,6 +285,8 @@ void Application::createUniformBuffers()
 		);
 
 		m_uniformBuffers[i]->map();
+
+		updateUniformBuffer(i);
     }
 }
 
@@ -339,6 +346,7 @@ void Application::createSyncObjects()
 {
 	m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	m_swapchainUpdatedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
 	ft::core::Semaphore::CreateInfo semaphoreInfo{};
@@ -350,6 +358,7 @@ void Application::createSyncObjects()
 	{
 		m_imageAvailableSemaphores[i] = std::make_unique<ft::core::Semaphore>(m_device->device->getVk(), semaphoreInfo);
 		m_renderFinishedSemaphores[i] = std::make_unique<ft::core::Semaphore>(m_device->device->getVk(), semaphoreInfo);
+		m_swapchainUpdatedSemaphores[i] = std::make_unique<ft::core::Semaphore>(m_device->device->getVk(), semaphoreInfo);
 		m_inFlightFences[i] = std::make_unique<ft::core::Fence>(m_device->device->getVk(), fenceInfo);
 	}
 
@@ -507,12 +516,15 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 
 void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
+	vkResetCommandBuffer(commandBuffer, 0);
+
 	ft::core::CommandBuffer::BeginInfo beginInfo = {};
 
 	vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
 	m_command->transitionImageLayout(
-		m_swapchain->swapchain->getImage(imageIndex),
+		// m_swapchain->swapchain->getImage(imageIndex),
+		m_colorImages[m_currentFrame]->image(),
 		VK_IMAGE_LAYOUT_UNDEFINED,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		VK_IMAGE_ASPECT_COLOR_BIT,
@@ -525,7 +537,8 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 
 	VkRenderingAttachmentInfo colorAttachment{};
 	colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-	colorAttachment.imageView = m_swapchain->imageViews[imageIndex]->getVk();
+	// colorAttachment.imageView = m_swapchain->imageViews[imageIndex]->getVk();
+	colorAttachment.imageView = m_colorImages[m_currentFrame]->view();
 	colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -551,18 +564,6 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicPipeline->pipeline->getVk());
 
-
-	ModelMatrix_push_constant pushConstant{};
-	pushConstant.model = glm::rotate(glm::mat4(1.0f), m_timer.getElapsedTime() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	vkCmdPushConstants(
-		commandBuffer,
-		m_graphicPipeline->layout->getVk(),
-		VK_SHADER_STAGE_VERTEX_BIT,
-		0,
-		sizeof(ModelMatrix_push_constant),
-		&pushConstant
-	);
-
 	vkCmdBindDescriptorSets(
 		commandBuffer,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -586,20 +587,37 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	scissor.extent = m_swapchain->swapchain->getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	VkBuffer vertexBuffers[] = {m_mesh->vertexBuffer().buffer()};
-	VkDeviceSize offsets[] = {0};
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+	for (size_t i = 0; i < 1; i++)
+	{
+		ModelMatrix_push_constant pushConstant{};
+		pushConstant.model = glm::rotate(glm::mat4(1.0f), m_timer.getElapsedTime() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		vkCmdPushConstants(
+			commandBuffer,
+			m_graphicPipeline->layout->getVk(),
+			VK_SHADER_STAGE_VERTEX_BIT,
+			0,
+			sizeof(ModelMatrix_push_constant),
+			&pushConstant
+		);
 
-	vkCmdBindIndexBuffer(commandBuffer, m_mesh->indexBuffer().buffer(), 0, VK_INDEX_TYPE_UINT32);
+		VkBuffer vertexBuffers[] = {m_mesh->vertexBuffer().buffer()};
+		VkDeviceSize offsets[] = {0};
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-	vkCmdDrawIndexed(commandBuffer, m_mesh->indexCount(), 1, 0, 0, 0);
+		vkCmdBindIndexBuffer(commandBuffer, m_mesh->indexBuffer().buffer(), 0, VK_INDEX_TYPE_UINT32);
+
+		vkCmdDrawIndexed(commandBuffer, m_mesh->indexCount(), 1, 0, 0, 0);
+	}
+
 
 	vkCmdEndRendering(commandBuffer);
 
 	m_command->transitionImageLayout(
-		m_swapchain->swapchain->getImage(imageIndex),
+		// m_swapchain->swapchain->getImage(imageIndex),
+		m_colorImages[m_currentFrame]->image(),
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		// VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 		VK_IMAGE_ASPECT_COLOR_BIT,
 		1,
 		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
@@ -630,35 +648,114 @@ void Application::drawFrame()
 
 	m_inFlightFences[m_currentFrame]->reset();
 
-	vkResetCommandBuffer(m_vkCommandBuffers[m_currentFrame], 0);
+
+
 	recordCommandBuffer(m_vkCommandBuffers[m_currentFrame], imageIndex);
 
-	updateUniformBuffer(m_currentFrame);
-
-	VkSubmitInfo submitInfo{};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-	VkSemaphore waitSemaphores[] = {m_imageAvailableSemaphores[m_currentFrame]->getVk()};
-	VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = waitSemaphores;
-	submitInfo.pWaitDstStageMask = waitStages;
+	VkSubmitInfo renderInfo{};
+	renderInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 	VkCommandBuffer commandBuffers[] = {m_vkCommandBuffers[m_currentFrame]};
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = commandBuffers;
+	renderInfo.commandBufferCount = 1;
+	renderInfo.pCommandBuffers = commandBuffers;
 
 	VkSemaphore signalSemaphores[] = {m_renderFinishedSemaphores[m_currentFrame]->getVk()};
-	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = signalSemaphores;
+	renderInfo.signalSemaphoreCount = 1;
+	renderInfo.pSignalSemaphores = signalSemaphores;
 
-	m_device->graphicsQueue->submit(1, &submitInfo, m_inFlightFences[m_currentFrame]->getVk());
+	m_device->graphicsQueue->submit(1, &renderInfo, m_inFlightFences[m_currentFrame]->getVk());
 
+
+
+	// Now instead of rendering directly to the swap chain image, we render to the offscreen image, and then copy it to the swap chain image.
+
+	// First, we need to transition the swap chain image to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL layout, so we can copy the offscreen image to it.
+	m_command->transitionImageLayout(
+		m_swapchain->swapchain->getImage(imageIndex),
+		VK_IMAGE_LAYOUT_UNDEFINED,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		1,
+		0,
+		0,
+		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VK_PIPELINE_STAGE_TRANSFER_BIT
+	);
+
+	// The offscreen image is allready in VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL layout, so we can copy it to the swap chain image.
+	VkCommandBuffer commandBuffer = m_command->beginSingleTimeCommands();
+	
+	VkImageCopy copyRegion{};
+	copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	copyRegion.srcSubresource.layerCount = 1;
+	copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	copyRegion.dstSubresource.layerCount = 1;
+	copyRegion.extent.width = m_swapchain->swapchain->getExtent().width;
+	copyRegion.extent.height = m_swapchain->swapchain->getExtent().height;
+	copyRegion.extent.depth = 1;
+
+	vkCmdCopyImage(
+		commandBuffer,
+		m_colorImages[m_currentFrame]->image(),
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		m_swapchain->swapchain->getImage(imageIndex),
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1,
+		&copyRegion
+	);
+
+	result = vkEndCommandBuffer(commandBuffer);
+	if (result != VK_SUCCESS)
+	{
+		TROW("Failed to record command buffer", result);
+	}
+
+	VkSubmitInfo copyImageInfo = {};
+	copyImageInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	copyImageInfo.commandBufferCount = 1;
+	copyImageInfo.pCommandBuffers = &commandBuffer;
+
+	VkSemaphore copyImageWaitSemaphores[] = {
+		m_imageAvailableSemaphores[m_currentFrame]->getVk(),
+		m_renderFinishedSemaphores[m_currentFrame]->getVk()
+	};
+	VkPipelineStageFlags copyImageWaitStages[] = {
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+	};
+	copyImageInfo.waitSemaphoreCount = 2;
+	copyImageInfo.pWaitSemaphores = copyImageWaitSemaphores;
+	copyImageInfo.pWaitDstStageMask = copyImageWaitStages;
+
+	VkSemaphore copyImageSignalSemaphores[] = {
+		m_swapchainUpdatedSemaphores[m_currentFrame]->getVk()
+	};
+	copyImageInfo.signalSemaphoreCount = 1;
+	copyImageInfo.pSignalSemaphores = copyImageSignalSemaphores;
+
+	m_command->submit(1, &copyImageInfo, VK_NULL_HANDLE);
+
+
+	// Now we need to transition the swap chain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout, so we can present it.
+	m_command->transitionImageLayout(
+		m_swapchain->swapchain->getImage(imageIndex),
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		1,
+		0,
+		0,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
+	);
+	
+
+	// Finally, we present the swap chain image.
 	VkPresentInfoKHR presentInfo{};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
 	presentInfo.waitSemaphoreCount = 1;
-	presentInfo.pWaitSemaphores = signalSemaphores;
+	presentInfo.pWaitSemaphores = copyImageSignalSemaphores;
 
 	VkSwapchainKHR swapChains[] = {m_swapchain->swapchain->getVk()};
 	presentInfo.swapchainCount = 1;
@@ -666,6 +763,7 @@ void Application::drawFrame()
 	presentInfo.pImageIndices = &imageIndex;
 
 	result = vkQueuePresentKHR(m_device->presentQueue->getVk(), &presentInfo);
+
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_framebufferResized)
 	{
