@@ -27,10 +27,31 @@ struct SwapChainSupportDetails
 	std::vector<VkPresentModeKHR> presentModes;
 };
 
-struct UniformBufferObject {
-	glm::mat4 model;
+struct ViewProj_UBO {
 	glm::mat4 view;
 	glm::mat4 proj;
+};
+
+struct ModelMatrix_push_constant
+{
+	glm::mat4 model;
+};
+
+struct Timer
+{
+	std::chrono::_V2::system_clock::time_point start;
+
+	Timer()
+	{
+		start = std::chrono::high_resolution_clock::now();
+	}
+
+	float getElapsedTime()
+	{
+		auto end = std::chrono::high_resolution_clock::now();
+		auto duration = std::chrono::duration<float, std::chrono::seconds::period>(end - start);
+		return duration.count();
+	}
 };
 
 class Application
@@ -85,6 +106,8 @@ private:
 	bool m_framebufferResized = false;
 	
 	uint32_t m_currentFrame = 0;
+
+	Timer m_timer;
 
 
 	void init();

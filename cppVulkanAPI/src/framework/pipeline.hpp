@@ -24,8 +24,7 @@ namespace LIB_NAMESPACE
 			VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
 			std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
-
-			VkRenderPass renderPass;
+			std::vector<VkPushConstantRange> pushConstantRanges;
 
 			void* pNext = nullptr;
 		};

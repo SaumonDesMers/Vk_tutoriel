@@ -107,6 +107,9 @@ namespace LIB_NAMESPACE
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(createInfo.descriptorSetLayouts.size());
 		pipelineLayoutInfo.pSetLayouts = createInfo.descriptorSetLayouts.data();
+		pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(createInfo.pushConstantRanges.size());
+		pipelineLayoutInfo.pPushConstantRanges = createInfo.pushConstantRanges.data();
+
 
 		layout = std::make_unique<ft::core::PipelineLayout>(device, pipelineLayoutInfo);
 
@@ -123,7 +126,7 @@ namespace LIB_NAMESPACE
 		pipelineInfo.pColorBlendState = &colorBlending;
 		pipelineInfo.pDynamicState = &dynamicState;
 		pipelineInfo.layout = layout->getVk();
-		pipelineInfo.renderPass = createInfo.renderPass;
+		pipelineInfo.renderPass = VK_NULL_HANDLE;
 		pipelineInfo.subpass = 0;
 		pipelineInfo.pNext = createInfo.pNext;
 
