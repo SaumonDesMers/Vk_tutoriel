@@ -92,10 +92,8 @@ private:
 	void createDevice();
 	void createSwapchain();
 	void recreateSwapChain();
-	void createRenderPass();
 	void createDescriptor();
 	void createGraphicsPipeline();
-	void createFramebuffers();
 	void createCommandPool();
 	void createColorResources();
 	void createDepthResources();

@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <set>
+#include <iostream>
 
 namespace LIB_NAMESPACE
 {
@@ -99,7 +100,7 @@ namespace LIB_NAMESPACE
 			if (isDeviceSuitable(phyDev))
 			{
 				pickedPhysicalDevice = phyDev;
-				msaaSamples = getMaxUsableSampleCount(pickedPhysicalDevice);
+				msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 				break;
 			}
 		}
