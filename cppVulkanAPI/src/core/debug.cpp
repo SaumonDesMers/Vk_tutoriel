@@ -89,7 +89,7 @@ namespace LIB_NAMESPACE
 			void*
 		)
 		{
-			std::cerr << pCallbackData->pMessage << std::endl;
+			std::cerr << pCallbackData->pMessage << "\n" << std::endl;
 		}
 	}
 }

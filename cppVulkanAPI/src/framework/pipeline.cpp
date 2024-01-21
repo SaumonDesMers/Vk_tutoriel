@@ -2,6 +2,8 @@
 #include "core/pipeline/shader_module.hpp"
 #include "object/vertex.hpp"
 
+#include <iostream>
+
 namespace LIB_NAMESPACE
 {
 	Pipeline::Pipeline(VkDevice device, const CreateInfo& createInfo)

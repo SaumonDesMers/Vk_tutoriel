@@ -34,3 +34,4 @@
 #include "../src/framework/memory/image.hpp"
 #include "../src/framework/memory/texture.hpp"
 #include "../src/framework/object/mesh.hpp"
+#include "../src/framework/render_api.hpp"

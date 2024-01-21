@@ -16,6 +16,8 @@ namespace LIB_NAMESPACE
 
 	public:
 
+		typedef uint32_t ID;
+
 		struct CreateInfo
 		{
 			std::string vertexShaderPath;

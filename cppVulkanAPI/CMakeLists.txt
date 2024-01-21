@@ -55,6 +55,7 @@ target_sources(${PROJECT_NAME}
 		src/framework/memory/image.cpp
 		src/framework/memory/texture.cpp
 		src/framework/object/mesh.cpp
+		src/framework/render_api.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw vulkan dl pthread X11 Xxf86vm Xrandr Xi)
