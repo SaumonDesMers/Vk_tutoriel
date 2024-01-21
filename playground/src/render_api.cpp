@@ -1,4 +1,4 @@
-#include "application.hpp"
+#include "render_api.hpp"
 #include "logger.hpp"
 
 #define GLM_FORCE_RADIANS
@@ -11,12 +11,12 @@
 #include <set>
 #include <chrono>
 
-Application::Application()
+RenderAPI::RenderAPI()
 {
 	
 }
 
-Application::~Application()
+RenderAPI::~RenderAPI()
 {
 	m_device->device->waitIdle();
 
@@ -26,7 +26,7 @@ Application::~Application()
 	}
 }
 
-void Application::run()
+void RenderAPI::run()
 {
 	init();
 
@@ -50,7 +50,7 @@ void Application::run()
 	}
 }
 
-void Application::init()
+void RenderAPI::init()
 {
 	createDevice();
 	createSwapchain();
@@ -66,16 +66,16 @@ void Application::init()
 	createCommandBuffer();
 	createSyncObjects();
 
-	FT_INFO("Application initialized");
+	FT_INFO("RenderAPI initialized");
 }
 
 
-void Application::createDevice()
+void RenderAPI::createDevice()
 {
 	m_device = std::make_unique<ft::Device>();
 }
 
-void Application::createSwapchain()
+void RenderAPI::createSwapchain()
 {
 	ft::Swapchain::CreateInfo swapchainInfo = {};
 	swapchainInfo.surface = m_device->surface->getVk();
@@ -92,7 +92,7 @@ void Application::createSwapchain()
 	m_swapchain = std::make_unique<ft::Swapchain>(m_device->device->getVk(), swapchainInfo);
 }
 
-void Application::recreateSwapChain()
+void RenderAPI::recreateSwapChain()
 {
 	int width = 0, height = 0;
     m_device->window->getFramebufferSize(&width, &height);
@@ -115,7 +115,7 @@ void Application::recreateSwapChain()
 
 }
 
-void Application::createDescriptor()
+void RenderAPI::createDescriptor()
 {
 	VkDescriptorSetLayoutBinding uboLayoutBinding{};
     uboLayoutBinding.binding = 0;
@@ -138,13 +138,13 @@ void Application::createDescriptor()
 	m_descriptor = std::make_unique<ft::Descriptor>(m_device->device->getVk(), descriptorInfo);
 }
 
-void Application::createGraphicsPipeline()
+void RenderAPI::createGraphicsPipeline()
 {
 	ft::Pipeline::CreateInfo pipelineInfo = {};
 
 	pipelineInfo.vertexShaderPath = "playground/shaders/simple_shader.vert.spv";
 	pipelineInfo.fragmentShaderPath = "playground/shaders/simple_shader.frag.spv";
-	
+
 	pipelineInfo.descriptorSetLayouts = { m_descriptor->layout };
 
 	VkPushConstantRange pushConstantRange{};
@@ -165,7 +165,7 @@ void Application::createGraphicsPipeline()
 	m_graphicPipeline = std::make_unique<ft::Pipeline>(m_device->device->getVk(), pipelineInfo);
 }
 
-void Application::createCommandPool()
+void RenderAPI::createCommandPool()
 {
 	ft::Queue::FamilyIndices queueFamilyIndices = m_device->findQueueFamilies(m_device->physicalDevice->getVk());
 
@@ -177,7 +177,7 @@ void Application::createCommandPool()
 	m_command = std::make_unique<ft::Command>(m_device->device->getVk(), commandInfo);
 }
 
-void Application::createColorResources()
+void RenderAPI::createColorResources()
 {
 	m_colorImage = std::make_unique<ft::Image>(ft::Image::createColorImage(
 		m_device->device->getVk(),
@@ -189,7 +189,7 @@ void Application::createColorResources()
 
 }
 
-void Application::createDepthResources()
+void RenderAPI::createDepthResources()
 {
 	VkFormat depthFormat = findDepthFormat();
 
@@ -202,7 +202,7 @@ void Application::createDepthResources()
 	));
 }
 
-void Application::createTextureImage()
+void RenderAPI::createTextureImage()
 {
 	m_texture = std::make_unique<ft::Texture>(
 		m_device->device->getVk(),
@@ -221,7 +221,7 @@ void Application::createTextureImage()
 
 }
 
-void Application::createTextureSampler()
+void RenderAPI::createTextureSampler()
 {
 	VkSamplerCreateInfo samplerInfo{};
 	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -253,7 +253,7 @@ void Application::createTextureSampler()
 	m_textureSampler = std::make_unique<ft::core::Sampler>(m_device->device->getVk(), samplerInfo);
 }
 
-ft::Mesh::ID Application::loadModel(const std::string& filename)
+ft::Mesh::ID RenderAPI::loadModel(const std::string& filename)
 {
 	ft::Mesh::CreateInfo meshInfo = {};
 
@@ -269,7 +269,7 @@ ft::Mesh::ID Application::loadModel(const std::string& filename)
 	return m_maxMeshID++;
 }
 
-void Application::createUniformBuffers()
+void RenderAPI::createUniformBuffers()
 {
     VkDeviceSize bufferSize = sizeof(ViewProj_UBO);
 
@@ -294,7 +294,7 @@ void Application::createUniformBuffers()
     }
 }
 
-void Application::updateDescriptorSets()
+void RenderAPI::updateDescriptorSets()
 {
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
@@ -336,7 +336,7 @@ void Application::updateDescriptorSets()
 
 }
 
-void Application::createCommandBuffer()
+void RenderAPI::createCommandBuffer()
 {
 	m_vkCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -346,7 +346,7 @@ void Application::createCommandBuffer()
 	}
 }
 
-void Application::createSyncObjects()
+void RenderAPI::createSyncObjects()
 {
 	m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -369,7 +369,7 @@ void Application::createSyncObjects()
 }
 
 
-VkFormat Application::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+VkFormat RenderAPI::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 {
 	for (const auto& format : candidates)
 	{
@@ -395,7 +395,7 @@ VkFormat Application::findSupportedFormat(const std::vector<VkFormat>& candidate
 	throw std::runtime_error("failed to find supported format.");
 }
 
-VkFormat Application::findDepthFormat() {
+VkFormat RenderAPI::findDepthFormat() {
     static VkFormat depthFormat = findSupportedFormat(
         {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
         VK_IMAGE_TILING_OPTIMAL,
@@ -404,12 +404,12 @@ VkFormat Application::findDepthFormat() {
 	return depthFormat;
 }
 
-bool Application::hasStencilComponent(VkFormat format) {
+bool RenderAPI::hasStencilComponent(VkFormat format) {
 	return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
 
-void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
+void RenderAPI::generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 {
 	// Check if image format supports linear blitting
 	VkFormatProperties formatProperties;
@@ -518,7 +518,7 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 }
 
 
-void Application::updateUniformBuffer(uint32_t currentImage)
+void RenderAPI::updateUniformBuffer(uint32_t currentImage)
 {
 	ViewProj_UBO ubo{};
 	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -529,7 +529,7 @@ void Application::updateUniformBuffer(uint32_t currentImage)
 	m_uniformBuffers[currentImage]->write(&ubo, sizeof(ubo));
 }
 
-void Application::copyRenderedImageToSwapchainImage(uint32_t swapchainImageIndex)
+void RenderAPI::copyRenderedImageToSwapchainImage(uint32_t swapchainImageIndex)
 {
 
 	// First, we need to transition the swap chain image to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL layout, so we can copy the offscreen image to it.
@@ -631,7 +631,7 @@ void Application::copyRenderedImageToSwapchainImage(uint32_t swapchainImageIndex
 
 
 
-void Application::startDraw()
+void RenderAPI::startDraw()
 {
 	VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
 
@@ -657,7 +657,7 @@ void Application::startDraw()
 	);
 }
 
-void Application::startRendering()
+void RenderAPI::startRendering()
 {
 	VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
 
@@ -688,7 +688,7 @@ void Application::startRendering()
 	vkCmdBeginRendering(cmd, &renderingInfo);
 }
 
-void Application::draw()
+void RenderAPI::draw()
 {
 	VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
 
@@ -742,14 +742,14 @@ void Application::draw()
 	}
 }
 
-void Application::endRendering()
+void RenderAPI::endRendering()
 {
 	VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
 
 	vkCmdEndRendering(cmd);
 }
 
-void Application::endDraw()
+void RenderAPI::endDraw()
 {
 	VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
 

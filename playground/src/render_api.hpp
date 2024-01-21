@@ -39,14 +39,14 @@ struct Timer
 	}
 };
 
-class Application
+class RenderAPI
 {
 
 public:
 
-	Application();
+	RenderAPI();
 
-	~Application();
+	~RenderAPI();
 
 	void run();
 

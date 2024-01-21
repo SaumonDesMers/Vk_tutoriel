@@ -28,7 +28,7 @@ target_sources(${PROJECT_NAME}
 	PRIVATE
 		src/main.cpp
 		src/logger.cpp
-		src/application.cpp
+		src/render_api.cpp
 		src/game_object.cpp
 )
 

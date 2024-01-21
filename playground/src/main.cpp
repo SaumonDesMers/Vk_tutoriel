@@ -1,4 +1,4 @@
-#include "application.hpp"
+#include "render_api.hpp"
 #include "logger.hpp"
 
 int main(void)
@@ -6,7 +6,7 @@ int main(void)
 	logger.setTimestamp(false);
 	try
 	{
-		Application app;
+		RenderAPI app;
 
 		app.run();
 	}
