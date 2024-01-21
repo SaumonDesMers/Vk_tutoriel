@@ -9,7 +9,7 @@
 #include <optional>
 
 
-const int MAX_FRAMES_IN_FLIGHT = 2;
+const int MAX_FRAMES_IN_FLIGHT = 3;
 
 struct ViewProj_UBO {
 	glm::mat4 view;
@@ -70,8 +70,7 @@ private:
 
 	std::unique_ptr<ft::Pipeline> m_graphicPipeline;
 
-	// std::unique_ptr<ft::Image> m_colorImage;
-	std::vector<std::unique_ptr<ft::Image>> m_colorImages;
+	std::unique_ptr<ft::Image> m_colorImage;
 	std::unique_ptr<ft::Image> m_depthImage;
 
 	std::vector<std::unique_ptr<ft::core::Semaphore>> m_imageAvailableSemaphores;
@@ -118,7 +117,21 @@ private:
 
 	void generateMipmaps(VkImage image, VkFormat format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
-	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-	void drawFrame();
+
+	// function to start recording a command buffer
+	void startDraw();
+
+	// function to start a render pass
+	void startRendering();
+
+	// function to do the actual drawing
+	void draw();
 	void updateUniformBuffer(uint32_t currentImage);
+
+	// function to end a render pass
+	void endRendering();
+
+	// function to end recording a command buffer
+	void endDraw();
+	void copyRenderedImageToSwapchainImage(uint32_t swapchainImageIndex);
 };

@@ -33,7 +33,11 @@ void Application::run()
 	while (m_device->window->shouldClose() == false)
 	{
 		m_device->windowManager->pollEvents();
-		drawFrame();
+		startDraw();
+		startRendering();
+		draw();
+		endRendering();
+		endDraw();
 	}
 }
 
@@ -92,7 +96,7 @@ void Application::recreateSwapChain()
 
 	m_device->device->waitIdle();
 
-	m_colorImages.clear();
+	m_colorImage.reset();
 	m_depthImage.reset();
 	m_swapchain.reset();
 
@@ -143,7 +147,7 @@ void Application::createGraphicsPipeline()
 	pushConstantRange.size = sizeof(ModelMatrix_push_constant);
 	pipelineInfo.pushConstantRanges = { pushConstantRange };
 
-	VkFormat colorAttachementFormat = m_colorImages[0]->format();
+	VkFormat colorAttachementFormat = m_colorImage->format();
 	VkPipelineRenderingCreateInfo renderingInfo = {};
 	renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 	renderingInfo.colorAttachmentCount = 1;
@@ -169,18 +173,13 @@ void Application::createCommandPool()
 
 void Application::createColorResources()
 {
-	m_colorImages.resize(MAX_FRAMES_IN_FLIGHT);
-
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-	{
-		m_colorImages[i] = std::make_unique<ft::Image>(ft::Image::createColorImage(
-			m_device->device->getVk(),
-			m_device->physicalDevice->getVk(),
-			m_swapchain->swapchain->getExtent(),
-			m_swapchain->swapchain->getImageFormat(),
-			m_device->msaaSamples
-		));
-	}
+	m_colorImage = std::make_unique<ft::Image>(ft::Image::createColorImage(
+		m_device->device->getVk(),
+		m_device->physicalDevice->getVk(),
+		m_swapchain->swapchain->getExtent(),
+		m_swapchain->swapchain->getImageFormat(),
+		m_device->msaaSamples
+	));
 
 }
 
@@ -513,162 +512,23 @@ void Application::generateMipmaps(VkImage image, VkFormat format, int32_t texWid
 }
 
 
-void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void Application::updateUniformBuffer(uint32_t currentImage)
 {
-	vkResetCommandBuffer(commandBuffer, 0);
+	ViewProj_UBO ubo{};
+	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.proj = glm::perspective(glm::radians(45.0f), m_swapchain->swapchain->getExtent().width / (float) m_swapchain->swapchain->getExtent().height, 0.1f, 10.0f);
 
-	ft::core::CommandBuffer::BeginInfo beginInfo = {};
+	ubo.proj[1][1] *= -1;
 
-	vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
-	m_command->transitionImageLayout(
-		m_colorImages[m_currentFrame]->image(),
-		VK_IMAGE_LAYOUT_UNDEFINED,
-		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		VK_IMAGE_ASPECT_COLOR_BIT,
-		1,
-		0,
-		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-	);
-
-	VkRenderingAttachmentInfo colorAttachment{};
-	colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-	colorAttachment.imageView = m_colorImages[m_currentFrame]->view();
-	colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachment.clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
-
-	VkRenderingAttachmentInfo depthAttachment{};
-	depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-	depthAttachment.imageView = m_depthImage->view();
-	depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.clearValue = {1.0f, 0};
-
-	VkRenderingInfo renderingInfo{};
-	renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-	renderingInfo.renderArea = {0, 0, m_swapchain->swapchain->getExtent().width, m_swapchain->swapchain->getExtent().height};
-	renderingInfo.layerCount = 1;
-	renderingInfo.colorAttachmentCount = 1;
-	renderingInfo.pColorAttachments = &colorAttachment;
-	renderingInfo.pDepthAttachment = &depthAttachment;
-
-	vkCmdBeginRendering(commandBuffer, &renderingInfo);
-
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicPipeline->pipeline->getVk());
-
-	vkCmdBindDescriptorSets(
-		commandBuffer,
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		m_graphicPipeline->layout->getVk(),
-		0, 1,
-		&m_descriptor->sets[m_currentFrame],
-		0, nullptr
-	);
-
-	VkViewport viewport{};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = static_cast<float>(m_swapchain->swapchain->getExtent().width);
-	viewport.height = static_cast<float>(m_swapchain->swapchain->getExtent().height);
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-	VkRect2D scissor{};
-	scissor.offset = {0, 0};
-	scissor.extent = m_swapchain->swapchain->getExtent();
-	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-	for (size_t i = 0; i < 1; i++)
-	{
-		ModelMatrix_push_constant pushConstant{};
-		pushConstant.model = glm::rotate(glm::mat4(1.0f), m_timer.getElapsedTime() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		vkCmdPushConstants(
-			commandBuffer,
-			m_graphicPipeline->layout->getVk(),
-			VK_SHADER_STAGE_VERTEX_BIT,
-			0,
-			sizeof(ModelMatrix_push_constant),
-			&pushConstant
-		);
-
-		VkBuffer vertexBuffers[] = {m_mesh->vertexBuffer().buffer()};
-		VkDeviceSize offsets[] = {0};
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-
-		vkCmdBindIndexBuffer(commandBuffer, m_mesh->indexBuffer().buffer(), 0, VK_INDEX_TYPE_UINT32);
-
-		vkCmdDrawIndexed(commandBuffer, m_mesh->indexCount(), 1, 0, 0, 0);
-	}
-
-
-	vkCmdEndRendering(commandBuffer);
-
-	m_command->transitionImageLayout(
-		// m_swapchain->swapchain->getImage(imageIndex),
-		m_colorImages[m_currentFrame]->image(),
-		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		// VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		VK_IMAGE_ASPECT_COLOR_BIT,
-		1,
-		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-		0,
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
-	);
-
-	vkEndCommandBuffer(commandBuffer);
+	m_uniformBuffers[currentImage]->write(&ubo, sizeof(ubo));
 }
 
-void Application::drawFrame()
+void Application::copyRenderedImageToSwapchainImage(uint32_t swapchainImageIndex)
 {
-	m_inFlightFences[m_currentFrame]->wait();
-
-	uint32_t imageIndex;
-	VkResult result = m_swapchain->swapchain->acquireNextImage(UINT64_MAX, m_imageAvailableSemaphores[m_currentFrame]->getVk(), VK_NULL_HANDLE, &imageIndex);
-
-	if (result == VK_ERROR_OUT_OF_DATE_KHR)
-	{
-		recreateSwapChain();
-		return;
-	}
-	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-	{
-		throw std::runtime_error("failed to acquire swap chain image!");
-	}
-
-	m_inFlightFences[m_currentFrame]->reset();
-
-	updateUniformBuffer(m_currentFrame);
-
-	recordCommandBuffer(m_vkCommandBuffers[m_currentFrame], imageIndex);
-
-	VkSubmitInfo renderInfo{};
-	renderInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-	VkCommandBuffer commandBuffers[] = {m_vkCommandBuffers[m_currentFrame]};
-	renderInfo.commandBufferCount = 1;
-	renderInfo.pCommandBuffers = commandBuffers;
-
-	VkSemaphore signalSemaphores[] = {m_renderFinishedSemaphores[m_currentFrame]->getVk()};
-	renderInfo.signalSemaphoreCount = 1;
-	renderInfo.pSignalSemaphores = signalSemaphores;
-
-	m_device->graphicsQueue->submit(1, &renderInfo, m_inFlightFences[m_currentFrame]->getVk());
-
-
-
-	// Now instead of rendering directly to the swap chain image, we render to the offscreen image, and then copy it to the swap chain image.
 
 	// First, we need to transition the swap chain image to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL layout, so we can copy the offscreen image to it.
 	m_command->transitionImageLayout(
-		m_swapchain->swapchain->getImage(imageIndex),
+		m_swapchain->swapchain->getImage(swapchainImageIndex),
 		VK_IMAGE_LAYOUT_UNDEFINED,
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		VK_IMAGE_ASPECT_COLOR_BIT,
@@ -686,8 +546,8 @@ void Application::drawFrame()
 	VkImageBlit blit{};
 	blit.srcOffsets[0] = {0, 0, 0};
 	blit.srcOffsets[1] = {
-		static_cast<int32_t>(m_colorImages[m_currentFrame]->width()),
-		static_cast<int32_t>(m_colorImages[m_currentFrame]->height()),
+		static_cast<int32_t>(m_colorImage->width()),
+		static_cast<int32_t>(m_colorImage->height()),
 		1
 	};
 	blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -708,16 +568,16 @@ void Application::drawFrame()
 
 	vkCmdBlitImage(
 		commandBuffer,
-		m_colorImages[m_currentFrame]->image(),
+		m_colorImage->image(),
 		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		m_swapchain->swapchain->getImage(imageIndex),
+		m_swapchain->swapchain->getImage(swapchainImageIndex),
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1,
 		&blit,
 		VK_FILTER_LINEAR
 	);
 
-	result = vkEndCommandBuffer(commandBuffer);
+	VkResult result = vkEndCommandBuffer(commandBuffer);
 	if (result != VK_SUCCESS)
 	{
 		TROW("Failed to record command buffer", result);
@@ -751,7 +611,7 @@ void Application::drawFrame()
 
 	// Now we need to transition the swap chain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout, so we can present it.
 	m_command->transitionImageLayout(
-		m_swapchain->swapchain->getImage(imageIndex),
+		m_swapchain->swapchain->getImage(swapchainImageIndex),
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 		VK_IMAGE_ASPECT_COLOR_BIT,
@@ -761,12 +621,187 @@ void Application::drawFrame()
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
 	);
-	
+}
+
+
+
+void Application::startDraw()
+{
+	VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
+
+	m_inFlightFences[m_currentFrame]->wait();
+	m_inFlightFences[m_currentFrame]->reset();
+
+	vkResetCommandBuffer(cmd, 0);
+
+	ft::core::CommandBuffer::BeginInfo beginInfo = {};
+
+	vkBeginCommandBuffer(cmd, &beginInfo);
+
+	m_command->transitionImageLayout(
+		m_colorImage->image(),
+		VK_IMAGE_LAYOUT_UNDEFINED,
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		1,
+		0,
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+	);
+}
+
+void Application::startRendering()
+{
+	VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
+
+	VkRenderingAttachmentInfo colorAttachment{};
+	colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+	colorAttachment.imageView = m_colorImage->view();
+	colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachment.clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+
+	VkRenderingAttachmentInfo depthAttachment{};
+	depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+	depthAttachment.imageView = m_depthImage->view();
+	depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	depthAttachment.clearValue = {1.0f, 0};
+
+	VkRenderingInfo renderingInfo{};
+	renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+	renderingInfo.renderArea = {0, 0, m_colorImage->width(), m_colorImage->height()};
+	renderingInfo.layerCount = 1;
+	renderingInfo.colorAttachmentCount = 1;
+	renderingInfo.pColorAttachments = &colorAttachment;
+	renderingInfo.pDepthAttachment = &depthAttachment;
+
+	vkCmdBeginRendering(cmd, &renderingInfo);
+}
+
+void Application::draw()
+{
+	VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
+
+	updateUniformBuffer(m_currentFrame);
+
+	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicPipeline->pipeline->getVk());
+
+	vkCmdBindDescriptorSets(
+		cmd,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		m_graphicPipeline->layout->getVk(),
+		0, 1,
+		&m_descriptor->sets[m_currentFrame],
+		0, nullptr
+	);
+
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = static_cast<float>(m_colorImage->width());
+	viewport.height = static_cast<float>(m_colorImage->height());
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+	VkRect2D scissor{};
+	scissor.offset = {0, 0};
+	scissor.extent = m_swapchain->swapchain->getExtent();
+	vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+	for (size_t i = 0; i < 1; i++)
+	{
+		ModelMatrix_push_constant pushConstant{};
+		pushConstant.model = glm::rotate(glm::mat4(1.0f), m_timer.getElapsedTime() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		vkCmdPushConstants(
+			cmd,
+			m_graphicPipeline->layout->getVk(),
+			VK_SHADER_STAGE_VERTEX_BIT,
+			0,
+			sizeof(ModelMatrix_push_constant),
+			&pushConstant
+		);
+
+		VkBuffer vertexBuffers[] = {m_mesh->vertexBuffer().buffer()};
+		VkDeviceSize offsets[] = {0};
+		vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
+
+		vkCmdBindIndexBuffer(cmd, m_mesh->indexBuffer().buffer(), 0, VK_INDEX_TYPE_UINT32);
+
+		vkCmdDrawIndexed(cmd, m_mesh->indexCount(), 1, 0, 0, 0);
+	}
+}
+
+void Application::endRendering()
+{
+	VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
+
+	vkCmdEndRendering(cmd);
+}
+
+void Application::endDraw()
+{
+	VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
+
+	m_command->transitionImageLayout(
+		m_colorImage->image(),
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		1,
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		0,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
+	);
+
+	vkEndCommandBuffer(cmd);
+
+	VkSubmitInfo renderInfo{};
+	renderInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	VkCommandBuffer commandBuffers[] = {m_vkCommandBuffers[m_currentFrame]};
+	renderInfo.commandBufferCount = 1;
+	renderInfo.pCommandBuffers = commandBuffers;
+
+	VkSemaphore signalSemaphores[] = {m_renderFinishedSemaphores[m_currentFrame]->getVk()};
+	renderInfo.signalSemaphoreCount = 1;
+	renderInfo.pSignalSemaphores = signalSemaphores;
+
+	m_device->graphicsQueue->submit(1, &renderInfo, m_inFlightFences[m_currentFrame]->getVk());
+
+
+
+	// Now instead of rendering directly to the swap chain image, we render to the offscreen image, and then copy it to the swap chain image.
+
+	uint32_t imageIndex;
+	VkResult result = m_swapchain->swapchain->acquireNextImage(
+		UINT64_MAX, m_imageAvailableSemaphores[m_currentFrame]->getVk(), VK_NULL_HANDLE, &imageIndex
+	);
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+	{
+		recreateSwapChain();
+		return;
+	}
+	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+	{
+		throw std::runtime_error("failed to acquire swap chain image!");
+	}
+
+	copyRenderedImageToSwapchainImage(imageIndex);
 
 	// Finally, we present the swap chain image.
 	VkPresentInfoKHR presentInfo{};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
+	VkSemaphore copyImageSignalSemaphores[] = {
+		m_swapchainUpdatedSemaphores[m_currentFrame]->getVk()
+	};
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = copyImageSignalSemaphores;
 
@@ -789,15 +824,4 @@ void Application::drawFrame()
 	}
 
 	m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-}
-
-void Application::updateUniformBuffer(uint32_t currentImage)
-{
-	ViewProj_UBO ubo{};
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), m_swapchain->swapchain->getExtent().width / (float) m_swapchain->swapchain->getExtent().height, 0.1f, 10.0f);
-
-	ubo.proj[1][1] *= -1;
-
-	m_uniformBuffers[currentImage]->write(&ubo, sizeof(ubo));
 }
