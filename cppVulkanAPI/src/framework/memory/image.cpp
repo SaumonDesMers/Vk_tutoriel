@@ -12,6 +12,8 @@ namespace LIB_NAMESPACE
 		VkMemoryPropertyFlags properties,
 		VkImageViewCreateInfo viewInfo
 	):
+		m_width(imageInfo.extent.width),
+		m_height(imageInfo.extent.height),
 		m_format(imageInfo.format),
 		m_mipLevels(imageInfo.mipLevels)
 	{
@@ -44,6 +46,8 @@ namespace LIB_NAMESPACE
 		m_memory = std::move(other.m_memory);
 		m_imageView = std::move(other.m_imageView);
 
+		m_width = other.m_width;
+		m_height = other.m_height;
 		m_format = other.m_format;
 		m_mipLevels = other.m_mipLevels;
 	}

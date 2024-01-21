@@ -18,6 +18,8 @@ Application::Application()
 
 Application::~Application()
 {
+	m_device->device->waitIdle();
+
 	for (auto& vkCommandBuffer : m_vkCommandBuffers)
 	{
 		m_command->freeCommandBuffer(vkCommandBuffer);
@@ -33,8 +35,6 @@ void Application::run()
 		m_device->windowManager->pollEvents();
 		drawFrame();
 	}
-
-	m_device->device->waitIdle();
 }
 
 void Application::init()
@@ -100,6 +100,7 @@ void Application::recreateSwapChain()
 	createSwapchain();
 	createColorResources();
 	createDepthResources();
+
 }
 
 void Application::createDescriptor()
@@ -285,8 +286,6 @@ void Application::createUniformBuffers()
 		);
 
 		m_uniformBuffers[i]->map();
-
-		updateUniformBuffer(i);
     }
 }
 
@@ -523,7 +522,6 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 	vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
 	m_command->transitionImageLayout(
-		// m_swapchain->swapchain->getImage(imageIndex),
 		m_colorImages[m_currentFrame]->image(),
 		VK_IMAGE_LAYOUT_UNDEFINED,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -537,7 +535,6 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
 
 	VkRenderingAttachmentInfo colorAttachment{};
 	colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-	// colorAttachment.imageView = m_swapchain->imageViews[imageIndex]->getVk();
 	colorAttachment.imageView = m_colorImages[m_currentFrame]->view();
 	colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -648,7 +645,7 @@ void Application::drawFrame()
 
 	m_inFlightFences[m_currentFrame]->reset();
 
-
+	updateUniformBuffer(m_currentFrame);
 
 	recordCommandBuffer(m_vkCommandBuffers[m_currentFrame], imageIndex);
 
@@ -684,24 +681,40 @@ void Application::drawFrame()
 
 	// The offscreen image is allready in VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL layout, so we can copy it to the swap chain image.
 	VkCommandBuffer commandBuffer = m_command->beginSingleTimeCommands();
-	
-	VkImageCopy copyRegion{};
-	copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	copyRegion.srcSubresource.layerCount = 1;
-	copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	copyRegion.dstSubresource.layerCount = 1;
-	copyRegion.extent.width = m_swapchain->swapchain->getExtent().width;
-	copyRegion.extent.height = m_swapchain->swapchain->getExtent().height;
-	copyRegion.extent.depth = 1;
 
-	vkCmdCopyImage(
+	// copy with blit
+	VkImageBlit blit{};
+	blit.srcOffsets[0] = {0, 0, 0};
+	blit.srcOffsets[1] = {
+		static_cast<int32_t>(m_colorImages[m_currentFrame]->width()),
+		static_cast<int32_t>(m_colorImages[m_currentFrame]->height()),
+		1
+	};
+	blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	blit.srcSubresource.mipLevel = 0;
+	blit.srcSubresource.baseArrayLayer = 0;
+	blit.srcSubresource.layerCount = 1;
+
+	blit.dstOffsets[0] = {0, 0, 0};
+	blit.dstOffsets[1] = {
+		static_cast<int32_t>(m_swapchain->swapchain->getExtent().width),
+		static_cast<int32_t>(m_swapchain->swapchain->getExtent().height),
+		1
+	};
+	blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	blit.dstSubresource.mipLevel = 0;
+	blit.dstSubresource.baseArrayLayer = 0;
+	blit.dstSubresource.layerCount = 1;
+
+	vkCmdBlitImage(
 		commandBuffer,
 		m_colorImages[m_currentFrame]->image(),
 		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 		m_swapchain->swapchain->getImage(imageIndex),
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1,
-		&copyRegion
+		&blit,
+		VK_FILTER_LINEAR
 	);
 
 	result = vkEndCommandBuffer(commandBuffer);
