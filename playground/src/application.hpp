@@ -1,5 +1,7 @@
 #pragma once
 
+#include "game_object.hpp"
+
 #include <cppVulkanAPI.hpp>
 
 #include <glm/glm.hpp>
@@ -7,7 +9,6 @@
 #include <stdexcept>
 #include <memory>
 #include <optional>
-
 
 const int MAX_FRAMES_IN_FLIGHT = 3;
 
@@ -78,7 +79,8 @@ private:
 	std::vector<std::unique_ptr<ft::core::Semaphore>> m_swapchainUpdatedSemaphores;
 	std::vector<std::unique_ptr<ft::core::Fence>> m_inFlightFences;
 
-	std::unique_ptr<ft::Mesh> m_mesh;
+	ft::Mesh::ID m_maxMeshID = 0;
+	std::map<ft::Mesh::ID, std::unique_ptr<ft::Mesh>> m_meshAtlas;
 
 	uint32_t m_mipLevels;
 	std::unique_ptr<ft::Texture> m_texture;
@@ -91,6 +93,8 @@ private:
 	uint32_t m_currentFrame = 0;
 
 	Timer m_timer;
+
+	std::vector<GameObject> m_gameObjects;
 
 
 	void init();
@@ -105,7 +109,7 @@ private:
 	void createDepthResources();
 	void createTextureImage();
 	void createTextureSampler();
-	void loadModel();
+	ft::Mesh::ID loadModel(const std::string& filename);
 	void createUniformBuffers();
 	void updateDescriptorSets();
 	void createCommandBuffer();

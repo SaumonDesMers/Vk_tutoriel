@@ -30,9 +30,18 @@ void Application::run()
 {
 	init();
 
+	GameObject gameObject;
+	gameObject.meshID = loadModel("playground/models/viking_room.obj");
+	m_gameObjects.push_back(gameObject);
+
+	gameObject.transform.position.y = 2.0f;
+	m_gameObjects.push_back(gameObject);
+
+
 	while (m_device->window->shouldClose() == false)
 	{
 		m_device->windowManager->pollEvents();
+
 		startDraw();
 		startRendering();
 		draw();
@@ -52,7 +61,6 @@ void Application::init()
 	createCommandPool();
 	createTextureImage();
 	createTextureSampler();
-	loadModel();
 	createUniformBuffers();
 	updateDescriptorSets();
 	createCommandBuffer();
@@ -136,9 +144,7 @@ void Application::createGraphicsPipeline()
 
 	pipelineInfo.vertexShaderPath = "playground/shaders/simple_shader.vert.spv";
 	pipelineInfo.fragmentShaderPath = "playground/shaders/simple_shader.frag.spv";
-
-	pipelineInfo.msaaSamples = m_device->msaaSamples;
-
+	
 	pipelineInfo.descriptorSetLayouts = { m_descriptor->layout };
 
 	VkPushConstantRange pushConstantRange{};
@@ -247,20 +253,20 @@ void Application::createTextureSampler()
 	m_textureSampler = std::make_unique<ft::core::Sampler>(m_device->device->getVk(), samplerInfo);
 }
 
-void Application::loadModel()
+ft::Mesh::ID Application::loadModel(const std::string& filename)
 {
-	std::string modelPath = "playground/models/viking_room.obj";
-
 	ft::Mesh::CreateInfo meshInfo = {};
 
-	ft::Mesh::readObjFile(modelPath, meshInfo.vertices, meshInfo.indices);
+	ft::Mesh::readObjFile(filename, meshInfo.vertices, meshInfo.indices);
 
-	m_mesh = std::make_unique<ft::Mesh>(
+	m_meshAtlas[m_maxMeshID] = std::make_unique<ft::Mesh>(
 		m_device->device->getVk(),
 		m_device->physicalDevice->getVk(),
 		*m_command.get(),
 		meshInfo
 	);
+
+	return m_maxMeshID++;
 }
 
 void Application::createUniformBuffers()
@@ -713,10 +719,10 @@ void Application::draw()
 	scissor.extent = m_swapchain->swapchain->getExtent();
 	vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-	for (size_t i = 0; i < 1; i++)
+	for (size_t i = 0; i < m_gameObjects.size(); i++)
 	{
 		ModelMatrix_push_constant pushConstant{};
-		pushConstant.model = glm::rotate(glm::mat4(1.0f), m_timer.getElapsedTime() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		pushConstant.model = m_gameObjects[i].transform.modelMatrix();
 		vkCmdPushConstants(
 			cmd,
 			m_graphicPipeline->layout->getVk(),
@@ -726,13 +732,13 @@ void Application::draw()
 			&pushConstant
 		);
 
-		VkBuffer vertexBuffers[] = {m_mesh->vertexBuffer().buffer()};
+		VkBuffer vertexBuffers[] = {m_meshAtlas[m_gameObjects[i].meshID]->vertexBuffer().buffer()};
 		VkDeviceSize offsets[] = {0};
 		vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 
-		vkCmdBindIndexBuffer(cmd, m_mesh->indexBuffer().buffer(), 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindIndexBuffer(cmd, m_meshAtlas[m_gameObjects[i].meshID]->indexBuffer().buffer(), 0, VK_INDEX_TYPE_UINT32);
 
-		vkCmdDrawIndexed(cmd, m_mesh->indexCount(), 1, 0, 0, 0);
+		vkCmdDrawIndexed(cmd, m_meshAtlas[m_gameObjects[i].meshID]->indexCount(), 1, 0, 0, 0);
 	}
 }
 

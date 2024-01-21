@@ -29,6 +29,7 @@ target_sources(${PROJECT_NAME}
 		src/main.cpp
 		src/logger.cpp
 		src/application.cpp
+		src/game_object.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
