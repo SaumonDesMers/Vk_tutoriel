@@ -3,6 +3,11 @@
 #include "logger.hpp"
 #include "game_object.hpp"
 
+struct ModelMatrix_push_constant
+{
+	glm::mat4 model;
+};
+
 int main(void)
 {
 	logger.setTimestamp(false);
@@ -20,19 +25,52 @@ int main(void)
 		std::vector<GameObject> gameObjects;
 		gameObjects.push_back(obj1);
 
+		// create descriptor set
+		VkDescriptorSetLayoutBinding projViewLayoutBinding{};
+		projViewLayoutBinding.binding = 0;
+		projViewLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		projViewLayoutBinding.descriptorCount = 1;
+		projViewLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+		ft::Descriptor::ID projViewDescriptorID = renderAPI.createDescriptor(projViewLayoutBinding);
+
+		VkDescriptorSetLayoutBinding textureLayoutBinding{};
+		textureLayoutBinding.binding = 0;
+		textureLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		textureLayoutBinding.descriptorCount = 1;
+		textureLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+		ft::Descriptor::ID textureDescriptorID = renderAPI.createDescriptor(textureLayoutBinding);
+
+		// create texture
+		ft::Texture::CreateInfo textureInfo{};
+		textureInfo.filepath = "playground/textures/viking_room.ppm";
+		textureInfo.mipLevel = 1;
+		textureInfo.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+		ft::Texture::ID textureID = renderAPI.loadTexture(textureInfo);
+
+		// create uniform buffer
+		ft::UniformBuffer::CreateInfo uniformBufferInfo{};
+		uniformBufferInfo.size = sizeof(ViewProj_UBO);
+		uniformBufferInfo.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+		ft::UniformBuffer::ID uniformBufferID = renderAPI.createUniformBuffer(uniformBufferInfo);
+
+
 		// create pipeline
 		ft::Pipeline::CreateInfo pipelineCreateInfo{};
 		pipelineCreateInfo.vertexShaderPath = "playground/shaders/simple_shader.vert.spv";
 		pipelineCreateInfo.fragmentShaderPath = "playground/shaders/simple_shader.frag.spv";
 		pipelineCreateInfo.descriptorSetLayouts = {
-			renderAPI.m_uniformDescriptor->layout,
-			renderAPI.m_imageDescriptor->layout
+			renderAPI.m_uniformBufferMap[uniformBufferID]->descriptor()->layout(),
+			renderAPI.m_textureMap[textureID]->descriptor()->layout()
 		};
 		pipelineCreateInfo.pushConstantRanges = {
 			{VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ModelMatrix_push_constant)}
 		};
 
-		ft::Pipeline::ID pipelineID = renderAPI.createPipeline(pipelineCreateInfo);
+		ft::Pipeline::ID simpleShaderPipelineID = renderAPI.createPipeline(pipelineCreateInfo);
 
 		// main loop
 		while (renderAPI.m_device->window->shouldClose() == false)
@@ -55,26 +93,25 @@ int main(void)
 
 			ubo.proj[1][1] *= -1;
 
-			renderAPI.m_uniformBuffers[renderAPI.m_currentFrame]->write(&ubo, sizeof(ubo));
+			renderAPI.m_uniformBufferMap[uniformBufferID]->buffer(renderAPI.m_currentFrame)->write(&ubo, sizeof(ubo));
 
-			// vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderAPI.m_graphicPipeline->pipeline->getVk());
-			renderAPI.bindPipeline(pipelineID);
+			renderAPI.bindPipeline(simpleShaderPipelineID);
 
 			vkCmdBindDescriptorSets(
 				cmd,
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				renderAPI.m_pipelineMap[pipelineID]->layout->getVk(),
+				renderAPI.m_pipelineMap[simpleShaderPipelineID]->layout->getVk(),
 				0, 1,
-				&renderAPI.m_uniformDescriptor->sets[renderAPI.m_currentFrame],
+				renderAPI.m_uniformBufferMap[uniformBufferID]->descriptor()->pSet(renderAPI.m_currentFrame),
 				0, nullptr
 			);
 
 			vkCmdBindDescriptorSets(
 				cmd,
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				renderAPI.m_pipelineMap[pipelineID]->layout->getVk(),
+				renderAPI.m_pipelineMap[simpleShaderPipelineID]->layout->getVk(),
 				1, 1,
-				&renderAPI.m_imageDescriptor->sets[renderAPI.m_currentFrame],
+				renderAPI.m_textureMap[textureID]->descriptor()->pSet(renderAPI.m_currentFrame),
 				0, nullptr
 			);
 
@@ -98,7 +135,7 @@ int main(void)
 				pushConstant.model = gameObject.transform.modelMatrix();
 				vkCmdPushConstants(
 					cmd,
-					renderAPI.m_pipelineMap[pipelineID]->layout->getVk(),
+					renderAPI.m_pipelineMap[simpleShaderPipelineID]->layout->getVk(),
 					VK_SHADER_STAGE_VERTEX_BIT,
 					0,
 					sizeof(ModelMatrix_push_constant),
@@ -121,18 +158,3 @@ int main(void)
 	
 	return 0;
 }
-
-/*
-
-Validation Error: [ VUID-VkGraphicsPipelineCreateInfo-layout-07988 ]
-Object 0: handle = 0xcb1c7c000000001b, type = VK_OBJECT_TYPE_SHADER_MODULE;
-Object 1: handle = 0x2cfba2000000001c, type = VK_OBJECT_TYPE_PIPELINE_LAYOUT;
-
-| MessageID = 0x215f02cd | vkCreateGraphicsPipelines():
-pCreateInfos[0].pStages[1] SPIR-V (VK_SHADER_STAGE_FRAGMENT_BIT) uses descriptor slot [Set 0 Binding 1] (type `VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER`)
-but was not declared in the pipeline layout.
-
-The Vulkan spec states: If a resource variables is declared in a shader, a descriptor slot in layout must match the shader stage
-(https://vulkan.lunarg.com/doc/view/1.3.275.0/linux/1.3-extensions/vkspec.html#VUID-VkGraphicsPipelineCreateInfo-layout-07988)
-
-*/

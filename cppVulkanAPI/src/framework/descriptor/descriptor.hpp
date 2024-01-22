@@ -14,20 +14,29 @@ namespace LIB_NAMESPACE
 
 	public:
 
+		typedef uint32_t ID;
+
 		struct CreateInfo
 		{
 			std::vector<VkDescriptorSetLayoutBinding> bindings;
 			uint32_t descriptorCount;
 		};
 
-		VkDescriptorPool pool;
-		VkDescriptorSetLayout layout;
-		std::vector<VkDescriptorSet> sets;
+		static inline ID maxID = 0;
 
 		Descriptor(VkDevice device, const CreateInfo& createInfo);
 		~Descriptor();
+
+		VkDescriptorPool pool() { return m_pool; }
+		VkDescriptorSetLayout layout() { return m_layout; }
+		VkDescriptorSet set(uint32_t index) { return m_sets.at(index); }
+		VkDescriptorSet* pSet(uint32_t index) { return &m_sets.at(index); }
 	
 	private:
+
+		VkDescriptorPool m_pool;
+		VkDescriptorSetLayout m_layout;
+		std::vector<VkDescriptorSet> m_sets;
 
 		VkDevice m_device;
 

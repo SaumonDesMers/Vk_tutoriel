@@ -32,15 +32,9 @@ namespace LIB_NAMESPACE
 	{
 		createDevice();
 		createSwapchain();
-		createDescriptor();
 		createColorResources();
 		createDepthResources();
 		createCommandPool();
-		createTextureImage();
-		createTextureSampler();
-		createUniformBuffers();
-		updateDescriptorSets();
-		createCommandBuffer();
 		createSyncObjects();
 	}
 
@@ -90,50 +84,6 @@ namespace LIB_NAMESPACE
 
 	}
 
-	void RenderAPI::createDescriptor()
-	{
-		VkDescriptorSetLayoutBinding uboLayoutBinding{};
-		uboLayoutBinding.binding = 0;
-		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		uboLayoutBinding.descriptorCount = 1;
-		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-		ft::Descriptor::CreateInfo uboDescriptorInfo{};
-		uboDescriptorInfo.bindings = { uboLayoutBinding };
-		uboDescriptorInfo.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-
-		m_uniformDescriptor = std::make_unique<ft::Descriptor>(m_device->device->getVk(), uboDescriptorInfo);
-
-
-		VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-		samplerLayoutBinding.binding = 1;
-		samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		samplerLayoutBinding.descriptorCount = 1;
-		samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-		ft::Descriptor::CreateInfo samplerDescriptorInfo{};
-		samplerDescriptorInfo.bindings = { samplerLayoutBinding };
-		samplerDescriptorInfo.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-
-		m_imageDescriptor = std::make_unique<ft::Descriptor>(m_device->device->getVk(), samplerDescriptorInfo);
-	}
-
-	Pipeline::ID RenderAPI::createPipeline(Pipeline::CreateInfo& createInfo)
-	{
-		VkFormat colorAttachementFormat = m_colorImage->format();
-		VkPipelineRenderingCreateInfo renderingInfo = {};
-		renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-		renderingInfo.colorAttachmentCount = 1;
-		renderingInfo.pColorAttachmentFormats = &colorAttachementFormat;
-		renderingInfo.depthAttachmentFormat = findDepthFormat();
-
-		createInfo.pNext = &renderingInfo;
-
-		m_pipelineMap[m_maxPipelineID] = std::make_unique<ft::Pipeline>(m_device->device->getVk(), createInfo);
-
-		return m_maxPipelineID++;
-	}
-
 	void RenderAPI::createCommandPool()
 	{
 		ft::Queue::FamilyIndices queueFamilyIndices = m_device->findQueueFamilies(m_device->physicalDevice->getVk());
@@ -144,6 +94,13 @@ namespace LIB_NAMESPACE
 		commandInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 		m_command = std::make_unique<ft::Command>(m_device->device->getVk(), commandInfo);
+
+
+		m_vkCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_vkCommandBuffers[i] = m_command->allocateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+		}
 	}
 
 	void RenderAPI::createColorResources()
@@ -169,160 +126,6 @@ namespace LIB_NAMESPACE
 			depthFormat,
 			m_device->msaaSamples
 		));
-	}
-
-	void RenderAPI::createTextureImage()
-	{
-		m_texture = std::make_unique<ft::Texture>(
-			m_device->device->getVk(),
-			m_device->physicalDevice->getVk(),
-			*m_command.get(),
-			"playground/textures/viking_room.ppm"
-		);
-
-		generateMipmaps(
-			m_texture->image().image(),
-			VK_FORMAT_R8G8B8A8_SRGB,
-			m_texture->width(),
-			m_texture->height(),
-			m_texture->image().mipLevels()
-		);
-
-	}
-
-	void RenderAPI::createTextureSampler()
-	{
-		VkSamplerCreateInfo samplerInfo{};
-		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = VK_FILTER_LINEAR;
-		samplerInfo.minFilter = VK_FILTER_LINEAR;
-
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-
-		VkPhysicalDeviceProperties properties{};
-		m_device->physicalDevice->getProperties(&properties);
-
-		samplerInfo.anisotropyEnable = VK_TRUE;
-		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-
-		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-
-		samplerInfo.unnormalizedCoordinates = VK_FALSE;
-
-		samplerInfo.compareEnable = VK_FALSE;
-		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-
-		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		samplerInfo.mipLodBias = 0.0f;
-		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = static_cast<float>(m_mipLevels);
-
-		m_textureSampler = std::make_unique<ft::core::Sampler>(m_device->device->getVk(), samplerInfo);
-	}
-
-	ft::Mesh::ID RenderAPI::loadModel(const std::string& filename)
-	{
-		ft::Mesh::CreateInfo meshInfo = {};
-
-		ft::Mesh::readObjFile(filename, meshInfo.vertices, meshInfo.indices);
-
-		m_meshMap[m_maxMeshID] = std::make_unique<ft::Mesh>(
-			m_device->device->getVk(),
-			m_device->physicalDevice->getVk(),
-			*m_command.get(),
-			meshInfo
-		);
-
-		return m_maxMeshID++;
-	}
-
-	void RenderAPI::createUniformBuffers()
-	{
-		VkDeviceSize bufferSize = sizeof(ViewProj_UBO);
-
-		m_uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			VkBufferCreateInfo bufferInfo{};
-			bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			bufferInfo.size = bufferSize;
-			bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-			bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-			m_uniformBuffers[i] = std::make_unique<ft::Buffer>(
-				m_device->device->getVk(),
-				m_device->physicalDevice->getVk(),
-				bufferInfo,
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-			);
-
-			m_uniformBuffers[i]->map();
-		}
-	}
-
-	void RenderAPI::updateDescriptorSets()
-	{
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = m_uniformBuffers[i]->buffer();
-			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(ViewProj_UBO);
-
-			VkWriteDescriptorSet uboDescriptorWrites{};
-
-			uboDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			uboDescriptorWrites.dstSet = m_uniformDescriptor->sets[i];
-			uboDescriptorWrites.dstBinding = 0;
-			uboDescriptorWrites.dstArrayElement = 0;
-			uboDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			uboDescriptorWrites.descriptorCount = 1;
-			uboDescriptorWrites.pBufferInfo = &bufferInfo;
-
-			vkUpdateDescriptorSets(
-				m_device->device->getVk(),
-				1,
-				&uboDescriptorWrites,
-				0, nullptr
-			);
-
-
-			VkDescriptorImageInfo imageInfo{};
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = m_texture->image().view();
-			imageInfo.sampler = m_textureSampler->getVk();
-
-			VkWriteDescriptorSet samplerDescriptorWrites{};
-
-			samplerDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			samplerDescriptorWrites.dstSet = m_imageDescriptor->sets[i];
-			samplerDescriptorWrites.dstBinding = 1;
-			samplerDescriptorWrites.dstArrayElement = 0;
-			samplerDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			samplerDescriptorWrites.descriptorCount = 1;
-			samplerDescriptorWrites.pImageInfo = &imageInfo;
-
-			vkUpdateDescriptorSets(
-				m_device->device->getVk(),
-				1,
-				&samplerDescriptorWrites,
-				0, nullptr
-			);
-		}
-
-	}
-
-	void RenderAPI::createCommandBuffer()
-	{
-		m_vkCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			m_vkCommandBuffers[i] = m_command->allocateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-		}
 	}
 
 	void RenderAPI::createSyncObjects()
@@ -581,6 +384,8 @@ namespace LIB_NAMESPACE
 
 		m_command->submit(1, &copyImageInfo, VK_NULL_HANDLE);
 
+		m_command->queueWaitIdle();
+		m_command->freeCommandBuffer(commandBuffer);
 
 		// Now we need to transition the swap chain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout, so we can present it.
 		m_command->transitionImageLayout(
@@ -748,6 +553,83 @@ namespace LIB_NAMESPACE
 
 
 
+	ft::Mesh::ID RenderAPI::loadModel(const std::string& filename)
+	{
+		ft::Mesh::CreateInfo meshInfo = {};
+
+		ft::Mesh::readObjFile(filename, meshInfo.vertices, meshInfo.indices);
+
+		m_meshMap[m_maxMeshID] = std::make_unique<ft::Mesh>(
+			m_device->device->getVk(),
+			m_device->physicalDevice->getVk(),
+			*m_command.get(),
+			meshInfo
+		);
+
+		return m_maxMeshID++;
+	}
+
+	Descriptor::ID RenderAPI::createDescriptor(VkDescriptorSetLayoutBinding layoutBinding)
+	{
+		ft::Descriptor::CreateInfo descriptorInfo{};
+		descriptorInfo.bindings = { layoutBinding };
+		descriptorInfo.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+		m_descriptorMap[Descriptor::maxID] = std::make_unique<Descriptor>(
+			m_device->device->getVk(),
+			descriptorInfo
+		);
+
+		return Descriptor::maxID++;
+	}
+
+	Texture::ID RenderAPI::loadTexture(Texture::CreateInfo& createInfo)
+	{
+		m_textureMap[m_maxTextureID] = std::make_unique<Texture>(
+			m_device->device->getVk(),
+			m_device->physicalDevice->getVk(),
+			*m_command.get(),
+			createInfo
+		);
+
+		generateMipmaps(
+			m_textureMap[m_maxTextureID]->image().image(),
+			VK_FORMAT_R8G8B8A8_SRGB,
+			m_textureMap[m_maxTextureID]->width(),
+			m_textureMap[m_maxTextureID]->height(),
+			m_textureMap[m_maxTextureID]->image().mipLevels()
+		);
+
+		return m_maxTextureID++;
+	}
+
+	Pipeline::ID RenderAPI::createPipeline(Pipeline::CreateInfo& createInfo)
+	{
+		VkFormat colorAttachementFormat = m_colorImage->format();
+		VkPipelineRenderingCreateInfo renderingInfo = {};
+		renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+		renderingInfo.colorAttachmentCount = 1;
+		renderingInfo.pColorAttachmentFormats = &colorAttachementFormat;
+		renderingInfo.depthAttachmentFormat = findDepthFormat();
+
+		createInfo.pNext = &renderingInfo;
+
+		m_pipelineMap[Pipeline::maxID] = std::make_unique<ft::Pipeline>(m_device->device->getVk(), createInfo);
+
+		return Pipeline::maxID++;
+	}
+
+	UniformBuffer::ID RenderAPI::createUniformBuffer(UniformBuffer::CreateInfo& createInfo)
+	{
+		m_uniformBufferMap[UniformBuffer::maxID] = std::make_unique<UniformBuffer>(
+			m_device->device->getVk(),
+			m_device->physicalDevice->getVk(),
+			createInfo
+		);
+
+		return UniformBuffer::maxID++;
+	}
+
 	void RenderAPI::bindPipeline(Pipeline::ID pipelineID)
 	{
 		VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
@@ -767,4 +649,5 @@ namespace LIB_NAMESPACE
 
 		vkCmdDrawIndexed(cmd, m_meshMap[meshID]->indexCount(), 1, 0, 0, 0);
 	}
+
 }

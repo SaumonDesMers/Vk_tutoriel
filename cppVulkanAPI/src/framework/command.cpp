@@ -69,6 +69,15 @@ namespace LIB_NAMESPACE
 		return commandBuffer;
 	}
 
+	void Command::queueWaitIdle()
+	{
+		VkResult result = vkQueueWaitIdle(m_queue);
+		if (result != VK_SUCCESS)
+		{
+			TROW("Failed to wait for queue to be idle", result);
+		}
+	}
+
 	void Command::endSingleTimeCommands(VkCommandBuffer commandBuffer)
 	{
 		VkResult result = vkEndCommandBuffer(commandBuffer);

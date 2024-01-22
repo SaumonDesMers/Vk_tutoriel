@@ -31,6 +31,8 @@ namespace LIB_NAMESPACE
 			void* pNext = nullptr;
 		};
 
+		static inline ID maxID = 0;
+
 		std::unique_ptr<core::PipelineLayout> layout;
 		std::unique_ptr<core::Pipeline> pipeline;
 

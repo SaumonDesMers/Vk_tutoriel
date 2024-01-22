@@ -3,12 +3,13 @@
 #include "defines.hpp"
 #include "device.hpp"
 #include "swapchain.hpp"
-#include "descriptor.hpp"
+#include "descriptor/descriptor.hpp"
+#include "descriptor/uniform_buffer.hpp"
+#include "descriptor/texture.hpp"
 #include "command.hpp"
 #include "pipeline.hpp"
 #include "memory/image.hpp"
 #include "memory/buffer.hpp"
-#include "memory/texture.hpp"
 #include "core/image/sampler.hpp"
 #include "core/sync_object.hpp"
 #include "object/mesh.hpp"
@@ -22,16 +23,9 @@
 #include <map>
 #include <chrono>
 
-const int MAX_FRAMES_IN_FLIGHT = 3;
-
 struct ViewProj_UBO {
 	glm::mat4 view;
 	glm::mat4 proj;
-};
-
-struct ModelMatrix_push_constant
-{
-	glm::mat4 model;
 };
 
 namespace LIB_NAMESPACE
@@ -42,12 +36,13 @@ namespace LIB_NAMESPACE
 	public:
 
 		RenderAPI();
-
 		~RenderAPI();
 
 		Mesh::ID loadModel(const std::string& filename);
-
 		Pipeline::ID createPipeline(Pipeline::CreateInfo& createInfo);
+		Descriptor::ID createDescriptor(VkDescriptorSetLayoutBinding layoutBinding);
+		Texture::ID loadTexture(Texture::CreateInfo& createInfo);
+		UniformBuffer::ID createUniformBuffer(UniformBuffer::CreateInfo& createInfo);
 
 		// function to start recording a command buffer
 		void startDraw();
@@ -56,6 +51,7 @@ namespace LIB_NAMESPACE
 		// function to do the actual drawing
 		void bindPipeline(Pipeline::ID pipelineID);
 		void bindMesh(Mesh::ID meshID);
+
 		// function to end a render pass
 		void endRendering();
 		// function to end recording a command buffer
@@ -75,14 +71,11 @@ namespace LIB_NAMESPACE
 
 		std::unique_ptr<ft::Swapchain> m_swapchain;
 
-		std::unique_ptr<ft::Descriptor> m_uniformDescriptor;
-		std::unique_ptr<ft::Descriptor> m_imageDescriptor;
+		std::map<Descriptor::ID, std::unique_ptr<ft::Descriptor>> m_descriptorMap;
 
 		std::unique_ptr<ft::Command> m_command;
 		std::vector<VkCommandBuffer> m_vkCommandBuffers;
 
-		// std::unique_ptr<ft::Pipeline> m_graphicPipeline;
-		Pipeline::ID m_maxPipelineID = 0;
 		std::map<Pipeline::ID, std::unique_ptr<ft::Pipeline>> m_pipelineMap;
 
 		std::unique_ptr<ft::Image> m_colorImage;
@@ -97,10 +90,10 @@ namespace LIB_NAMESPACE
 		std::map<Mesh::ID, std::unique_ptr<ft::Mesh>> m_meshMap;
 
 		uint32_t m_mipLevels;
-		std::unique_ptr<ft::Texture> m_texture;
-		std::unique_ptr<ft::core::Sampler> m_textureSampler;
+		Texture::ID m_maxTextureID;
+		std::map<Texture::ID, std::unique_ptr<Texture>> m_textureMap;
 
-		std::vector<std::unique_ptr<ft::Buffer>> m_uniformBuffers;
+		std::map<UniformBuffer::ID, std::unique_ptr<ft::UniformBuffer>> m_uniformBufferMap;
 
 		bool m_framebufferResized = false;
 		
@@ -115,11 +108,6 @@ namespace LIB_NAMESPACE
 		void createCommandPool();
 		void createColorResources();
 		void createDepthResources();
-		void createTextureImage();
-		void createTextureSampler();
-		void createUniformBuffers();
-		void updateDescriptorSets();
-		void createCommandBuffer();
 		void createSyncObjects();
 
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);

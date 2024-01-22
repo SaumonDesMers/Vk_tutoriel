@@ -29,6 +29,8 @@ namespace LIB_NAMESPACE
 		VkCommandBuffer beginSingleTimeCommands();
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
+		void queueWaitIdle();
+
 		void submit(
 			uint32_t submitCount,
 			const VkSubmitInfo *pSubmits,

@@ -14,4 +14,6 @@
 	const bool enableValidationLayers = true;
 #endif
 
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
 #define TROW(message, vkResult) throw std::runtime_error(std::string(message) + " (" + std::string(string_VkResult(vkResult)) + ")");

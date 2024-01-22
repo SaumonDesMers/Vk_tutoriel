@@ -4,9 +4,14 @@
 
 namespace LIB_NAMESPACE
 {
-	Descriptor::Descriptor(VkDevice device, const CreateInfo& createInfo)
-		: m_device(device)
+	Descriptor::Descriptor(VkDevice device, const CreateInfo& createInfo):
+		m_device(device)
 	{
+		if (createInfo.bindings.empty())
+		{
+			throw std::runtime_error("Cannot create descriptor with 0 binding.");
+		}
+
 		createLayout(createInfo);
 		createPool(createInfo);
 		createSets(createInfo);
@@ -14,8 +19,8 @@ namespace LIB_NAMESPACE
 
 	Descriptor::~Descriptor()
 	{
-		vkDestroyDescriptorSetLayout(m_device, layout, nullptr);
-		vkDestroyDescriptorPool(m_device, pool, nullptr);
+		vkDestroyDescriptorSetLayout(m_device, m_layout, nullptr);
+		vkDestroyDescriptorPool(m_device, m_pool, nullptr);
 	}
 
 	void Descriptor::createLayout(const CreateInfo& createInfo)
@@ -25,7 +30,7 @@ namespace LIB_NAMESPACE
 		layoutInfo.bindingCount = static_cast<uint32_t>(createInfo.bindings.size());
 		layoutInfo.pBindings = createInfo.bindings.data();
 
-		if (vkCreateDescriptorSetLayout(m_device, &layoutInfo, nullptr, &layout) != VK_SUCCESS)
+		if (vkCreateDescriptorSetLayout(m_device, &layoutInfo, nullptr, &m_layout) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create descriptor set layout.");
 		}
@@ -47,7 +52,7 @@ namespace LIB_NAMESPACE
 		poolInfo.pPoolSizes = poolSizes.data();
 		poolInfo.maxSets = createInfo.descriptorCount;
 
-		if (vkCreateDescriptorPool(m_device, &poolInfo, nullptr, &pool) != VK_SUCCESS)
+		if (vkCreateDescriptorPool(m_device, &poolInfo, nullptr, &m_pool) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create descriptor pool.");
 		}
@@ -55,17 +60,17 @@ namespace LIB_NAMESPACE
 
 	void Descriptor::createSets(const CreateInfo& createInfo)
 	{
-		std::vector<VkDescriptorSetLayout> layouts(createInfo.descriptorCount, layout);
+		std::vector<VkDescriptorSetLayout> layouts(createInfo.descriptorCount, m_layout);
 
 		VkDescriptorSetAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorPool = pool;
+		allocInfo.descriptorPool = m_pool;
 		allocInfo.descriptorSetCount = static_cast<uint32_t>(createInfo.descriptorCount);
 		allocInfo.pSetLayouts = layouts.data();
 
-		sets.resize(createInfo.descriptorCount);
+		m_sets.resize(createInfo.descriptorCount);
 
-		VkResult result = vkAllocateDescriptorSets(m_device, &allocInfo, sets.data());
+		VkResult result = vkAllocateDescriptorSets(m_device, &allocInfo, m_sets.data());
 		if (result != VK_SUCCESS)
 		{
 			TROW("failed to allocate descriptor sets", result)

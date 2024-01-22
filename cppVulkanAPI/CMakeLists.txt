@@ -18,6 +18,7 @@ target_compile_options(${PROJECT_NAME}
 		-Wextra
 		-Werror
 		-Wpedantic
+		-Wno-missing-braces
 )
 
 target_sources(${PROJECT_NAME}
@@ -49,11 +50,12 @@ target_sources(${PROJECT_NAME}
 		src/framework/device.cpp
 		src/framework/swapchain.cpp
 		src/framework/pipeline.cpp
-		src/framework/descriptor.cpp
+		src/framework/descriptor/descriptor.cpp
+		src/framework/descriptor/texture.cpp
+		src/framework/descriptor/uniform_buffer.cpp
 		src/framework/command.cpp
 		src/framework/memory/buffer.cpp
 		src/framework/memory/image.cpp
-		src/framework/memory/texture.cpp
 		src/framework/object/mesh.cpp
 		src/framework/render_api.cpp
 )
