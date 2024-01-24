@@ -50,14 +50,31 @@ namespace LIB_NAMESPACE
 		void startRendering();
 		// function to do the actual drawing
 		void bindPipeline(Pipeline::ID pipelineID);
-		void bindMesh(Mesh::ID meshID);
+		void drawMesh(Mesh::ID meshID);
+		void bindDescriptor(
+			Pipeline::ID pipelineID,
+			uint32_t firstSet,
+			uint32_t descriptorSetCount,
+			const VkDescriptorSet *pDescriptorSets
+		);
+		void pushConstant(Pipeline::ID pipelineID, VkShaderStageFlags stageFlags, uint32_t size, const void* data);
+		void setViewport(VkViewport& viewport);
+		void setScissor(VkRect2D& scissor);
 
 		// function to end a render pass
 		void endRendering();
 		// function to end recording a command buffer
 		void endDraw();
 
-	// private:
+		// temporary functions to access private members
+		GLFWwindow* getWindow();
+		uint32_t currentFrame();
+		std::unique_ptr<ft::Mesh>& getMesh(Mesh::ID meshID);
+		std::unique_ptr<ft::Descriptor>& getDescriptor(Descriptor::ID descriptorID);
+		std::unique_ptr<Texture>& getTexture(Texture::ID textureID);
+		std::unique_ptr<ft::UniformBuffer>& getUniformBuffer(UniformBuffer::ID uniformBufferID);
+
+	private:
 
 		const std::vector<const char*> validationLayers = {
 			"VK_LAYER_KHRONOS_validation"

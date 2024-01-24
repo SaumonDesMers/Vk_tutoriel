@@ -637,7 +637,54 @@ namespace LIB_NAMESPACE
 		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineMap[pipelineID]->pipeline->getVk());
 	}
 
-	void RenderAPI::bindMesh(ft::Mesh::ID meshID)
+	void RenderAPI::bindDescriptor(
+		Pipeline::ID pipelineID,
+		uint32_t firstSet,
+		uint32_t descriptorSetCount,
+		const VkDescriptorSet *pDescriptorSets
+	)
+	{
+		VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
+
+		vkCmdBindDescriptorSets(
+			cmd,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			m_pipelineMap[pipelineID]->layout->getVk(),
+			firstSet, descriptorSetCount,
+			pDescriptorSets,
+			0, nullptr
+		);
+	}
+
+	void RenderAPI::pushConstant(Pipeline::ID pipelineID, VkShaderStageFlags stageFlags, uint32_t size, const void* data)
+	{
+		VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
+
+		vkCmdPushConstants(
+			cmd,
+			m_pipelineMap[pipelineID]->layout->getVk(),
+			stageFlags,
+			0,
+			size,
+			data
+		);
+	}
+
+	void RenderAPI::setViewport(VkViewport& viewport)
+	{
+		VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
+
+		vkCmdSetViewport(cmd, 0, 1, &viewport);
+	}
+
+	void RenderAPI::setScissor(VkRect2D& scissor)
+	{
+		VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
+
+		vkCmdSetScissor(cmd, 0, 1, &scissor);
+	}
+
+	void RenderAPI::drawMesh(ft::Mesh::ID meshID)
 	{
 		VkCommandBuffer cmd = m_vkCommandBuffers[m_currentFrame];
 
@@ -650,4 +697,34 @@ namespace LIB_NAMESPACE
 		vkCmdDrawIndexed(cmd, m_meshMap[meshID]->indexCount(), 1, 0, 0, 0);
 	}
 
+
+	GLFWwindow* RenderAPI::getWindow()
+	{
+		return m_device->window->getGLFWwindow();
+	}
+
+	uint32_t RenderAPI::currentFrame()
+	{
+		return m_currentFrame;
+	}
+
+	std::unique_ptr<ft::Mesh>& RenderAPI::getMesh(ft::Mesh::ID meshID)
+	{
+		return m_meshMap[meshID];
+	}
+
+	std::unique_ptr<ft::Descriptor>& RenderAPI::getDescriptor(Descriptor::ID descriptorID)
+	{
+		return m_descriptorMap[descriptorID];
+	}
+
+	std::unique_ptr<Texture>& RenderAPI::getTexture(Texture::ID textureID)
+	{
+		return m_textureMap[textureID];
+	}
+
+	std::unique_ptr<ft::UniformBuffer>& RenderAPI::getUniformBuffer(UniformBuffer::ID uniformBufferID)
+	{
+		return m_uniformBufferMap[uniformBufferID];
+	}
 }
