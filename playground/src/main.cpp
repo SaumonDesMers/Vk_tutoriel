@@ -13,6 +13,10 @@ int main(void)
 	logger.setTimestamp(false);
 	try
 	{
+		// parseSpriv("playground/shaders/simple_shader.vert.spv", "playground/shaders/simple_shader.frag.spv");
+		// return 0;
+
+
 		ft::RenderAPI renderAPI;
 		FT_INFO("RenderAPI initialized");
 

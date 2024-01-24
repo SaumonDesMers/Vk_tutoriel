@@ -36,3 +36,4 @@
 #include "../src/framework/memory/image.hpp"
 #include "../src/framework/object/mesh.hpp"
 #include "../src/framework/render_api.hpp"
+#include "../src/framework/spirv/parser.hpp"
